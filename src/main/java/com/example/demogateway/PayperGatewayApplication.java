@@ -24,9 +24,9 @@ import javax.annotation.Resource;
 
 @RestController
 @SpringBootApplication
-public class DemogatewayApplication {
+public class PayperGatewayApplication {
 
-	@Resource
+@Resource
 	private PaymentConfig config;
 
 	@RequestMapping("/payment-required")
@@ -89,6 +89,6 @@ public class DemogatewayApplication {
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemogatewayApplication.class, args);
+		SpringApplication.run(PayperGatewayApplication.class, args);
 	}
 }

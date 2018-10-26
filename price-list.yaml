@@ -1,0 +1,16 @@
+apis:
+  - name: swapi
+    baseUrl: http://swapi.co
+    walletAddress: 1016
+    routes:
+      - route: /api/people
+        price: 340
+      - route: /api/planets
+        price: 100
+  - name: swapi2
+    baseUrl: http://swapi2.co
+    walletAddress: 1016
+    routes:
+      - route: /api/people
+        price: 300
+

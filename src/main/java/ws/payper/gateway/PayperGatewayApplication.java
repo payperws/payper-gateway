@@ -1,6 +1,7 @@
 package ws.payper.gateway;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +13,8 @@ import org.springframework.web.server.ServerWebExchange;
 import ws.payper.gateway.config.Api;
 import ws.payper.gateway.config.Route;
 import ws.payper.gateway.config.RoutePriceConfiguration;
+
+import java.net.URISyntaxException;
 
 @SpringBootApplication
 public class PayperGatewayApplication {
@@ -38,16 +41,28 @@ public class PayperGatewayApplication {
 
     private void build(Api api, Route route, RouteLocatorBuilder.Builder builder) {
         String routeId = api.getName() + "-" + route.getRoute();
-        String redirectUrl = getPaymentRequiredUrl();
         builder
                 .route(routeId + "-r1",
                         r -> r.predicate(this::paymentReceiptMissing)
-                                .filters(f -> f.redirect(302, redirectUrl))
+                                .filters(f -> f.redirect(302, redirectUrl(api, route)))
                                 .uri(api.getBaseUrl()))
                 .route(routeId +"-r2",
                         r -> r.predicate(this::paymentReceiptValid)
                                 .filters(f -> f.removeRequestHeader(RECEIPT_HEADER))
                                 .uri(api.getBaseUrl()));
+    }
+
+    private String redirectUrl(Api api, Route route) {
+        String redirectUrl = getPaymentRequiredUrl();
+        try {
+            return new URIBuilder(redirectUrl)
+                    .addParameter("amount", route.getPrice())
+                    .addParameter("account", api.getWalletAddress())
+                    .build()
+                    .toString();
+        } catch (URISyntaxException e) {
+            throw new RouteConfigurationException(e);
+        }
     }
 
     private String getPaymentRequiredUrl() {

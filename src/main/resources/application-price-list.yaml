@@ -2,9 +2,9 @@ price-list:
   apis:
     - name: httpbin
       baseUrl: http://httpbin.org
-      walletAddress: 1017
+      walletAddress: 1019
       routes:
         - route: /api/people
-          price: 340
+          price: 14
         - route: /api/planets
-          price: 100
+          price: 13

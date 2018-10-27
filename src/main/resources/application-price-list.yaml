@@ -1,16 +1,10 @@
 price-list:
   apis:
-    - name: swapi
-      baseUrl: http://swapi.co
+    - name: httpbin
+      baseUrl: http://httpbin.org
       walletAddress: 1017
       routes:
         - route: /api/people
           price: 340
         - route: /api/planets
           price: 100
-    - name: swapi2
-      baseUrl: http://swapi2.co
-      walletAddress: 1018
-      routes:
-        - route: /api/people
-          price: 340

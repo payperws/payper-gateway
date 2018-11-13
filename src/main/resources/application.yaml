@@ -1,3 +1,8 @@
+logging.level.org.springframework: DEBUG
+
 spring:
   profiles:
     include: 'price-list'
+
+payper:
+  paymentRequiredRedirectUrl: 'http://localhost:8080/payment-required'

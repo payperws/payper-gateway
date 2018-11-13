@@ -2,6 +2,7 @@ package ws.payper.gateway;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -21,13 +22,16 @@ public class PayperGatewayApplication {
 
     private final RoutePriceConfiguration config;
 
-    @Autowired
-    public PayperGatewayApplication(RoutePriceConfiguration config) {
-        this.config = config;
-    }
+    private final PaymentVerifier paymentVerifier;
+
+    @Value("${payper.paymentRequiredRedirectUrl}")
+    private String paymentRequiredUrl;
 
     @Autowired
-    public PaymentVerifier paymentVerifier;
+    public PayperGatewayApplication(RoutePriceConfiguration config, PaymentVerifier paymentVerifier) {
+        this.config = config;
+        this.paymentVerifier = paymentVerifier;
+    }
 
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder routeLocatorBuilder) {
@@ -53,7 +57,7 @@ public class PayperGatewayApplication {
     }
 
     private String redirectUrl(Api api, Route route) {
-        String redirectUrl = getPaymentRequiredUrl();
+        String redirectUrl = paymentRequiredUrl;
         try {
             return new URIBuilder(redirectUrl)
                     .addParameter("amount", route.getPrice())
@@ -63,10 +67,6 @@ public class PayperGatewayApplication {
         } catch (URISyntaxException e) {
             throw new RouteConfigurationException(e);
         }
-    }
-
-    private String getPaymentRequiredUrl() {
-        return "http://localhost:8080/payment-required";
     }
 
     private BooleanSpec paymentRequiredSpec(PredicateSpec spec, Api api, Route route) {

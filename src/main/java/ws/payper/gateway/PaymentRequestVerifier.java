@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 @Component
-public class PaymentVerifier {
+public class PaymentRequestVerifier {
 
     private static final String RECEIPT_HEADER = "X-Payment-Receipt";
 
@@ -24,6 +24,9 @@ public class PaymentVerifier {
 
     @Autowired
     private HeaderRoutePredicateFactory headerRoutePredicateFactory;
+
+    @Autowired
+    private PaymentNetwork paymentNetwork;
 
     public boolean isPaymentRequired(ServerWebExchange swe, Api api, Route route) {
         return isRequestMatching(swe, api, route) && (isPaymentProofMissing(swe, api, route) || receiptNetworkVerificationFailed(swe, api, route));
@@ -48,7 +51,8 @@ public class PaymentVerifier {
     }
 
     private boolean receiptNetworkVerificationFailed(ServerWebExchange swe, Api api, Route route) {
-        boolean failed = false;
-        return failed;
+        String account = api.getWalletAddress();
+        String amount = route.getPrice();
+        return !paymentNetwork.verifyTransaction(account, amount);
     }
 }

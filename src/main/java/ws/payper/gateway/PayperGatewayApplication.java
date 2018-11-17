@@ -22,13 +22,13 @@ public class PayperGatewayApplication {
 
     private final RoutePriceConfiguration config;
 
-    private final PaymentVerifier paymentVerifier;
+    private final PaymentRequestVerifier paymentVerifier;
 
     @Value("${payper.paymentRequiredRedirectUrl}")
     private String paymentRequiredUrl;
 
     @Autowired
-    public PayperGatewayApplication(RoutePriceConfiguration config, PaymentVerifier paymentVerifier) {
+    public PayperGatewayApplication(RoutePriceConfiguration config, PaymentRequestVerifier paymentVerifier) {
         this.config = config;
         this.paymentVerifier = paymentVerifier;
     }

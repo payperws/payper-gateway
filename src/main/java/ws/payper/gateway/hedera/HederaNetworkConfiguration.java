@@ -1,6 +1,7 @@
 package ws.payper.gateway.hedera;
 
 
+import com.hedera.sdk.account.HederaAccount;
 import com.hedera.sdk.common.HederaAccountID;
 import com.hedera.sdk.common.HederaDuration;
 import com.hedera.sdk.common.HederaKey;
@@ -50,7 +51,7 @@ public class HederaNetworkConfiguration {
     private String privKey;
 
     @Bean
-    public HederaTransactionAndQueryDefaults txDefaults() {
+    public HederaTransactionAndQueryDefaults queryDefaults() {
         HederaTransactionAndQueryDefaults txDefaults = new HederaTransactionAndQueryDefaults();
 
         HederaAccountID nodeAccountID = new HederaAccountID(nodeAccountShard, nodeAccountRealm, nodeAccountNum);
@@ -78,6 +79,17 @@ public class HederaNetworkConfiguration {
 
         txDefaults.transactionValidDuration = new HederaDuration(120, 0);
 
+        txDefaults.generateRecord = true;
+
         return txDefaults;
+    }
+
+    @Bean
+    public HederaAccount hederaAccount() {
+        HederaTransactionAndQueryDefaults defaults = queryDefaults();
+        HederaAccount hederaAccount = new HederaAccount();
+        hederaAccount.setHederaAccountID(defaults.payingAccountID);
+        hederaAccount.setNode(defaults.node);
+        return hederaAccount;
     }
 }

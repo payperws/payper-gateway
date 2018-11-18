@@ -4,6 +4,6 @@ public interface PaymentNetwork {
 
     long getBalance(String account);
 
-    boolean verifyTransaction(String account, String amount);
+    boolean verifyTransaction(String transactionId, String account, String amount);
 
 }

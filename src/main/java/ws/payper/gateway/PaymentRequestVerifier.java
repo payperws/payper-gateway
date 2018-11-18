@@ -51,8 +51,10 @@ public class PaymentRequestVerifier {
     }
 
     private boolean receiptNetworkVerificationFailed(ServerWebExchange swe, Api api, Route route) {
+        String transactionId = Objects.requireNonNull(swe.getRequest().getHeaders().get(RECEIPT_HEADER)).stream().findFirst().orElse("");
         String account = api.getWalletAddress();
         String amount = route.getPrice();
-        return !paymentNetwork.verifyTransaction(account, amount);
+        boolean transactionVerified = paymentNetwork.verifyTransaction(transactionId, account, amount);
+        return !transactionVerified;
     }
 }

@@ -1,6 +1,6 @@
 # Payper Gateway
 
-Payper Gateway is an HTTP (reverse) proxy that verifies payments to route requests. As a practical application, it can be used to sell API requests for digital cash (crypto-currency) on the Internet.
+Payper Gateway is an HTTP (reverse) proxy that verifies payments to route requests. As a practical application, it can be used to sell API requests for digital cash (crypto-currency) on the Internet. See the detailed description in this [medium article](https://medium.com/@alexandru.males/payper-p2p-micro-payments-for-the-open-api-economy-e8adee76d396?fbclid=IwAR25i3YekBZ82ETVOTDaNnYH-zo7R4niaVHrhDRknwptWLlha8WwT-7ORp4).
 
 ## Concept
 The gateway is part of a larger concept called Payper that deals with peer-to-peer (disintermediated) payment processing for APIs. Payper is a toolset that aims to bring together crypto-currency micropayments and APIs (web services in general) in order to allow open trading of resources on the Internet.

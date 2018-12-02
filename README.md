@@ -18,13 +18,19 @@ cd hedera-sdk-java
 mvn install
 ```
 #### Build and Run
-Change dir into `payper-gateway`
+1. Change dir into `payper-gateway` and build it:
 ```
 mvn package
-java -jar target/gateway-0.0.1-SNAPSHOT.jar --price-list api-prices-sample.yaml
 ```
-#### Price List Configuration
-Take a look inside `api-prices-sample.yaml` to see how to configure payment verification for your own API. 
+
+2. Configure your pricelist. As an example, refer to `application-price-list.yaml`. Create a file called exactly like that, `application-price-list.yaml` in your current directory.
+
+3. Run the Payper Gateway jar from your current directory:
+```
+java -jar target/gateway-0.0.1-SNAPSHOT.jar
+```
+#### Test It
+Open one of the configured URL in a browser. You will be prompted to make a payment in order to get access to the requested resource. The details on how to make the payment are listed in the Payment Required page.
 
 ## Implementation
 This component basically integrates [Hedera Hashgraph](https://www.hedera.com) payment verification into an extension of [Spring Cloud Gateway](https://spring.io/projects/spring-cloud-gateway).

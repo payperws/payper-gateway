@@ -1,10 +1,20 @@
-price-list:
-  apis:
-    - name: httpbin
-      baseUrl: http://httpbin.org
-      walletAddress: 1004
-      routes:
-        - route: /api/people
-          price: 140
-        - route: /api/planets
-          price: 110
+#payper:
+#  paymentRequiredRedirectUrl: 'http://51.15.207.34:8080/payment-required'
+#price-list:
+#  apis:
+#    - name: httpbin
+#      baseUrl: https://youtu.be
+#      walletAddress: 1004
+#      routes:
+#        - route: /PMNeE4uY1IM
+#          price: 200
+#        - route: /T8C5t1K_pVY
+#          price: 0
+#        - route: /lg5WKsVnEA4
+#          price: 420
+#    - name: gdocs
+#      baseUrl: https://docs.google.com
+#      walletAddress: 1004
+#      routes:
+#        - route: /presentation/d/1GXxBUijOe_wqPWd09uZpzFYyY3zkykKc4lms7U9TldM/edit?usp=sharing
+#          price: 1500

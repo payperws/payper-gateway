@@ -1,16 +1,29 @@
-#payper:
-#  paymentRequiredRedirectUrl: 'http://51.15.207.34:8080/payment-required'
+price-list:
+  apis:
+    - name: httpbin
+      baseUrl: http://httpbin.org
+      walletAddress: 1004
+      routes:
+        - route: /get
+          price: 20
+
 #price-list:
 #  apis:
-#    - name: httpbin
-#      baseUrl: https://youtu.be
+#    - name: medium
+#      baseUrl: https://medium.com
+#      walletAddress: 1004
+#      routes:
+#        - route: /@alexandru.males/payper-p2p-micro-payments-for-the-open-api-economy-e8adee76d396
+#          price: 200
+#    - name: youtube
+#      baseUrl: https://youtube.com
 #      walletAddress: 1004
 #      routes:
 #        - route: /PMNeE4uY1IM
 #          price: 200
 #        - route: /T8C5t1K_pVY
 #          price: 0
-#        - route: /lg5WKsVnEA4
+#        - route: /embed/lg5WKsVnEA4
 #          price: 420
 #    - name: gdocs
 #      baseUrl: https://docs.google.com

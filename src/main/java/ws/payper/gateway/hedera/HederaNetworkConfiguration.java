@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import ws.payper.gateway.config.ConfigurationException;
 
 import java.security.spec.InvalidKeySpecException;
 
@@ -65,7 +66,7 @@ public class HederaNetworkConfiguration {
             try {
                 payingKeyPair = new HederaCryptoKeyPair(HederaKey.KeyType.ED25519, pubKey, privKey);
             } catch (InvalidKeySpecException ex) {
-                throw new NetworkConfigurationException("Could not init ED25519 key pair", ex);
+                throw new ConfigurationException("Could not init ED25519 key pair", ex);
             }
         }
 

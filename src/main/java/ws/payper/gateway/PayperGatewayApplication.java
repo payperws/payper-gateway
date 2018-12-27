@@ -11,11 +11,13 @@ import org.springframework.cloud.gateway.route.builder.PredicateSpec;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import ws.payper.gateway.config.Api;
+import ws.payper.gateway.config.ConfigurationException;
 import ws.payper.gateway.config.Route;
 import ws.payper.gateway.config.RoutePriceConfiguration;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.MessageFormat;
 
 @SpringBootApplication
 public class PayperGatewayApplication {
@@ -24,13 +26,19 @@ public class PayperGatewayApplication {
 
     private final PaymentRequestVerifier paymentVerifier;
 
-    @Value("${payper.paymentRequiredRedirectUrl}")
-    private String paymentRequiredUrl;
+    @Value("${payper.baseUrl}")
+    private String baseUrl;
+
+    @Value("${payper.redirectPath}")
+    private String redirectPath;
+
+    private PaymentUriBuilder paymentUriBuilder;
 
     @Autowired
-    public PayperGatewayApplication(RoutePriceConfiguration config, PaymentRequestVerifier paymentVerifier) {
+    public PayperGatewayApplication(RoutePriceConfiguration config, PaymentRequestVerifier paymentVerifier, PaymentUriBuilder paymentUriBuilder) {
         this.config = config;
         this.paymentVerifier = paymentVerifier;
+        this.paymentUriBuilder = paymentUriBuilder;
     }
 
     @Bean
@@ -57,15 +65,32 @@ public class PayperGatewayApplication {
     }
 
     private String redirectUrl(Api api, Route route) {
-        String redirectUrl = paymentRequiredUrl;
+        String paymentRequiredUrl = getPaymentRequiredUrl();
+        String resourceUrl = getResourceUrl(route);
+        return paymentUriBuilder.buildUri(paymentRequiredUrl, resourceUrl, api, route).toString();
+    }
+
+    private String getResourceUrl(Route route) {
         try {
-            return new URIBuilder(redirectUrl)
-                    .addParameter("amount", route.getPrice())
-                    .addParameter("account", api.getWalletAddress())
-                    .build()
-                    .toString();
+            return new URIBuilder(baseUrl).setPath(route.getRoute()).build().toString();
         } catch (URISyntaxException e) {
-            throw new RouteConfigurationException(e);
+            String message = MessageFormat.format(
+                    "Could not create resource URL from payper.baseUrl=[{0}] and route=[{1}]",
+                    baseUrl,
+                    route.getRoute());
+            throw new ConfigurationException(message, e);
+        }
+    }
+
+    private String getPaymentRequiredUrl() {
+        try {
+            return new URIBuilder(baseUrl).setPath(redirectPath).build().toString();
+        } catch (URISyntaxException e) {
+            String message = MessageFormat.format(
+            "Could not create payment required URL from payper.baseUrl=[{0}] and payper.redirectPath=[{1}]",
+                    baseUrl,
+                    redirectPath);
+            throw new ConfigurationException(message, e);
         }
     }
 
@@ -77,7 +102,7 @@ public class PayperGatewayApplication {
         try {
             return new URI(url).getPath();
         } catch (URISyntaxException e) {
-            throw new RouteConfigurationException("Could not extract path from URL: " + url, e);
+            throw new ConfigurationException("Could not extract path from URL: " + url, e);
         }
     }
 

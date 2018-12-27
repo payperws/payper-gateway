@@ -6,6 +6,8 @@ public class Route {
 
     private String price;
 
+    private String title;
+
     public String getRoute() {
         return route;
     }
@@ -20,5 +22,13 @@ public class Route {
 
     public void setPrice(String price) {
         this.price = price;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

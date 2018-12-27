@@ -8,6 +8,8 @@ import com.hedera.sdk.transaction.HederaTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ws.payper.gateway.PaymentNetwork;
+import ws.payper.gateway.config.PaymentEndpoint;
+import ws.payper.gateway.config.PaymentOptionType;
 
 @Component
 public class HederaPaymentNetwork implements PaymentNetwork {
@@ -17,6 +19,11 @@ public class HederaPaymentNetwork implements PaymentNetwork {
 
     @Autowired
     private HederaAccount hederaAccount;
+
+    @Override
+    public PaymentOptionType getPaymentOptionType() {
+        return PaymentOptionType.HEDERA_HBAR;
+    }
 
     @Override
     public long getBalance(String accountId) {
@@ -41,8 +48,8 @@ public class HederaPaymentNetwork implements PaymentNetwork {
     }
 
     @Override
-    public boolean verifyTransaction(String transactionId, String account, String amount) {
-        HederaTransactionID hederaTransactionID = parseTransactionId(transactionId);
+    public boolean verifyTransaction(String paymentProof, PaymentEndpoint paymentEndpoint, String amount) {
+        HederaTransactionID hederaTransactionID = parseTransactionId(paymentProof);
         HederaTransactionReceipt receipt;
         try {
             receipt = Utilities.getReceipt(hederaTransactionID, queryDefaults.node, 1, 0, 0);
@@ -57,6 +64,7 @@ public class HederaPaymentNetwork implements PaymentNetwork {
             } catch (Exception ex) {
                 throw new NetworkCommunicationException("Could not retrieve transaction record", ex);
             }
+            String account =  ((HederaHbarPaymentEndpoint) paymentEndpoint).getAccount();
             return txRecord.transferList.stream()
                     .anyMatch(h -> matchTransfer(h, account, amount));
         }
@@ -104,6 +112,11 @@ public class HederaPaymentNetwork implements PaymentNetwork {
         HederaTimeStamp timestamp = new HederaTimeStamp(seconds, nanos);
 
         return new HederaTransactionID(accountID, timestamp);
+    }
+
+    @Override
+    public String getPaymentProofPattern() {
+        return "^[0-9]{8,10}\\|[0-9]{1,9}\\|[0-9]{4,10}";
     }
 
 }

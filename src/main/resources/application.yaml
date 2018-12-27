@@ -5,4 +5,5 @@ spring:
     include: 'price-list'
 
 payper:
-  paymentRequiredRedirectUrl: 'http://localhost:8080/payment-required'
+  baseUrl: 'http://localhost:8080'
+  redirectPath: 'pypr/payment-required'

@@ -1,21 +1,67 @@
 package ws.payper.gateway;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import ws.payper.gateway.config.PaymentOptionType;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Controller
 public class PaymentRequiredController {
 
-    @RequestMapping("/payment-required")
-    @ResponseStatus(code = HttpStatus.PAYMENT_REQUIRED)
-    public String paymentRequired(@RequestParam("amount") String amount, @RequestParam("account") String account, Model model) {
-        model.addAttribute("amount", amount);
-        model.addAttribute("account", account);
-        return "payment-required";
+    private List<InvoiceGenerator> invoiceGeneratorList;
+
+    private Map<PaymentOptionType, InvoiceGenerator> invoiceGenerators;
+
+    @Autowired
+    public void setInvoiceGeneratorList(List<InvoiceGenerator> invoiceGeneratorList) {
+        this.invoiceGenerators = invoiceGeneratorList.stream().collect(Collectors.toMap(InvoiceGenerator::getPaymentOptionType, Function.identity()));
     }
 
+    @RequestMapping("/pypr/payment-required")
+    @ResponseStatus(code = HttpStatus.PAYMENT_REQUIRED)
+    public String paymentRequired(
+                                  @RequestParam(value = "title") String title,
+                                  @RequestParam(value = "sourceurl") String sourceUrl,
+                                  @RequestParam(value = "option") PaymentOptionType paymentOptionType,
+                                  @RequestParam(value = "amount") String amount,
+                                  @RequestParam(value = "account", required = false) String account,
+                                  Model model) {
+
+        InvoiceGenerator invoiceGenerator = invoiceGenerators.get(paymentOptionType);
+
+        if (invoiceGenerator == null) {
+            throw new IllegalArgumentException("Payment option not supported: " + paymentOptionType.name());
+        }
+
+        URL url;
+        try {
+            url = new URL(sourceUrl);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+
+        InvoiceRequest invoiceRequest = new InvoiceRequest(title, url, paymentOptionType, amount);
+        invoiceRequest.setAccount(account);
+
+        Invoice invoice = invoiceGenerator.newInvoice(invoiceRequest);
+
+        model.addAllAttributes(invoice.allParameters());
+
+        if (PaymentOptionType.LIGHTNING_BTC.equals(paymentOptionType)) {
+            return "payment-required-lightning-btc";
+        } else {
+            return "payment-required";
+        }
+    }
 }

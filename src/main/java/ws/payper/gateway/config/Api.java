@@ -9,7 +9,7 @@ public class Api {
 
     private String baseUrl;
 
-    private String walletAddress;
+    private PaymentOptionBuilder payment;
 
     private List<Route> routes = new ArrayList<>();
 
@@ -29,12 +29,12 @@ public class Api {
         this.baseUrl = baseUrl;
     }
 
-    public String getWalletAddress() {
-        return walletAddress;
+    public PaymentOptionBuilder getPayment() {
+        return payment;
     }
 
-    public void setWalletAddress(String walletAddress) {
-        this.walletAddress = walletAddress;
+    public void setPayment(PaymentOptionBuilder payment) {
+        this.payment = payment;
     }
 
     public List<Route> getRoutes() {

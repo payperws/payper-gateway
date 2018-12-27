@@ -2,7 +2,8 @@ price-list:
   apis:
     - name: httpbin
       baseUrl: http://httpbin.org
-      walletAddress: 1004
+      payment:
+        type: LIGHTNING_BTC
       routes:
         - route: /get
           price: 20

@@ -1,6 +1,58 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var url = /*[[${url}]]*/ 'https://payable.example.com/some-content';
+        var r_hash = /*[[${r_hash}]]*/ 'ybKxT/3nUSERPUTVc9IxaHo+dDApcK6JFofFysKv61Q=';
+        /*]]>*/
+
+        var polling = (r_hash != 'ybKxT/3nUSERPUTVc9IxaHo+dDApcK6JFofFysKv61Q=');
+        var retries = 50;
+        var sleep = 2000;
+
+        async function poll(polling, retries, sleep) {
+            var is402 = true;
+
+            while (is402 && polling && (retries > 0)) {
+              console.log("Polling...  URL = " +  url + "; Header = " + r_hash);
+
+              var newXHR = new XMLHttpRequest();
+              newXHR.open('GET', url);
+              newXHR.setRequestHeader('X-Payment-Receipt', r_hash);
+
+              newXHR.onreadystatechange = function(){
+                  if ( newXHR.readyState == 4 ) {
+                      if ( newXHR.status != 402 ) {
+                          is402 = false;
+                          console.log('Not 402. Might be that the payment was verified!');
+                      }
+                  }
+              };
+
+              newXHR.send();
+
+              retries--;
+
+              if (is402) {
+                  await pause(retries, sleep);
+              }
+            }
+
+            if (!is402) {
+                window.open(url + "?x_payment_receipt=" + encodeURIComponent(r_hash), "_self");
+            }
+        }
+
+        function pause(retries, sleep) {
+          return new Promise(resolve => setTimeout(() => {
+            console.log(`Retries left: ${retries}`);
+            resolve();
+          }, sleep));
+        }
+
+        poll(polling, retries, sleep);
+    </script>
 </head>
 <body>
 <p>Content: <strong th:text="${content_title}">Lightning Network Master Course - Lesson 1</strong></p>

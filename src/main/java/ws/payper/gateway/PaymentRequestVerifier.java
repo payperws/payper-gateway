@@ -1,8 +1,10 @@
 package ws.payper.gateway;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.handler.predicate.HeaderRoutePredicateFactory;
 import org.springframework.cloud.gateway.handler.predicate.PathRoutePredicateFactory;
+import org.springframework.cloud.gateway.handler.predicate.QueryRoutePredicateFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -23,11 +25,16 @@ public class PaymentRequestVerifier {
 
     private static final String RECEIPT_HEADER = "X-Payment-Receipt";
 
+    private static final String RECEIPT_PARAM = "x_payment_receipt";
+
     @Autowired
     private PathRoutePredicateFactory pathRoutePredicateFactory;
 
     @Autowired
     private HeaderRoutePredicateFactory headerRoutePredicateFactory;
+
+    @Autowired
+    private QueryRoutePredicateFactory queryRoutePredicateFactory;
 
     @SuppressWarnings("unused")
     private List<PaymentNetwork> paymentNetworkList;
@@ -68,11 +75,16 @@ public class PaymentRequestVerifier {
     private boolean isPaymentProofMissing(ServerWebExchange swe, Api api, Route route) {
         String pattern = getPaymentNetwork(api).getPaymentProofPattern();
         Predicate<ServerWebExchange> headerPredicate = headerRoutePredicateFactory.apply(c -> c.setHeader(RECEIPT_HEADER).setRegexp(pattern));
-        return !headerPredicate.test(swe);
+        Predicate<ServerWebExchange> paramPredicate = queryRoutePredicateFactory.apply(c -> c.setParam(RECEIPT_PARAM).setRegexp(pattern));
+        return !headerPredicate.or(paramPredicate).test(swe);
     }
 
     private boolean receiptNetworkVerificationFailed(ServerWebExchange swe, Api api, Route route) {
         String paymentProof = Objects.requireNonNull(swe.getRequest().getHeaders().get(RECEIPT_HEADER)).stream().findFirst().orElse("");
+        if (StringUtils.isBlank(paymentProof)) {
+            paymentProof = Objects.requireNonNull(swe.getRequest().getQueryParams().get(RECEIPT_PARAM)).stream().findFirst().orElse("");
+        }
+
         PaymentEndpoint paymentEndpoint = api.getPayment().build();
         String amount = route.getPrice();
         boolean transactionVerified = getPaymentNetwork(api).verifyTransaction(paymentProof, paymentEndpoint, amount);

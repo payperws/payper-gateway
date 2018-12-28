@@ -7,6 +7,7 @@ price-list:
       routes:
         - route: /get
           price: 20
+          title: 'Echo Your GET Request'
 
 #price-list:
 #  apis:

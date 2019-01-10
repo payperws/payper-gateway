@@ -6,6 +6,7 @@ import ws.payper.gateway.Invoice;
 import ws.payper.gateway.InvoiceGenerator;
 import ws.payper.gateway.InvoiceRequest;
 import ws.payper.gateway.config.PaymentOptionType;
+import ws.payper.gateway.util.QrCodeGenerator;
 
 import javax.annotation.Resource;
 import java.text.MessageFormat;
@@ -18,6 +19,9 @@ public class LightningInvoiceGenerator implements InvoiceGenerator {
 
     @Resource
     private LightningPaymentNetwork network;
+
+    @Resource
+    private QrCodeGenerator qrCodeGenerator;
 
     @Override
     public Invoice newInvoice(InvoiceRequest invoiceRequest) {
@@ -37,7 +41,7 @@ public class LightningInvoiceGenerator implements InvoiceGenerator {
     }
 
     private String getQrCode(String paymentRequest) {
-        return "iVBORw0KGgoAAAANSUhEUgAAAMgAAADIAQAAAACFI5MzAAABZUlEQVR42u2YQY7DIAxFYZVjcFMSbsoxWMH8/4EmrTSb0Uj2oshqIz8WKLa/TcL4bYUv+SNpASuOerYAy8e46Eg+SMIRy4AjwQeCZzp9EPhKC5H2evZERg0HjEf2R8a04Ywo2vWUZe0aXoiqpCHIyz7qx5LMtTKRVfKhO5ZEDhzzWroCpVHYPRCtPslRsYthb8kFwQ9OfSgTKcys5uiGFAW506bAYNdwQfRfePbUmYY1vt61OWlssxl9THZKbLjFB8GpkYN5aXNFxfSlO/YkSo+nuoTnFGBPkgqXFTxj/pierIkkmX1sz3TloTvGZE92Q+oiSa7RCVGJnGOpC7uZ9rogUj6qMh08OEN9q7IpWVMAExCwy12ckD09XTsH76nTnigTZ7+dqty28jkg82aTZ499ywMfROpSVutAW/NE9kB3qd++3xstyYz2RV3Be2XLXVOAPblvOZ39nyt/3n+MyPd71f+SH8TnCmM/Ep27AAAAAElFTkSuQmCC";
+        return qrCodeGenerator.base64encoded(paymentRequest);
     }
 
     @Override

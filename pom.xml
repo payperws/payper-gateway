@@ -61,9 +61,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.hedera</groupId>
-			<artifactId>sdk</artifactId>
-			<version>0.1.0</version>
+			<groupId>com.hedera.hashgraph</groupId>
+			<artifactId>java-sdk</artifactId>
+			<version>0.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.lightningj</groupId>
@@ -73,6 +73,18 @@
 				<exclusion>
 					<groupId>io.netty</groupId>
 					<artifactId>netty-tcnative-boringssl-static</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-netty</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-protobuf</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-stub</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

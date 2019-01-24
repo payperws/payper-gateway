@@ -23,6 +23,14 @@ public class PaymentRequiredController {
 
     private Map<PaymentOptionType, InvoiceGenerator> invoiceGenerators;
 
+    private final String DEFAULT_VIEW = "payment-required";
+
+    private Map<PaymentOptionType, String> views = Map.of(
+            PaymentOptionType.HEDERA_HBAR, DEFAULT_VIEW,
+            PaymentOptionType.HEDERA_HBAR_INVOICE, "payment-required-hedera-invoice",
+            PaymentOptionType.LIGHTNING_BTC, "payment-required-lightning-btc"
+    );
+
     @Autowired
     public void setInvoiceGeneratorList(List<InvoiceGenerator> invoiceGeneratorList) {
         this.invoiceGenerators = invoiceGeneratorList.stream().collect(Collectors.toMap(InvoiceGenerator::getPaymentOptionType, Function.identity()));
@@ -58,10 +66,6 @@ public class PaymentRequiredController {
 
         model.addAllAttributes(invoice.allParameters());
 
-        if (PaymentOptionType.LIGHTNING_BTC.equals(paymentOptionType)) {
-            return "payment-required-lightning-btc";
-        } else {
-            return "payment-required";
-        }
+        return views.getOrDefault(paymentOptionType, DEFAULT_VIEW);
     }
 }

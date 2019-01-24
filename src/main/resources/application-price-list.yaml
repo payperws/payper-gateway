@@ -3,10 +3,19 @@ price-list:
     - name: httpbin
       baseUrl: http://httpbin.org
       payment:
-        type: LIGHTNING_BTC
+        type: HEDERA_HBAR_INVOICE
+        account: "0.0.1209"
       routes:
         - route: /get
-          price: 20
+          price: 10000000
+          title: 'Echo Your GET Request'
+    - name: httpbin
+      baseUrl: http://httpbin.org
+      payment:
+        type: LIGHTNING_BTC
+      routes:
+        - route: /get2
+          price: 30
           title: 'Echo Your GET Request'
 
 #price-list:

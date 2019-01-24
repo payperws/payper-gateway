@@ -1,5 +1,6 @@
 package ws.payper.gateway.config;
 
+import ws.payper.gateway.hedera.HederaHbarInvoicePaymentEndpoint;
 import ws.payper.gateway.hedera.HederaHbarPaymentEndpoint;
 import ws.payper.gateway.lightning.LightningBtcPaymentEndpoint;
 
@@ -18,6 +19,9 @@ public class PaymentOptionBuilder {
         } else if (PaymentOptionType.HEDERA_HBAR.equals(type)){
             validateHederaParams(account);
             return new HederaHbarPaymentEndpoint(account);
+        } else if (PaymentOptionType.HEDERA_HBAR_INVOICE.equals(type)){
+            validateHederaParams(account);
+            return new HederaHbarInvoicePaymentEndpoint(account);
         } else {
             throw new ConfigurationException("Unexpected payment option type: " + type);
         }

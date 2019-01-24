@@ -30,4 +30,10 @@ cp src/main/resources/application-price-list.yaml application-price-list.yaml
 
 keytool -import -alias google.com -keystore ~/.sdkman/candidates/java/10.0.2-open/lib/security/cacerts -file _.google.com.cer
 
+### Install Lightning Node
+
+
+
+
+### Run 
 java -jar target/gateway-0.0.1-SNAPSHOT.jar

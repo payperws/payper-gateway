@@ -63,7 +63,7 @@
 		<dependency>
 			<groupId>com.hedera.hashgraph</groupId>
 			<artifactId>java-sdk</artifactId>
-			<version>0.2.0</version>
+			<version>0.2.0-CUSTOM</version>
 		</dependency>
 		<dependency>
 			<groupId>org.lightningj</groupId>
@@ -101,10 +101,6 @@
 		</dependency>
 	</dependencies>
 
-	<properties>
-		<java.version>1.8</java.version>
-	</properties>
-
 	<repositories>
 		<repository>
 			<id>spring-milestones</id>
@@ -129,8 +125,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>10</source>
-                    <target>10</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
         </plugins>

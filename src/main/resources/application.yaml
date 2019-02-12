@@ -1,4 +1,11 @@
-logging.level.org.springframework: DEBUG
+logging.level.org.springframework: INFO
+
+management:
+  endpoints:
+    web:
+      # e.g. http://localhost:8080/actuator/gateway/routes
+      exposure:
+        include: gateway
 
 spring:
   profiles:

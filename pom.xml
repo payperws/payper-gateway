@@ -35,6 +35,10 @@
 			<artifactId>spring-cloud-starter-gateway</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
 			<exclusions>
@@ -61,9 +65,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.hedera</groupId>
-			<artifactId>sdk</artifactId>
-			<version>0.1.0</version>
+			<groupId>com.hedera.hashgraph</groupId>
+			<artifactId>hedera-java-sdk</artifactId>
+			<version>0.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.lightningj</groupId>
@@ -74,6 +78,18 @@
 					<groupId>io.netty</groupId>
 					<artifactId>netty-tcnative-boringssl-static</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-netty</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-protobuf</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-stub</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -81,11 +97,13 @@
 			<artifactId>netty-tcnative-boringssl-static</artifactId>
 			<version>2.0.20.Final</version>
 		</dependency>
-	</dependencies>
 
-	<properties>
-		<java.version>1.8</java.version>
-	</properties>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.3.3</version>
+		</dependency>
+	</dependencies>
 
 	<repositories>
 		<repository>
@@ -107,7 +125,15 @@
 					<executable>true</executable>
 				</configuration>
 			</plugin>
-		</plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+        </plugins>
 	</build>
 
 </project>

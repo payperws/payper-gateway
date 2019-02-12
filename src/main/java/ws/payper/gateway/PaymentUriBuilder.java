@@ -6,6 +6,7 @@ import ws.payper.gateway.config.Api;
 import ws.payper.gateway.config.PaymentEndpoint;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.config.Route;
+import ws.payper.gateway.hedera.HederaHbarInvoicePaymentEndpoint;
 import ws.payper.gateway.hedera.HederaHbarPaymentEndpoint;
 
 import java.net.URI;
@@ -26,6 +27,8 @@ public class PaymentUriBuilder {
 
             if (PaymentOptionType.HEDERA_HBAR.equals(endpoint.getType())) {
                 uriBuilder.addParameter("account", ((HederaHbarPaymentEndpoint) endpoint).getAccount());
+            } else if (PaymentOptionType.HEDERA_HBAR_INVOICE.equals(endpoint.getType())) {
+                uriBuilder.addParameter("account", ((HederaHbarInvoicePaymentEndpoint) endpoint).getAccount());
             }
 
             return uriBuilder.build();

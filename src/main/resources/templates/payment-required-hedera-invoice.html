@@ -14,7 +14,7 @@
     var pay_req = /*[[${pay_req}]]*/ 'lntb19u1pwzz9qkpp5cmdr6lf6eqmnakhdz94704vakgz5pwxvr6fu8utwg338ael2eftsdp8xys9xcmpd3sjqsmgd9czq3njv9c8qatrvd5kumccqp2fh7v4h8ughya9rj0x6th3972fzyqzq2ra5u67v74ky20lyqet7hhlh9vvgmlgxal6ynqyegswmn6ehzsscfm72zhr05atfcw0as8s9qqxz6e0p';
     /*]]>*/
 
-    var polling = (r_hash != 'ybKxT/3nUSERPUTVc9IxaHo+dDApcK6JFofFysKv61Q=');
+    var polling = false; // (r_hash != 'ybKxT/3nUSERPUTVc9IxaHo+dDApcK6JFofFysKv61Q=');
     var retries = 50;
     var sleep = 2000;
 
@@ -47,7 +47,7 @@
         }
 
         if (!is402) {
-            window.open(url + "?x_payment_receipt=" + encodeURIComponent(r_hash), "_self");
+            // window.open(url + "?x_payment_receipt=" + encodeURIComponent(r_hash), "_self");
         }
     }
 
@@ -385,7 +385,7 @@
             <p><span class="am-value" th:text="${url}"></span></p>
             <p class="am-spacer"></p>
             <p><strong class="am-title">AMOUNT</strong></p>
-            <p><span class="am-value" th:text="${amount}">75</span><span class="am-value"> satoshi</span></p>
+            <p><span class="am-value" th:text="${amount}">100000000</span><span class="am-value"> tinybars</span></p>
         </div>
         <div class="am-second-part">
             <div class="am-fill">

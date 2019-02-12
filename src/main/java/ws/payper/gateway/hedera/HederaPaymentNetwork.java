@@ -5,6 +5,7 @@ import com.hedera.sdk.account.HederaAccountAmount;
 import com.hedera.sdk.common.*;
 import com.hedera.sdk.query.HederaQueryHeader;
 import com.hedera.sdk.transaction.HederaTransaction;
+import com.hederahashgraph.api.proto.java.ResponseCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ws.payper.gateway.PaymentNetwork;
@@ -57,7 +58,7 @@ public class HederaPaymentNetwork implements PaymentNetwork {
             throw new NetworkCommunicationException("Could not verify transaction ID", ex);
         }
 
-        if (receipt.transactionStatus == HederaTransactionStatus.SUCCESS) {
+        if (receipt.transactionStatus == ResponseCodeEnum.SUCCESS) {
             HederaTransactionRecord txRecord;
             try {
                 txRecord = getHederaTransactionRecord(hederaTransactionID, 10, queryDefaults);

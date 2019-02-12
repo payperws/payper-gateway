@@ -66,8 +66,8 @@
 
 		<dependency>
 			<groupId>com.hedera.hashgraph</groupId>
-			<artifactId>java-sdk</artifactId>
-			<version>0.2.0-CUSTOM</version>
+			<artifactId>hedera-java-sdk</artifactId>
+			<version>0.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.lightningj</groupId>

@@ -42,7 +42,7 @@ public class HederaInvoiceInvoiceGenerator implements InvoiceGenerator {
         params.put("pay_req", hederaAppLink);
         params.put("invoice_id", invoiceId);
 
-        return new Invoice(paymentOptionType, invoiceId, params);
+        return new Invoice(paymentOptionType, amount, params);
     }
 
     private String generateHederaAppLink(String account, String amount, String memo) {

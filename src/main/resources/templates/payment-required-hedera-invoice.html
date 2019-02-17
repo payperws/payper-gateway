@@ -8,13 +8,13 @@
     <link href="https://fonts.googleapis.com/css?family=Muli:400,700" rel="stylesheet">
     <!-- <link rel="stylesheet" type="text/css" href="css.css"> -->
     <script th:inline="javascript">
-        /*<![CDATA[*/
+    /*<![CDATA[*/
     var url = /*[[${url}]]*/ 'https://payable.example.com/some-content';
-    var r_hash = /*[[${r_hash}]]*/ 'ybKxT/3nUSERPUTVc9IxaHo+dDApcK6JFofFysKv61Q=';
-    var pay_req = /*[[${pay_req}]]*/ 'lntb19u1pwzz9qkpp5cmdr6lf6eqmnakhdz94704vakgz5pwxvr6fu8utwg338ael2eftsdp8xys9xcmpd3sjqsmgd9czq3njv9c8qatrvd5kumccqp2fh7v4h8ughya9rj0x6th3972fzyqzq2ra5u67v74ky20lyqet7hhlh9vvgmlgxal6ynqyegswmn6ehzsscfm72zhr05atfcw0as8s9qqxz6e0p';
+    var invoice_id = /*[[${invoice_id}]]*/ '2fe84032-68de-4f35-9e34-a548ab290738';
+    var pay_req = /*[[${pay_req}]]*/ 'https://hedera.app.link/5vuEEQhtLQ?acc=0.0.1209&action=payRequest&a=500008520&n=2fe84032-68de-4f35-9e34-a548ab290738';
     /*]]>*/
 
-    var polling = false; // (r_hash != 'ybKxT/3nUSERPUTVc9IxaHo+dDApcK6JFofFysKv61Q=');
+    var polling = (invoice_id != '2fe84032-68de-4f35-9e34-a548ab290738');
     var retries = 50;
     var sleep = 2000;
 
@@ -22,11 +22,11 @@
         var is402 = true;
 
         while (is402 && polling && (retries > 0)) {
-            console.log("Polling...  URL = " + url + "; Header = " + r_hash);
+            console.log("Polling...  URL = " + url + "; Header = " + invoice_id);
 
             var newXHR = new XMLHttpRequest();
             newXHR.open('GET', url);
-            newXHR.setRequestHeader('X-Payment-Receipt', r_hash);
+            newXHR.setRequestHeader('X-Payment-Receipt', invoice_id);
 
             newXHR.onreadystatechange = function() {
                 if (newXHR.readyState == 4) {
@@ -47,7 +47,7 @@
         }
 
         if (!is402) {
-            // window.open(url + "?x_payment_receipt=" + encodeURIComponent(r_hash), "_self");
+            window.open(url + "?x_payment_receipt=" + encodeURIComponent(invoice_id), "_self");
         }
     }
 
@@ -398,7 +398,7 @@
                 <p><span title="Click to copy to clipboard" id="am-invoice"  onClick="selectThis(this)" class="am-value" th:text="${pay_req}"></span></p>
                 <p style="margin-top:20px">
                     <button class="am-button" style="width:164px" onclick="window.open('lightning:' + pay_req, '_blank')">Open In Wallet</button>
-                    <button class="am-button" style="height:30px" onclick="window.open(url + '?x_payment_receipt=' + encodeURIComponent(r_hash), '_self');">Already Paid</button>
+                    <button class="am-button" style="height:30px" onclick="window.open(url + '?x_payment_receipt=' + encodeURIComponent(invoice_id), '_self');">Already Paid</button>
                     <span>&nbsp</span>
                     <button onClick="selectThis()" class="am-button" style="height:30px">Copy Invoice</button>
                 </p>
@@ -407,7 +407,7 @@
                 </div>
             </div>
         </div>
-        <!--<p>Hash: <strong th:text="${r_hash}">ybKxT/3nUSERPUTVc9IxaHo+dDApcK6JFofFysKv61Q=</strong></p>-->
+        <!--<p>Hash: <strong th:text="${invoice_id}">2fe84032-68de-4f35-9e34-a548ab290738</strong></p>-->
     </div>
     <div class="snack-wrap" style="visibility:hidden;">
         <input type="checkbox" checked class="snackclose animated" id="close" /><label class="snacklable animated" for="close"></label>

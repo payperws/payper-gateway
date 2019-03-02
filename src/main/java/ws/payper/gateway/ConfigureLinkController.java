@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+import ws.payper.gateway.config.PaymentOptionType;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -72,12 +74,52 @@ public class ConfigureLinkController {
 
         private String url;
 
+        private PaymentOptionType paymentOptionType;
+
+        private Map<String, String> paymentOptionArgs;
+
+        private BigDecimal price;
+
+        private CryptoCurrency currency;
+
         public String getUrl() {
             return url;
         }
 
         public void setUrl(String url) {
             this.url = url;
+        }
+
+        public PaymentOptionType getPaymentOptionType() {
+            return paymentOptionType;
+        }
+
+        public void setPaymentOptionType(PaymentOptionType paymentOptionType) {
+            this.paymentOptionType = paymentOptionType;
+        }
+
+        public Map<String, String> getPaymentOptionArgs() {
+            return paymentOptionArgs;
+        }
+
+        public void setPaymentOptionArgs(Map<String, String> paymentOptionArgs) {
+            this.paymentOptionArgs = paymentOptionArgs;
+        }
+
+        public BigDecimal getPrice() {
+            return price;
+        }
+
+        public void setPrice(BigDecimal price) {
+            this.price = price;
+        }
+
+        public CryptoCurrency getCurrency() {
+            return currency;
+        }
+
+        public void setCurrency(CryptoCurrency currency) {
+            this.currency = currency;
         }
     }
 

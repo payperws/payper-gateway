@@ -3,10 +3,12 @@ package ws.payper.gateway;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionWriter;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +29,9 @@ public class ConfigureLinkController {
 
     @Autowired
     private RouteDefinitionWriter routeDefinitionWriter;
+
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
     @PostMapping(value = "/link")
     public
@@ -63,11 +68,17 @@ public class ConfigureLinkController {
 
     public Mono<PayableLink> save(String id, PayableLink link, Mono<RouteDefinition> route) {
         return this.routeDefinitionWriter.save(route.map(r -> {
-            r.setId(id);
-            return r;
-        })).then(Mono.defer(() ->
-                Mono.just(repository.save(link))
-        ));
+                    r.setId(id);
+                    return r;
+                }
+        )).then(Mono.defer(this::refresh
+        )).then(Mono.defer(() ->
+                Mono.just(repository.save(link))));
+    }
+
+    public Mono<Void> refresh() {
+        this.publisher.publishEvent(new RefreshRoutesEvent(this));
+        return Mono.empty();
     }
 
     public static class LinkConfig {

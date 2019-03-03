@@ -33,7 +33,7 @@ public class ConfigureLinkController {
     private ApplicationEventPublisher publisher;
 
     @Autowired
-    private PaymentUriBuilder uriBuilder;
+    private PaymentUriHelper uriBuilder;
 
     @PostMapping(value = "/link")
     public

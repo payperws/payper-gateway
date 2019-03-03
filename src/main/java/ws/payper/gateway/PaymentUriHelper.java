@@ -16,7 +16,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 @Component
-public class PaymentUriBuilder {
+public class PaymentUriHelper {
 
     @Value("${payper.baseUrl}")
     private String baseUrl;
@@ -92,5 +92,13 @@ public class PaymentUriBuilder {
         } catch (URISyntaxException e) {
             throw new RuntimeException("Could not build redirect URL", e);
         }
+    }
+
+    public boolean isPayableLinkPath(String route) {
+        return route.startsWith("/pl/");
+    }
+
+    public String extractPayableId(String route) {
+        return route.substring(4);
     }
 }

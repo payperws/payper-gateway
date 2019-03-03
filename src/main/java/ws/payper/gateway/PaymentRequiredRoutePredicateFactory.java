@@ -29,6 +29,9 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
     @Autowired
     private PaymentRequestVerifier paymentRequestVerifier;
 
+    @Autowired
+    private PaymentUriHelper paymentUriHelper;
+
     public PaymentRequiredRoutePredicateFactory() {
         super(Config.class);
     }
@@ -52,8 +55,13 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
                 return true;
             }
 */
-            String route = swe.getRequest().getPath().value().substring(1);
-            return payableLinkRepository.find(route).map(this::paymentRequired).orElse(false);
+            String route = swe.getRequest().getPath().value();
+            if (paymentUriHelper.isPayableLinkPath(route)) {
+                String payableId = paymentUriHelper.extractPayableId(route);
+                return payableLinkRepository.find(payableId).map(this::paymentRequired).orElse(false);
+            } else {
+                return false;
+            }
         };
     }
 

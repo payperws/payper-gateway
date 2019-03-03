@@ -9,7 +9,6 @@ import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionWriter;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,18 +32,19 @@ public class ConfigureLinkController {
     @Autowired
     private ApplicationEventPublisher publisher;
 
+    @Autowired
+    private PaymentUriBuilder uriBuilder;
+
     @PostMapping(value = "/link")
     public
     Mono<PayableLink> newLink(@RequestBody LinkConfig link) {
         String payableId = RandomStringUtils.randomAlphanumeric(10);
-        String payableStr = "http://localhost:8080/" + payableId;
+        String payableStr = uriBuilder.payableUri(payableId).toString();
         PayableLink payable = new PayableLink(link, payableId, payableStr);
 
         RouteDefinition routeDefinition = createRouteDefinition(payable);
 
         return save(payableId, payable, Mono.just(routeDefinition));
-
-//        return repository.save(payable);
     }
 
     private RouteDefinition createRouteDefinition(PayableLink payable) {
@@ -57,7 +57,7 @@ public class ConfigureLinkController {
 
         FilterDefinition filterDef = new FilterDefinition();
         filterDef.setName("RedirectTo");
-        String redirectUrl = "http://localhost:8080/pypr/payment-required?title=Top+Ten+Myths+of+Distributed+Ledger+Technologies&sourceurl=http%3A%2F%2Flocalhost%3A8080%2Ftop10myths&option=HEDERA_HBAR_INVOICE&amount=500000000&account=0.0.1209";
+        String redirectUrl = uriBuilder.paymentRequiredUri(payable).toString();
         Map<String, String> filterArgs = Map.of("status", "302", "url", redirectUrl);
         filterDef.setArgs(filterArgs);
         route.setFilters(List.of(filterDef));
@@ -92,6 +92,8 @@ public class ConfigureLinkController {
         private BigDecimal price;
 
         private CryptoCurrency currency;
+
+        private String title;
 
         public String getUrl() {
             return url;
@@ -131,6 +133,14 @@ public class ConfigureLinkController {
 
         public void setCurrency(CryptoCurrency currency) {
             this.currency = currency;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
         }
     }
 

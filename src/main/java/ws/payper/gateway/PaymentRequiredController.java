@@ -32,6 +32,9 @@ public class PaymentRequiredController {
     );
 
     @Autowired
+    private InvoiceRepository invoiceRepository;
+
+    @Autowired
     public void setInvoiceGeneratorList(List<InvoiceGenerator> invoiceGeneratorList) {
         this.invoiceGenerators = invoiceGeneratorList.stream().collect(Collectors.toMap(InvoiceGenerator::getPaymentOptionType, Function.identity()));
     }
@@ -63,6 +66,8 @@ public class PaymentRequiredController {
         invoiceRequest.setAccount(account);
 
         Invoice invoice = invoiceGenerator.newInvoice(invoiceRequest);
+
+        invoice = invoiceRepository.save(invoice);
 
         model.addAllAttributes(invoice.allParameters());
 

@@ -46,8 +46,8 @@ public class PaymentRequestVerifier {
         this.paymentNetworks = paymentNetworkList.stream().collect(Collectors.toMap(PaymentNetwork::getPaymentOptionType, Function.identity()));
     }
 
-    public boolean isPaymentRequired(ServerWebExchange swe, String route, PaymentEndpoint paymentEndpoint, String price) {
-        return isRequestMatching(swe, route) && (isPaymentProofMissing(swe, paymentEndpoint.getType()) || receiptNetworkVerificationFailed(swe, paymentEndpoint, price));
+    public boolean isPaymentRequired(ServerWebExchange swe, String path, PaymentEndpoint paymentEndpoint, String price) {
+        return isRequestMatching(swe, path) && (isPaymentProofMissing(swe, paymentEndpoint.getType()) || receiptNetworkVerificationFailed(swe, paymentEndpoint, price));
     }
 
     public boolean isPaymentRequired(ServerWebExchange swe, Api api, Route route) {
@@ -59,16 +59,16 @@ public class PaymentRequestVerifier {
         return isRequestMatching(swe, routeStr) && (isPaymentProofMissing(swe, type) || receiptNetworkVerificationFailed(swe, paymentEndpoint, price));
     }
 
-    private boolean isRequestMatching(ServerWebExchange swe, String route) {
-        return methodMatches(swe, HttpMethod.GET) && pathMatches(swe, route);
+    private boolean isRequestMatching(ServerWebExchange swe, String path) {
+        return methodMatches(swe, HttpMethod.GET) && pathMatches(swe, path);
     }
 
     private boolean methodMatches(ServerWebExchange swe, HttpMethod method) {
         return Objects.equals(swe.getRequest().getMethod(), method);
     }
 
-    private boolean pathMatches(ServerWebExchange swe, String route) {
-        Predicate<ServerWebExchange> routePredicate = pathRoutePredicateFactory.apply(c -> c.setPattern(route));
+    private boolean pathMatches(ServerWebExchange swe, String path) {
+        Predicate<ServerWebExchange> routePredicate = pathRoutePredicateFactory.apply(c -> c.setPattern(path));
         return routePredicate.test(swe);
     }
 

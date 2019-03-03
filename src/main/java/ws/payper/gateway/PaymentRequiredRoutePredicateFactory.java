@@ -58,16 +58,17 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
             String route = swe.getRequest().getPath().value();
             if (paymentUriHelper.isPayableLinkPath(route)) {
                 String payableId = paymentUriHelper.extractPayableId(route);
-                return payableLinkRepository.find(payableId).map(this::paymentRequired).orElse(false);
+                return payableLinkRepository.find(payableId).map(link -> paymentRequired(link, swe)).orElse(false);
             } else {
                 return false;
             }
         };
     }
 
-    private boolean paymentRequired(ConfigureLinkController.PayableLink link) {
-        boolean required = true;
-        return required;
+    private boolean paymentRequired(ConfigureLinkController.PayableLink link, ServerWebExchange swe) {
+        String account = link.getLinkConfig().getPaymentOptionArgs().get("account");
+        PaymentEndpoint paymentEndpoint = new HederaHbarInvoicePaymentEndpoint(account);
+        return paymentRequestVerifier.isPaymentRequired(swe, link.getPayablePath(), paymentEndpoint, link.getLinkConfig().getPrice().toString());
     }
 
     private String getPrice(Map<String, String> args) {

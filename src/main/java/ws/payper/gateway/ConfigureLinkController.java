@@ -39,8 +39,9 @@ public class ConfigureLinkController {
     public
     Mono<PayableLink> newLink(@RequestBody LinkConfig link) {
         String payableId = RandomStringUtils.randomAlphanumeric(10);
-        String payableStr = uriBuilder.payableUri(payableId).toString();
-        PayableLink payable = new PayableLink(link, payableId, payableStr);
+        String payableUrl = uriBuilder.payableUri(payableId).toString();
+        String payablePath = uriBuilder.payablePath(payableId);
+        PayableLink payable = new PayableLink(link, payableId, payableUrl, payablePath);
 
         RouteDefinition routeDefinition = createRouteDefinition(payable);
 
@@ -152,10 +153,13 @@ public class ConfigureLinkController {
 
         private String payableUrl;
 
-        public PayableLink(LinkConfig linkConfig, String payableId, String payableUrl) {
+        private String payablePath;
+
+        public PayableLink(LinkConfig linkConfig, String payableId, String payableUrl, String payablePath) {
             this.linkConfig = linkConfig;
             this.payableId = payableId;
             this.payableUrl = payableUrl;
+            this.payablePath = payablePath;
         }
 
         public LinkConfig getLinkConfig() {
@@ -168,6 +172,10 @@ public class ConfigureLinkController {
 
         public String getPayableUrl() {
             return payableUrl;
+        }
+
+        public String getPayablePath() {
+            return payablePath;
         }
     }
 }

@@ -101,4 +101,8 @@ public class PaymentUriHelper {
     public String extractPayableId(String route) {
         return route.substring(4);
     }
+
+    public String payablePath(String payableId) {
+        return "/pl/" + payableId;
+    }
 }

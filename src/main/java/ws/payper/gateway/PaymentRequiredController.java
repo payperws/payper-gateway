@@ -27,6 +27,7 @@ public class PaymentRequiredController {
 
     private Map<PaymentOptionType, String> views = Map.of(
             PaymentOptionType.HEDERA_HBAR, DEFAULT_VIEW,
+            PaymentOptionType.DUMMY_COIN, "payment-required-dummy-coin",
             PaymentOptionType.HEDERA_HBAR_INVOICE, "payment-required-hedera-invoice",
             PaymentOptionType.LIGHTNING_BTC, "payment-required-lightning-btc"
     );
@@ -46,6 +47,7 @@ public class PaymentRequiredController {
                                   @RequestParam(value = "sourceurl") String sourceUrl,
                                   @RequestParam(value = "option") PaymentOptionType paymentOptionType,
                                   @RequestParam(value = "amount") String amount,
+                                  @RequestParam(value = "currency") String currency,
                                   @RequestParam(value = "account", required = false) String account,
                                   Model model) {
 
@@ -62,7 +64,7 @@ public class PaymentRequiredController {
             throw new RuntimeException(e);
         }
 
-        InvoiceRequest invoiceRequest = new InvoiceRequest(title, url, paymentOptionType, amount);
+        InvoiceRequest invoiceRequest = new InvoiceRequest(title, url, paymentOptionType, amount, currency);
         invoiceRequest.setAccount(account);
 
         Invoice invoice = invoiceGenerator.newInvoice(invoiceRequest);

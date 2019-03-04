@@ -53,6 +53,11 @@ public class PayperGatewayApplication {
         return new PaymentRequiredRoutePredicateFactory();
     }
 
+    @Bean
+    public HostOrQueryRoutePredicateFactory hostOrQueryRoutePredicateFactory() {
+        return new HostOrQueryRoutePredicateFactory();
+    }
+
     private void build(Api api, RouteLocatorBuilder.Builder builder) {
         String baseUrlPath = getPath(api.getBaseUrl()) + "/pl/**";
         builder.route(api.getName(), r -> r.path(baseUrlPath).and().order(1).uri(api.getBaseUrl()));

@@ -20,6 +20,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import static ws.payper.gateway.PaymentRequestVerifier.RECEIPT_HEADER;
+
 @RestController
 public class ConfigureLinkController {
 
@@ -43,12 +45,13 @@ public class ConfigureLinkController {
         String payablePath = uriBuilder.payablePath(payableId);
         PayableLink payable = new PayableLink(link, payableId, payableUrl, payablePath);
 
-        RouteDefinition routeDefinition = createRouteDefinition(payable);
+        RouteDefinition redirectDef = createRedirectRouteDefinition(payable);
+        RouteDefinition defaultDef = createDefaultRouteDefinition(payable);
 
-        return save(payableId, payable, Mono.just(routeDefinition));
+        return save(payableId, payable, Mono.just(redirectDef), Mono.just(defaultDef));
     }
 
-    private RouteDefinition createRouteDefinition(PayableLink payable) {
+    private RouteDefinition createRedirectRouteDefinition(PayableLink payable) {
         RouteDefinition route = new RouteDefinition();
 
         route.setUri(URI.create(payable.getLinkConfig().getUrl()));
@@ -66,14 +69,36 @@ public class ConfigureLinkController {
         return route;
     }
 
+    private RouteDefinition createDefaultRouteDefinition(PayableLink payable) {
+        RouteDefinition route = new RouteDefinition();
 
-    public Mono<PayableLink> save(String id, PayableLink link, Mono<RouteDefinition> route) {
-        return this.routeDefinitionWriter.save(route.map(r -> {
-                    r.setId(id);
+        route.setUri(URI.create(payable.getLinkConfig().getUrl()));
+
+        PredicateDefinition predicateDefinition = new PredicateDefinition();
+        predicateDefinition.setName("HostOrQuery");
+        route.setPredicates(List.of(predicateDefinition));
+
+        FilterDefinition removeHeaderFilter = new FilterDefinition();
+        removeHeaderFilter.setName("RemoveRequestHeader");
+        removeHeaderFilter.setArgs(Map.of("name", RECEIPT_HEADER));
+
+        // TODO remove query parameter
+
+        route.setFilters(List.of(removeHeaderFilter));
+        return route;
+    }
+
+    public Mono<PayableLink> save(String id, PayableLink link, Mono<RouteDefinition> routeDef, Mono<RouteDefinition> defaultDef) {
+        return this.routeDefinitionWriter.save(routeDef.map(r -> {
+                    r.setId(id + "-redirect");
                     return r;
-                }
-        )).then(Mono.defer(this::refresh
-        )).then(Mono.defer(() ->
+                }))
+                .then(this.routeDefinitionWriter.save(defaultDef.map(r -> {
+                    r.setId(id + "-default");
+                    return r;
+                })))
+                .then(Mono.defer(this::refresh))
+                .then(Mono.defer(() ->
                 Mono.just(repository.save(link))));
     }
 

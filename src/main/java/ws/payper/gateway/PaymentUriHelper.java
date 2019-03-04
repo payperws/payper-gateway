@@ -105,4 +105,8 @@ public class PaymentUriHelper {
     public String payablePath(String payableId) {
         return "/pl/" + payableId;
     }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
 }

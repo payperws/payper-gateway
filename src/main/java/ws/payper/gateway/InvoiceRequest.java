@@ -16,11 +16,14 @@ public class InvoiceRequest {
 
     private String account;
 
-    public InvoiceRequest(String title, URL url, PaymentOptionType paymentOptionType, String amount) {
+    private final String currency;
+
+    public InvoiceRequest(String title, URL url, PaymentOptionType paymentOptionType, String amount, String currency) {
         this.title = title;
         this.url = url;
         this.paymentOptionType = paymentOptionType;
         this.amount = amount;
+        this.currency = currency;
     }
 
     public void setAccount(String account) {
@@ -41,6 +44,10 @@ public class InvoiceRequest {
 
     public String getAmount() {
         return amount;
+    }
+
+    public String getCurrency() {
+        return currency;
     }
 
     public String getAccount() {

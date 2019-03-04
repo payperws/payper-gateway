@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 @Component
 public class PaymentRequestVerifier {
 
-    private static final String RECEIPT_HEADER = "X-Payment-Receipt";
+    public static final String RECEIPT_HEADER = "X-Payment-Receipt";
 
-    private static final String RECEIPT_PARAM = "x_payment_receipt";
+    public static final String RECEIPT_PARAM = "x_payment_receipt";
 
     @Autowired
     private PathRoutePredicateFactory pathRoutePredicateFactory;
@@ -88,7 +88,7 @@ public class PaymentRequestVerifier {
     }
 
     private boolean receiptNetworkVerificationFailed(ServerWebExchange swe, PaymentEndpoint paymentEndpoint, String amount) {
-        String paymentProof = Objects.requireNonNull(swe.getRequest().getHeaders().get(RECEIPT_HEADER)).stream().findFirst().orElse("");
+        String paymentProof = swe.getRequest().getHeaders().getFirst(RECEIPT_HEADER);
         if (StringUtils.isBlank(paymentProof)) {
             paymentProof = Objects.requireNonNull(swe.getRequest().getQueryParams().get(RECEIPT_PARAM)).stream().findFirst().orElse("");
         }

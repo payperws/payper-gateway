@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ServerWebExchange;
 import ws.payper.gateway.config.PaymentEndpoint;
 import ws.payper.gateway.config.PaymentOptionType;
+import ws.payper.gateway.dummy.DummyCoinPaymentEndpoint;
 import ws.payper.gateway.hedera.HederaHbarInvoicePaymentEndpoint;
 
 import java.util.Map;
@@ -66,9 +67,16 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
     }
 
     private boolean paymentRequired(ConfigureLinkController.PayableLink link, ServerWebExchange swe) {
-        String account = link.getLinkConfig().getPaymentOptionArgs().get("account");
-        PaymentEndpoint paymentEndpoint = new HederaHbarInvoicePaymentEndpoint(account);
-        return paymentRequestVerifier.isPaymentRequired(swe, link.getPayablePath(), paymentEndpoint, link.getLinkConfig().getPrice().toString());
+        PaymentOptionType type = link.getLinkConfig().getPaymentOptionType();
+        PaymentEndpoint paymentEndpoint;
+        if (PaymentOptionType.DUMMY_COIN.equals(type)) {
+            paymentEndpoint = new DummyCoinPaymentEndpoint();
+        } else {
+            String account = link.getLinkConfig().getPaymentOptionArgs().get("account");
+            paymentEndpoint = new HederaHbarInvoicePaymentEndpoint(account);
+        }
+        boolean paymentRequired = paymentRequestVerifier.isPaymentRequired(swe, link.getPayablePath(), paymentEndpoint, link.getLinkConfig().getPrice().toString());
+        return paymentRequired;
     }
 
     private String getPrice(Map<String, String> args) {

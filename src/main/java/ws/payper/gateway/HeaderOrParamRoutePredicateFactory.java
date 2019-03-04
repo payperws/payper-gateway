@@ -10,9 +10,9 @@ import java.util.function.Predicate;
 import static ws.payper.gateway.PaymentRequestVerifier.RECEIPT_HEADER;
 import static ws.payper.gateway.PaymentRequestVerifier.RECEIPT_PARAM;
 
-public class HostOrQueryRoutePredicateFactory extends AbstractRoutePredicateFactory<HostOrQueryRoutePredicateFactory.Config> {
+public class HeaderOrParamRoutePredicateFactory extends AbstractRoutePredicateFactory<HeaderOrParamRoutePredicateFactory.Config> {
 
-    public HostOrQueryRoutePredicateFactory() {
+    public HeaderOrParamRoutePredicateFactory() {
         super(Config.class);
     }
 

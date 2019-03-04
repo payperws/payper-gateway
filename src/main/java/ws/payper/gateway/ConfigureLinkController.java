@@ -75,7 +75,7 @@ public class ConfigureLinkController {
         route.setUri(URI.create(payable.getLinkConfig().getUrl()));
 
         PredicateDefinition predicateDefinition = new PredicateDefinition();
-        predicateDefinition.setName("HostOrQuery");
+        predicateDefinition.setName("HeaderOrParam");
         route.setPredicates(List.of(predicateDefinition));
 
         FilterDefinition removeHeaderFilter = new FilterDefinition();

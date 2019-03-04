@@ -54,8 +54,8 @@ public class PayperGatewayApplication {
     }
 
     @Bean
-    public HostOrQueryRoutePredicateFactory hostOrQueryRoutePredicateFactory() {
-        return new HostOrQueryRoutePredicateFactory();
+    public HeaderOrParamRoutePredicateFactory headerOrParamRoutePredicateFactory() {
+        return new HeaderOrParamRoutePredicateFactory();
     }
 
     private void build(Api api, RouteLocatorBuilder.Builder builder) {

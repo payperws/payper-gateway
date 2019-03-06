@@ -1,0 +1,49 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head title="Payable Links">
+    <script th:inline="javascript">
+        function submit() {
+            var xhr = new XMLHttpRequest();
+            var url = "/link";
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var json = JSON.parse(xhr.responseText);
+                    console.log(json['payableUrl']);
+                    window.location.replace("/ok?url=" + json['payableUrl']);
+                }
+            };
+
+            var url = document.getElementById('url').value;
+            var title = document.getElementById('title').value;
+            var price = document.getElementById('price').value;
+            var data = JSON.stringify({"url": url, "title": title, "price": price, "currency": "DUMMY_COIN", "paymentOptionType": "DUMMY_COIN", "paymentOptionArgs": {}});
+            xhr.send(data);
+        }
+
+    </script>
+</head>
+<body>
+    <p>Create a Payable Link</p>
+    <table>
+        <tr>
+            <td>URL</td>
+            <td colspan="2"><input id="url" type="text"></td>
+        </tr>
+        <tr>
+            <td>Title</td>
+            <td colspan="2"><input id="title" type="text"></td>
+        </tr>
+        <tr>
+            <td>Price</td>
+            <td><input id="price" type="text"></td>
+            <td>Dummy Coins</td>
+        </tr>
+        <tr>
+            <td colspan="3" onclick="submit()"><button>Create</button></td>
+        </tr>
+    </table>
+</body>
+
+</html>

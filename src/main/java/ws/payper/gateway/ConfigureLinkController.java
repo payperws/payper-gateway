@@ -9,9 +9,9 @@ import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionWriter;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ws.payper.gateway.config.PaymentOptionType;
 
@@ -22,7 +22,7 @@ import java.util.Map;
 
 import static ws.payper.gateway.PaymentRequestVerifier.RECEIPT_HEADER;
 
-@RestController
+@Controller
 public class ConfigureLinkController {
 
     @Autowired
@@ -37,7 +37,19 @@ public class ConfigureLinkController {
     @Autowired
     private PaymentUriHelper uriBuilder;
 
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String showNewLinkPage() {
+        return "configure-link";
+    }
+
+    @RequestMapping(value = "/ok", method = RequestMethod.GET)
+    public String linkCreated(@RequestParam String url, Model model) {
+        model.addAttribute("payableLink", url);
+        return "link-created";
+    }
+
     @PostMapping(value = "/link")
+    @ResponseBody
     public
     Mono<PayableLink> newLink(@RequestBody LinkConfig link) {
         String payableId = RandomStringUtils.randomAlphanumeric(10);

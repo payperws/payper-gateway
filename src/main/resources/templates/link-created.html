@@ -1,0 +1,25 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head title="Payable Links">
+    <script th:inline="javascript">
+        function init() {
+            document.getElementById("copy_button").addEventListener("click", copyLink);
+        }
+
+        function copyLink() {
+            var copyText = document.getElementById("link_span");
+            var textArea = document.createElement("textarea");
+            textArea.value = copyText.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("Copy");
+            textArea.remove();
+        }
+    </script>
+</head>
+<body onload="init();">
+<p>Here's your payable link</p>
+<p><span id="link_span" th:text="${payableLink}">https://payablelinks.com/8ZD5dUGT3U</span> <button id="copy_button">Copy</button></p>
+</body>
+
+</html>

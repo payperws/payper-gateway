@@ -43,6 +43,7 @@ public class PaymentRequiredController {
     @RequestMapping("/pypr/payment-required")
     @ResponseStatus(code = HttpStatus.PAYMENT_REQUIRED)
     public String paymentRequired(
+                                  @RequestParam(value = "payableLinkId") String payableLinkId,
                                   @RequestParam(value = "title") String title,
                                   @RequestParam(value = "sourceurl") String sourceUrl,
                                   @RequestParam(value = "option") PaymentOptionType paymentOptionType,
@@ -64,7 +65,7 @@ public class PaymentRequiredController {
             throw new RuntimeException(e);
         }
 
-        InvoiceRequest invoiceRequest = new InvoiceRequest(title, url, paymentOptionType, amount, currency);
+        InvoiceRequest invoiceRequest = new InvoiceRequest(payableLinkId, title, url, paymentOptionType, amount, currency);
         invoiceRequest.setAccount(account);
 
         Invoice invoice = invoiceGenerator.newInvoice(invoiceRequest);

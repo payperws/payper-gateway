@@ -1,8 +1,11 @@
 package ws.payper.gateway;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.handler.predicate.AbstractRoutePredicateFactory;
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.util.function.Predicate;
@@ -11,6 +14,9 @@ import static ws.payper.gateway.PaymentRequestVerifier.RECEIPT_HEADER;
 import static ws.payper.gateway.PaymentRequestVerifier.RECEIPT_PARAM;
 
 public class HeaderOrParamRoutePredicateFactory extends AbstractRoutePredicateFactory<HeaderOrParamRoutePredicateFactory.Config> {
+
+    @Autowired
+    private InvoiceRepository invoiceRepository;
 
     public HeaderOrParamRoutePredicateFactory() {
         super(Config.class);
@@ -22,10 +28,50 @@ public class HeaderOrParamRoutePredicateFactory extends AbstractRoutePredicateFa
             ServerHttpRequest request = swe.getRequest();
             String receiptHeader = request.getHeaders().getFirst(RECEIPT_HEADER);
             String receiptParam = request.getQueryParams().getFirst(RECEIPT_PARAM);
-            return StringUtils.isNotBlank(receiptHeader) || StringUtils.isNotBlank(receiptParam);
+
+            String invoiceId = getFirstNonBlank(receiptHeader, receiptParam);
+
+            if (invoiceId != null) {
+                return invoiceRepository.find(invoiceId).map(invoice -> invoice.getPayableLinkId().equals(config.getLinkId())).orElse(false);
+            } else {
+                return false;
+            }
         };
     }
 
+    private String getFirstNonBlank(String receiptHeader, String receiptParam) {
+        String result = null;
+        if (StringUtils.isNotBlank(receiptHeader)) {
+            result = receiptHeader;
+        } else if (StringUtils.isNotBlank(receiptParam)) {
+            result = receiptParam;
+        }
+        return result;
+    }
+
+    public boolean isSame(String linkId, String configuredLinkId) {
+        return (StringUtils.isNotBlank(linkId)) && (linkId.equals(configuredLinkId));
+    }
+
+    @Validated
     public static class Config {
+
+        private String linkId;
+
+        public String getLinkId() {
+            return linkId;
+        }
+
+        public HeaderOrParamRoutePredicateFactory.Config setLinkId(String linkId) {
+            this.linkId = linkId;
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return new ToStringCreator(this)
+                    .append("linkId", linkId)
+                    .toString();
+        }
     }
 }

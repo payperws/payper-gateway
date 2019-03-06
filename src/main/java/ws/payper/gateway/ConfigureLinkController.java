@@ -57,6 +57,7 @@ public class ConfigureLinkController {
         route.setUri(URI.create(payable.getLinkConfig().getUrl()));
         PredicateDefinition predicateDefinition = new PredicateDefinition();
         predicateDefinition.setName("PaymentRequired");
+        predicateDefinition.setArgs(Map.of("linkId", payable.getPayableId()));
         route.setPredicates(List.of(predicateDefinition));
 
         FilterDefinition filterDef = new FilterDefinition();
@@ -76,6 +77,7 @@ public class ConfigureLinkController {
 
         PredicateDefinition predicateDefinition = new PredicateDefinition();
         predicateDefinition.setName("HeaderOrParam");
+        predicateDefinition.setArgs(Map.of("linkId", payable.getPayableId()));
         route.setPredicates(List.of(predicateDefinition));
 
         FilterDefinition removeHeaderFilter = new FilterDefinition();

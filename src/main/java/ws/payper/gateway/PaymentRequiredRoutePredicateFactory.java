@@ -40,26 +40,14 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
     @Override
     public Predicate<ServerWebExchange> apply(PaymentRequiredRoutePredicateFactory.Config config) {
         return swe -> {
-/*
-            String route = swe.getRequest().getPath().value();
-            RouteDefinition routeDefinition = routeDefinitionRepository.getRouteDefinitions()
-                    .filter(p -> p.getPredicates().stream().anyMatch(pd -> route.equals(pd.getArgs().get("route"))))
-                    .blockFirst();
-
-            if (routeDefinition != null) {
-                PredicateDefinition predicateDefinition = routeDefinition.getPredicates().get(0);
-                PaymentEndpoint paymentEndpoint = getPaymentEndpoint(predicateDefinition.getArgs());
-                String price = getPrice(predicateDefinition.getArgs());
-                return paymentRequestVerifier.isPaymentRequired(swe, route, paymentEndpoint, price);
-            } else {
-                logger.warn("Could not find route definition in repository: {}", route);
-                return true;
-            }
-*/
             String route = swe.getRequest().getPath().value();
             if (paymentUriHelper.isPayableLinkPath(route)) {
                 String payableId = paymentUriHelper.extractPayableId(route);
-                return payableLinkRepository.find(payableId).map(link -> paymentRequired(link, swe)).orElse(false);
+                if (StringUtils.isNotBlank(payableId) && payableId.equals(config.getLinkId())) {
+                    return payableLinkRepository.find(payableId).map(link -> paymentRequired(link, swe)).orElse(false);
+                } else {
+                    return false;
+                }
             } else {
                 return false;
             }
@@ -104,24 +92,29 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
         return endpoint;
     }
 
+    @Override
+    public Class<Config> getConfigClass() {
+        return Config.class;
+    }
+
     @Validated
     public static class Config {
 
-        private String pattern;
+        private String linkId;
 
-        public String getPattern() {
-            return pattern;
+        public String getLinkId() {
+            return linkId;
         }
 
-        public PaymentRequiredRoutePredicateFactory.Config setPattern(String pattern) {
-            this.pattern = pattern;
+        public PaymentRequiredRoutePredicateFactory.Config setLinkId(String linkId) {
+            this.linkId = linkId;
             return this;
         }
 
         @Override
         public String toString() {
             return new ToStringCreator(this)
-                    .append("pattern", pattern)
+                    .append("linkId", linkId)
                     .toString();
         }
     }

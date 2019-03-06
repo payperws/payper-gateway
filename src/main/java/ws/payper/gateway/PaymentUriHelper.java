@@ -1,7 +1,6 @@
 package ws.payper.gateway;
 
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.client.utils.URIUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ws.payper.gateway.config.Api;
@@ -65,6 +64,7 @@ public class PaymentUriHelper {
 
         PaymentOptionType paymentOptionType = linkConfig.getPaymentOptionType();
 
+        String payableLinkId = payable.getPayableId();
         String title = linkConfig.getTitle();
         String sourceUrl = payable.getPayableUrl();
         String paymentOption = paymentOptionType.name();
@@ -74,6 +74,7 @@ public class PaymentUriHelper {
         try {
 
             URIBuilder uriBuilder = new URIBuilder(paymentRequiredBaseUrl)
+                    .addParameter("payableLinkId", payableLinkId)
                     .addParameter("title", title)
                     .addParameter("sourceurl", sourceUrl)
                     .addParameter("option", paymentOption)

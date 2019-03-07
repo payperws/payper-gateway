@@ -19,11 +19,6 @@ public class DummyCoinPaymentNetwork implements PaymentNetwork {
     }
 
     @Override
-    public long getBalance(String account) {
-        return 0;
-    }
-
-    @Override
     public boolean verifyTransaction(String paymentProof, PaymentEndpoint paymentEndpoint, String amount) {
         synchronized (paidInvoices) {
             return paidInvoices.getOrDefault(paymentProof, false);

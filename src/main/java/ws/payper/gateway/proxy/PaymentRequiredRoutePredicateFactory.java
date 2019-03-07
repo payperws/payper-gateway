@@ -1,4 +1,4 @@
-package ws.payper.gateway;
+package ws.payper.gateway.proxy;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -9,12 +9,15 @@ import org.springframework.cloud.gateway.route.InMemoryRouteDefinitionRepository
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ServerWebExchange;
+import ws.payper.gateway.PaymentRequestVerifier;
 import ws.payper.gateway.config.PaymentEndpoint;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.dummy.DummyCoinPaymentEndpoint;
 import ws.payper.gateway.hedera.HederaHbarInvoicePaymentEndpoint;
+import ws.payper.gateway.repo.PayableLinkRepository;
+import ws.payper.gateway.util.PaymentUriHelper;
+import ws.payper.gateway.web.ConfigureLinkController;
 
-import java.util.Map;
 import java.util.function.Predicate;
 
 public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicateFactory<PaymentRequiredRoutePredicateFactory.Config> {
@@ -65,31 +68,6 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
         }
         boolean paymentRequired = paymentRequestVerifier.isPaymentRequired(swe, link.getPayablePath(), paymentEndpoint, link.getLinkConfig().getPrice().toString());
         return paymentRequired;
-    }
-
-    private String getPrice(Map<String, String> args) {
-        String price = args.get("price");
-        if (StringUtils.isBlank(price)) {
-            throw new IllegalStateException("price is blank");
-        }
-        return price;
-    }
-
-    public static PaymentEndpoint getPaymentEndpoint(Map<String, String> args) {
-        String strOptionType = args.get("paymentOptionType");
-
-        PaymentOptionType optionType = PaymentOptionType.valueOf(strOptionType);
-
-        PaymentEndpoint endpoint;
-
-        if (optionType == PaymentOptionType.HEDERA_HBAR_INVOICE) {
-            String account = args.get("account");
-            endpoint = new HederaHbarInvoicePaymentEndpoint(account);
-        } else {
-            throw new IllegalStateException("Payment option type not supported: " + optionType);
-        }
-
-        return endpoint;
     }
 
     @Override

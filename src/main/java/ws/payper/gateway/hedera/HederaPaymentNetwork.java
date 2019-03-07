@@ -27,28 +27,6 @@ public class HederaPaymentNetwork implements PaymentNetwork {
     }
 
     @Override
-    public long getBalance(String accountId) {
-        long accountNum;
-        try {
-            accountNum = Long.parseLong(accountId);
-        } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException("Could not parse accountId to long");
-        }
-
-        HederaAccount account = new HederaAccount();
-
-        account.txQueryDefaults = queryDefaults;
-
-        account.accountNum = accountNum;
-
-        try {
-            return account.getBalance();
-        } catch (Exception e) {
-            throw new NetworkCommunicationException("Could not retrieve balance for account " + accountId, e);
-        }
-    }
-
-    @Override
     public boolean verifyTransaction(String paymentProof, PaymentEndpoint paymentEndpoint, String amount) {
         HederaTransactionID hederaTransactionID = parseTransactionId(paymentProof);
         HederaTransactionReceipt receipt;

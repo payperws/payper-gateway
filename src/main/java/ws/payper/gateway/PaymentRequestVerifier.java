@@ -8,10 +8,8 @@ import org.springframework.cloud.gateway.handler.predicate.QueryRoutePredicateFa
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import ws.payper.gateway.config.Api;
 import ws.payper.gateway.config.PaymentEndpoint;
 import ws.payper.gateway.config.PaymentOptionType;
-import ws.payper.gateway.config.Route;
 
 import java.util.List;
 import java.util.Map;
@@ -48,15 +46,6 @@ public class PaymentRequestVerifier {
 
     public boolean isPaymentRequired(ServerWebExchange swe, String path, PaymentEndpoint paymentEndpoint, String price) {
         return isRequestMatching(swe, path) && (isPaymentProofMissing(swe, paymentEndpoint.getType()) || receiptNetworkVerificationFailed(swe, paymentEndpoint, price));
-    }
-
-    public boolean isPaymentRequired(ServerWebExchange swe, Api api, Route route) {
-        String routeStr = route.getRoute();
-        PaymentEndpoint paymentEndpoint = api.getPayment().build();
-        PaymentOptionType type = paymentEndpoint.getType();
-        String price = route.getPrice();
-
-        return isRequestMatching(swe, routeStr) && (isPaymentProofMissing(swe, type) || receiptNetworkVerificationFailed(swe, paymentEndpoint, price));
     }
 
     private boolean isRequestMatching(ServerWebExchange swe, String path) {

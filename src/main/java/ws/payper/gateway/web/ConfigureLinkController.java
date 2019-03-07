@@ -1,4 +1,4 @@
-package ws.payper.gateway;
+package ws.payper.gateway.web;
 
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -14,6 +14,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ws.payper.gateway.config.PaymentOptionType;
+import ws.payper.gateway.model.CryptoCurrency;
+import ws.payper.gateway.repo.PayableLinkRepository;
+import ws.payper.gateway.util.PaymentUriHelper;
 
 import java.math.BigDecimal;
 import java.net.URI;

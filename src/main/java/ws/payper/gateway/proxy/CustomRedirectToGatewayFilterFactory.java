@@ -1,4 +1,4 @@
-package ws.payper.gateway;
+package ws.payper.gateway.proxy;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.RedirectToGatewayFilterFactory;

@@ -1,14 +1,10 @@
-package ws.payper.gateway;
+package ws.payper.gateway.util;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ws.payper.gateway.config.Api;
-import ws.payper.gateway.config.PaymentEndpoint;
 import ws.payper.gateway.config.PaymentOptionType;
-import ws.payper.gateway.config.Route;
-import ws.payper.gateway.hedera.HederaHbarInvoicePaymentEndpoint;
-import ws.payper.gateway.hedera.HederaHbarPaymentEndpoint;
+import ws.payper.gateway.web.ConfigureLinkController;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
@@ -31,28 +27,6 @@ public class PaymentUriHelper {
     public void init() {
         this.payableBaseUrl = baseUrl + "/pl";
         this.paymentRequiredBaseUrl = baseUrl + "/" + redirectPath;
-    }
-
-    public URI buildUri(String paymentRequiredUrl, String sourceUrl, Api api, Route route) {
-        try {
-            PaymentEndpoint endpoint = api.getPayment().build();
-
-            URIBuilder uriBuilder = new URIBuilder(paymentRequiredUrl)
-                    .addParameter("title", route.getTitle())
-                    .addParameter("sourceurl", sourceUrl)
-                    .addParameter("option", endpoint.getType().name())
-                    .addParameter("amount", route.getPrice());
-
-            if (PaymentOptionType.HEDERA_HBAR.equals(endpoint.getType())) {
-                uriBuilder.addParameter("account", ((HederaHbarPaymentEndpoint) endpoint).getAccount());
-            } else if (PaymentOptionType.HEDERA_HBAR_INVOICE.equals(endpoint.getType())) {
-                uriBuilder.addParameter("account", ((HederaHbarInvoicePaymentEndpoint) endpoint).getAccount());
-            }
-
-            return uriBuilder.build();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Could not build redirect URL", e);
-        }
     }
 
     public URI payableUri(String payableId) {

@@ -12,8 +12,10 @@ public class Invoice {
     private String price;
 
     private Map<String, String> paymentOptionParameters;
+    private String payableLinkId;
 
-    public Invoice(PaymentOptionType paymentOptionType, String price, Map<String, String> paymentOptionParameters) {
+    public Invoice(String payableLinkId, PaymentOptionType paymentOptionType, String price, Map<String, String> paymentOptionParameters) {
+        this.payableLinkId = payableLinkId;
         this.paymentOptionType = paymentOptionType;
         this.price = price;
         this.paymentOptionParameters = paymentOptionParameters;
@@ -48,5 +50,13 @@ public class Invoice {
         allParams.put("paymentOptionType", paymentOptionType.name());
         allParams.put("price", price);
         return allParams;
+    }
+
+    public String getPayableLinkId() {
+        return payableLinkId;
+    }
+
+    public void setPayableLinkId(String payableLinkId) {
+        this.payableLinkId = payableLinkId;
     }
 }

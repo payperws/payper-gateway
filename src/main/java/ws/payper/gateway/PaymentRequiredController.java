@@ -27,9 +27,13 @@ public class PaymentRequiredController {
 
     private Map<PaymentOptionType, String> views = Map.of(
             PaymentOptionType.HEDERA_HBAR, DEFAULT_VIEW,
+            PaymentOptionType.DUMMY_COIN, "payment-required-dummy-coin",
             PaymentOptionType.HEDERA_HBAR_INVOICE, "payment-required-hedera-invoice",
             PaymentOptionType.LIGHTNING_BTC, "payment-required-lightning-btc"
     );
+
+    @Autowired
+    private InvoiceRepository invoiceRepository;
 
     @Autowired
     public void setInvoiceGeneratorList(List<InvoiceGenerator> invoiceGeneratorList) {
@@ -39,10 +43,12 @@ public class PaymentRequiredController {
     @RequestMapping("/pypr/payment-required")
     @ResponseStatus(code = HttpStatus.PAYMENT_REQUIRED)
     public String paymentRequired(
+                                  @RequestParam(value = "payableLinkId") String payableLinkId,
                                   @RequestParam(value = "title") String title,
                                   @RequestParam(value = "sourceurl") String sourceUrl,
                                   @RequestParam(value = "option") PaymentOptionType paymentOptionType,
                                   @RequestParam(value = "amount") String amount,
+                                  @RequestParam(value = "currency") String currency,
                                   @RequestParam(value = "account", required = false) String account,
                                   Model model) {
 
@@ -59,10 +65,12 @@ public class PaymentRequiredController {
             throw new RuntimeException(e);
         }
 
-        InvoiceRequest invoiceRequest = new InvoiceRequest(title, url, paymentOptionType, amount);
+        InvoiceRequest invoiceRequest = new InvoiceRequest(payableLinkId, title, url, paymentOptionType, amount, currency);
         invoiceRequest.setAccount(account);
 
         Invoice invoice = invoiceGenerator.newInvoice(invoiceRequest);
+
+        invoice = invoiceRepository.save(invoice);
 
         model.addAllAttributes(invoice.allParameters());
 

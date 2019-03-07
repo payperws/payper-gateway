@@ -16,11 +16,17 @@ public class InvoiceRequest {
 
     private String account;
 
-    public InvoiceRequest(String title, URL url, PaymentOptionType paymentOptionType, String amount) {
+    private final String currency;
+
+    private String payableLinkId;
+
+    public InvoiceRequest(String payableLinkId, String title, URL url, PaymentOptionType paymentOptionType, String amount, String currency) {
+        this.payableLinkId = payableLinkId;
         this.title = title;
         this.url = url;
         this.paymentOptionType = paymentOptionType;
         this.amount = amount;
+        this.currency = currency;
     }
 
     public void setAccount(String account) {
@@ -43,7 +49,19 @@ public class InvoiceRequest {
         return amount;
     }
 
+    public String getCurrency() {
+        return currency;
+    }
+
     public String getAccount() {
         return account;
+    }
+
+    public String getPayableLinkId() {
+        return payableLinkId;
+    }
+
+    public void setPayableLinkId(String payableLinkId) {
+        this.payableLinkId = payableLinkId;
     }
 }

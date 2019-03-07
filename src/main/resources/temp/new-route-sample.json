@@ -1,0 +1,23 @@
+{
+  "uri": "https://hashgraph.org/discussion/532/top-ten-myths-of-distributed-ledger-technologies",
+  "predicates": [
+    {
+      "name": "PaymentRequired",
+      "args": {
+        "route": "/top10myths",
+        "paymentOptionType": "HEDERA_HBAR_INVOICE",
+        "account": "0.0.1209",
+        "price": "5"
+      }
+    }
+  ],
+  "filters": [
+    {
+      "name": "RedirectTo",
+      "args": {
+        "status": 302,
+        "url": "http://localhost:8080/pypr/payment-required?title=Top+Ten+Myths+of+Distributed+Ledger+Technologies&sourceurl=http%3A%2F%2Flocalhost%3A8080%2Ftop10myths&option=HEDERA_HBAR_INVOICE&amount=500000000&account=0.0.1209"
+      }
+    }
+  ]
+}

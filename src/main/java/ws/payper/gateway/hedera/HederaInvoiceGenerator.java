@@ -20,7 +20,7 @@ public class HederaInvoiceGenerator implements InvoiceGenerator {
 
         Map<String, String> params = new HashMap<>();
         params.put("account", account);
-        return new Invoice(paymentOptionType, amount, params);
+        return new Invoice(invoiceRequest.getPayableLinkId(), paymentOptionType, amount, params);
     }
 
     @Override

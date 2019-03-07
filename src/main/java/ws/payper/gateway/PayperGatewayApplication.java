@@ -32,27 +32,42 @@ public class PayperGatewayApplication {
     @Value("${payper.redirectPath}")
     private String redirectPath;
 
-    private PaymentUriBuilder paymentUriBuilder;
+    private PaymentUriHelper paymentUriHelper;
 
     @Autowired
-    public PayperGatewayApplication(RoutePriceConfiguration config, PaymentRequestVerifier paymentVerifier, PaymentUriBuilder paymentUriBuilder) {
+    public PayperGatewayApplication(RoutePriceConfiguration config, PaymentRequestVerifier paymentVerifier, PaymentUriHelper paymentUriHelper) {
         this.config = config;
         this.paymentVerifier = paymentVerifier;
-        this.paymentUriBuilder = paymentUriBuilder;
+        this.paymentUriHelper = paymentUriHelper;
     }
 
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder routeLocatorBuilder) {
         RouteLocatorBuilder.Builder builder = routeLocatorBuilder.routes();
-        config.getApis().forEach(api -> build(api, builder));
+//        config.getApis().forEach(api -> build(api, builder));
         return builder.build();
     }
 
+    @Bean
+    public PaymentRequiredRoutePredicateFactory paymentRequiredRoutePredicateFactory() {
+        return new PaymentRequiredRoutePredicateFactory();
+    }
+
+    @Bean
+    public CustomRedirectToGatewayFilterFactory customRedirectToRoutePredicateFactory() {
+        return new CustomRedirectToGatewayFilterFactory();
+    }
+
+    @Bean
+    public HeaderOrParamRoutePredicateFactory headerOrParamRoutePredicateFactory() {
+        return new HeaderOrParamRoutePredicateFactory();
+    }
+
     private void build(Api api, RouteLocatorBuilder.Builder builder) {
-        String baseUrlPath = getPath(api.getBaseUrl()) + "/**";
+        String baseUrlPath = getPath(api.getBaseUrl()) + "/pl/**";
         builder.route(api.getName(), r -> r.path(baseUrlPath).and().order(1).uri(api.getBaseUrl()));
 
-        api.getRoutes().forEach(route -> build(api, route, builder));
+//        api.getRoutes().forEach(route -> build(api, route, builder));
     }
 
     private void build(Api api, Route route, RouteLocatorBuilder.Builder builder) {
@@ -67,7 +82,7 @@ public class PayperGatewayApplication {
     private String redirectUrl(Api api, Route route) {
         String paymentRequiredUrl = getPaymentRequiredUrl();
         String resourceUrl = getResourceUrl(route);
-        return paymentUriBuilder.buildUri(paymentRequiredUrl, resourceUrl, api, route).toString();
+        return paymentUriHelper.buildUri(paymentRequiredUrl, resourceUrl, api, route).toString();
     }
 
     private String getResourceUrl(Route route) {

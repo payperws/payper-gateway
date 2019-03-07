@@ -54,6 +54,11 @@ public class PayperGatewayApplication {
     }
 
     @Bean
+    public CustomRedirectToGatewayFilterFactory customRedirectToRoutePredicateFactory() {
+        return new CustomRedirectToGatewayFilterFactory();
+    }
+
+    @Bean
     public HeaderOrParamRoutePredicateFactory headerOrParamRoutePredicateFactory() {
         return new HeaderOrParamRoutePredicateFactory();
     }

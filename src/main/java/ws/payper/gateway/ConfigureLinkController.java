@@ -73,7 +73,7 @@ public class ConfigureLinkController {
         route.setPredicates(List.of(predicateDefinition));
 
         FilterDefinition filterDef = new FilterDefinition();
-        filterDef.setName("RedirectTo");
+        filterDef.setName("CustomRedirectTo");
         String redirectUrl = uriBuilder.paymentRequiredUri(payable).toString();
         Map<String, String> filterArgs = Map.of("status", "302", "url", redirectUrl);
         filterDef.setArgs(filterArgs);

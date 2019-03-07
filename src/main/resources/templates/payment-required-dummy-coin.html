@@ -27,6 +27,7 @@
             var newXHR = new XMLHttpRequest();
             newXHR.open('GET', url);
             newXHR.setRequestHeader('X-Payment-Receipt', invoice_id);
+            newXHR.setRequestHeader('X-Payment-Quick-Check', 'true');
 
             newXHR.onreadystatechange = function() {
                 if (newXHR.readyState == 4) {

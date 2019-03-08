@@ -1,7 +1,8 @@
-package ws.payper.gateway;
+package ws.payper.gateway.repo;
 
 import org.springframework.data.repository.Repository;
 import org.springframework.stereotype.Component;
+import ws.payper.gateway.model.Invoice;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;

@@ -5,7 +5,7 @@
 
 	<groupId>ws.payper</groupId>
 	<artifactId>gateway</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>${revision}${changelist}</version>
 	<packaging>jar</packaging>
 
 	<name>Payper Gateway</name>
@@ -16,6 +16,11 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.0.5.RELEASE</version>
 	</parent>
+
+	<properties>
+		<revision>1.0.0</revision>
+		<changelist>-SNAPSHOT</changelist>
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>

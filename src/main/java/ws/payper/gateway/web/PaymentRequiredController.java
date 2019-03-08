@@ -1,4 +1,4 @@
-package ws.payper.gateway;
+package ws.payper.gateway.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -7,7 +7,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import ws.payper.gateway.InvoiceGenerator;
 import ws.payper.gateway.config.PaymentOptionType;
+import ws.payper.gateway.model.Invoice;
+import ws.payper.gateway.repo.InvoiceRepository;
 
 import java.net.MalformedURLException;
 import java.net.URL;

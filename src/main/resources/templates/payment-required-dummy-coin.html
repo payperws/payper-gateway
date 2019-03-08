@@ -16,7 +16,7 @@
 
     var polling = (invoice_id != '2fe84032-68de-4f35-9e34-a548ab290738');
     var retries = 50;
-    var sleep = 2000;
+    var sleep = 1000;
 
     async function poll(polling, retries, sleep) {
         var is402 = true;
@@ -30,7 +30,7 @@
             newXHR.setRequestHeader('X-Payment-Quick-Check', 'true');
 
             newXHR.onreadystatechange = function() {
-                if (newXHR.readyState == 4) {
+                if (newXHR.readyState == 4 || newXHR.readyState == 3) {
                     if (newXHR.status != 402) {
                         is402 = false;
                         console.log('Not 402. Might be that the payment was verified!');

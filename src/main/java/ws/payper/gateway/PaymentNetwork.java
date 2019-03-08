@@ -7,8 +7,6 @@ public interface PaymentNetwork {
 
     PaymentOptionType getPaymentOptionType();
 
-    long getBalance(String account);
-
     boolean verifyTransaction(String paymentProof, PaymentEndpoint paymentEndpoint, String amount);
 
     String getPaymentProofPattern();

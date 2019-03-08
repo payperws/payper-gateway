@@ -1,4 +1,4 @@
-package ws.payper.gateway;
+package ws.payper.gateway.web;
 
 import ws.payper.gateway.config.PaymentOptionType;
 

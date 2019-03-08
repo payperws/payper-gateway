@@ -1,4 +1,4 @@
-package ws.payper.gateway;
+package ws.payper.gateway.model;
 
 public enum CryptoCurrency {
     TINYBAR,

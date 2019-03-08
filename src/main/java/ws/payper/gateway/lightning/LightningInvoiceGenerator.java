@@ -2,9 +2,9 @@ package ws.payper.gateway.lightning;
 
 import org.lightningj.lnd.wrapper.message.AddInvoiceResponse;
 import org.springframework.stereotype.Component;
-import ws.payper.gateway.Invoice;
+import ws.payper.gateway.model.Invoice;
 import ws.payper.gateway.InvoiceGenerator;
-import ws.payper.gateway.InvoiceRequest;
+import ws.payper.gateway.web.InvoiceRequest;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.util.QrCodeGenerator;
 

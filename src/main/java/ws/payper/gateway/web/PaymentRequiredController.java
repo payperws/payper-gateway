@@ -1,5 +1,6 @@
 package ws.payper.gateway.web;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -53,7 +54,23 @@ public class PaymentRequiredController {
                                   @RequestParam(value = "amount") String amount,
                                   @RequestParam(value = "currency") String currency,
                                   @RequestParam(value = "account", required = false) String account,
+                                  @RequestParam(value = "invoice-id", required = false) String invoiceId,
                                   Model model) {
+
+        Invoice invoice;
+
+        if (StringUtils.isBlank(invoiceId)) {
+            invoice = newInvoice(payableLinkId, title, sourceUrl, paymentOptionType, amount, currency, account);
+        } else {
+            invoice = invoiceRepository.find(invoiceId).orElseThrow(
+                    () -> new IllegalArgumentException("Could not find invoice in repo. ID: " + invoiceId));
+        }
+        model.addAllAttributes(invoice.allParameters());
+        return views.getOrDefault(paymentOptionType, DEFAULT_VIEW);
+    }
+
+    private Invoice newInvoice(String payableLinkId, String title, String sourceUrl,
+                               PaymentOptionType paymentOptionType, String amount, String currency, String account) {
 
         InvoiceGenerator invoiceGenerator = invoiceGenerators.get(paymentOptionType);
 
@@ -74,9 +91,6 @@ public class PaymentRequiredController {
         Invoice invoice = invoiceGenerator.newInvoice(invoiceRequest);
 
         invoice = invoiceRepository.save(invoice);
-
-        model.addAllAttributes(invoice.allParameters());
-
-        return views.getOrDefault(paymentOptionType, DEFAULT_VIEW);
+        return invoice;
     }
 }

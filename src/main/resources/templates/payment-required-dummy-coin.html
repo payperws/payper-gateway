@@ -15,7 +15,7 @@
     /*]]>*/
 
     var polling = (invoice_id != '2fe84032-68de-4f35-9e34-a548ab290738');
-    var retries = 50;
+    var retries = 1000;
     var sleep = 1000;
 
     async function poll(polling, retries, sleep) {
@@ -47,8 +47,13 @@
             }
         }
 
-        if (!is402) {
-            window.open(url + "?x_payment_receipt=" + encodeURIComponent(invoice_id), "_self");
+        if (is402) {
+            console.log('Reloading');
+            var newUrl = replaceUrlParam(window.location.href, 'invoice-id', invoice_id);
+            window.location.replace(newUrl);
+        } else {
+            var newUrl = replaceUrlParam(url, 'x_payment_receipt', encodeURIComponent(invoice_id));
+            window.open(newUrl, "_self");
         }
     }
 
@@ -57,6 +62,18 @@
             console.log(`Retries left: ${retries}`);
             resolve();
         }, sleep));
+    }
+
+    function replaceUrlParam(urlVal, paramName, paramValue) {
+        if (paramValue == null) {
+            paramValue = '';
+        }
+        var pattern = new RegExp('\\b('+paramName+'=).*?(&|#|$)');
+        if (urlVal.search(pattern)>=0) {
+            return urlVal.replace(pattern,'$1' + paramValue + '$2');
+        }
+        urlVal = urlVal.replace(/[?#]$/,'');
+        return urlVal + (urlVal.indexOf('?')>0 ? '&' : '?') + paramName + '=' + paramValue;
     }
 
     poll(polling, retries, sleep);

@@ -22,7 +22,7 @@ import java.util.function.Predicate;
 
 public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicateFactory<PaymentRequiredRoutePredicateFactory.Config> {
 
-    private final Logger logger = LoggerFactory.getLogger(PaymentRequiredRoutePredicateFactory.class);
+    private static final Logger log = LoggerFactory.getLogger("PaymentProxy");
 
     @Autowired
     public PayableLinkRepository payableLinkRepository;
@@ -47,7 +47,13 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
             if (paymentUriHelper.isPayableLinkPath(route)) {
                 String payableId = paymentUriHelper.extractPayableId(route);
                 if (StringUtils.isNotBlank(payableId) && payableId.equals(config.getLinkId())) {
-                    return payableLinkRepository.find(payableId).map(link -> paymentRequired(link, swe)).orElse(false);
+                    return payableLinkRepository.find(payableId).map(link -> {
+                        log.info("[{}] found link in repository", payableId);
+                        return paymentRequired(link, swe);
+                    }).orElseGet(() -> {
+                        log.info("[{}] link NOT found in repository", payableId);
+                        return false;
+                    });
                 } else {
                     return false;
                 }
@@ -67,6 +73,7 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
             paymentEndpoint = new HederaHbarInvoicePaymentEndpoint(account);
         }
         boolean paymentRequired = paymentRequestVerifier.isPaymentRequired(swe, link.getPayablePath(), paymentEndpoint, link.getLinkConfig().getPrice().toString());
+        log.info("[{}] payment required: {}", link.getPayableId(), paymentRequired);
         return paymentRequired;
     }
 

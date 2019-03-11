@@ -1,6 +1,8 @@
 package ws.payper.gateway.proxy;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.handler.predicate.AbstractRoutePredicateFactory;
 import org.springframework.core.style.ToStringCreator;
@@ -15,6 +17,8 @@ import static ws.payper.gateway.PaymentRequestVerifier.RECEIPT_HEADER;
 import static ws.payper.gateway.PaymentRequestVerifier.RECEIPT_PARAM;
 
 public class HeaderOrParamRoutePredicateFactory extends AbstractRoutePredicateFactory<HeaderOrParamRoutePredicateFactory.Config> {
+
+    private final Logger log = LoggerFactory.getLogger("PaymentProxy");
 
     @Autowired
     private InvoiceRepository invoiceRepository;
@@ -33,7 +37,13 @@ public class HeaderOrParamRoutePredicateFactory extends AbstractRoutePredicateFa
             String invoiceId = getFirstNonBlank(receiptHeader, receiptParam);
 
             if (invoiceId != null) {
-                return invoiceRepository.find(invoiceId).map(invoice -> invoice.getPayableLinkId().equals(config.getLinkId())).orElse(false);
+                return invoiceRepository.find(invoiceId).map(invoice -> {
+                    boolean found = invoice.getPayableLinkId().equals(config.getLinkId());
+                    if (found) {
+                        log.info("[{}] [{}] invoice paid - proxying request", invoice.getPayableLinkId(), invoiceId);
+                    }
+                    return found;
+                }).orElse(false);
             } else {
                 return false;
             }

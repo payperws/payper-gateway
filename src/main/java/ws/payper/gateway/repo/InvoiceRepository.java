@@ -1,25 +1,14 @@
 package ws.payper.gateway.repo;
 
-import org.springframework.data.repository.Repository;
-import org.springframework.stereotype.Component;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import ws.payper.gateway.model.Invoice;
 
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
-@Component
-public class InvoiceRepository implements Repository<Invoice, Long> {
+public interface InvoiceRepository extends MongoRepository<Invoice, String> {
 
-    private ConcurrentMap<String, Invoice> invoiceIds = new ConcurrentHashMap<>();
+    @Override
+    <S extends Invoice> S save(S s);
 
-    public synchronized Invoice save(Invoice invoice) {
-        String invoiceId = invoice.getPaymentOptionParameters().get("invoice_id");
-        invoiceIds.putIfAbsent(invoiceId, invoice);
-        return invoice;
-    }
-
-    public synchronized Optional<Invoice> find(String invoiceId) {
-        return Optional.ofNullable(invoiceIds.get(invoiceId));
-    }
+    Optional<Invoice> findByInvoiceId(String invoiceId);
 }

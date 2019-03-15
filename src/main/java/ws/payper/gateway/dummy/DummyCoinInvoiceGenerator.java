@@ -40,7 +40,7 @@ public class DummyCoinInvoiceGenerator implements InvoiceGenerator {
                 "open_in_wallet", dummyWalletUrl
         );
 
-        Invoice invoice = new Invoice(request.getPayableLinkId(), request.getPaymentOptionType(), request.getAmount(), args);
+        Invoice invoice = new Invoice(invoiceId, request.getPayableLinkId(), request.getPaymentOptionType(), request.getAmount(), args);
 
         network.addInvoice(invoiceId);
 

@@ -7,14 +7,21 @@ import java.util.Map;
 
 public class Invoice {
 
+    private String invoiceId;
+
     private PaymentOptionType paymentOptionType;
 
     private String price;
 
     private Map<String, String> paymentOptionParameters;
+
     private String payableLinkId;
 
-    public Invoice(String payableLinkId, PaymentOptionType paymentOptionType, String price, Map<String, String> paymentOptionParameters) {
+    public Invoice() {
+    }
+
+    public Invoice(String invoiceId, String payableLinkId, PaymentOptionType paymentOptionType, String price, Map<String, String> paymentOptionParameters) {
+        this.invoiceId = invoiceId;
         this.payableLinkId = payableLinkId;
         this.paymentOptionType = paymentOptionType;
         this.price = price;
@@ -58,5 +65,13 @@ public class Invoice {
 
     public void setPayableLinkId(String payableLinkId) {
         this.payableLinkId = payableLinkId;
+    }
+
+    public String getInvoiceId() {
+        return invoiceId;
+    }
+
+    public void setInvoiceId(String invoiceId) {
+        this.invoiceId = invoiceId;
     }
 }

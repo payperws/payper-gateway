@@ -39,7 +39,7 @@ public class LightningInvoiceGenerator implements InvoiceGenerator {
         String rhash = new String(Base64.getEncoder().encode(invoiceResponse.getRHash()));
         params.put("r_hash", rhash);
         params.put("invoice_id", rhash);
-        return new Invoice(invoiceRequest.getPayableLinkId(), paymentOptionType, amount, params);
+        return new Invoice(rhash, invoiceRequest.getPayableLinkId(), paymentOptionType, amount, params);
     }
 
     private String getQrCode(String paymentRequest) {

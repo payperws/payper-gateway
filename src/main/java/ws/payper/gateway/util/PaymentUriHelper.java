@@ -3,6 +3,7 @@ package ws.payper.gateway.util;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.web.ConfigureLinkController;
 
@@ -33,7 +34,7 @@ public class PaymentUriHelper {
         return URI.create(payableBaseUrl + "/" + payableId);
     }
 
-    public URI paymentRequiredUri(ConfigureLinkController.PayableLink payable) {
+    public URI paymentRequiredUri(PayableLink payable) {
         ConfigureLinkController.LinkConfig linkConfig = payable.getLinkConfig();
 
         PaymentOptionType paymentOptionType = linkConfig.getPaymentOptionType();

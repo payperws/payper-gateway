@@ -5,10 +5,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import ws.payper.gateway.proxy.CustomRedirectToGatewayFilterFactory;
 import ws.payper.gateway.proxy.HeaderOrParamRoutePredicateFactory;
 import ws.payper.gateway.proxy.PaymentRequiredRoutePredicateFactory;
 
+@EnableMongoRepositories(basePackages = "ws.payper.gateway.repo")
 @SpringBootApplication
 public class PayperGatewayApplication {
 

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.model.CryptoCurrency;
 import ws.payper.gateway.repo.PayableLinkRepository;
@@ -187,37 +188,4 @@ public class ConfigureLinkController {
         }
     }
 
-    public static class PayableLink {
-
-        private LinkConfig linkConfig;
-
-        private String payableId;
-
-        private String payableUrl;
-
-        private String payablePath;
-
-        public PayableLink(LinkConfig linkConfig, String payableId, String payableUrl, String payablePath) {
-            this.linkConfig = linkConfig;
-            this.payableId = payableId;
-            this.payableUrl = payableUrl;
-            this.payablePath = payablePath;
-        }
-
-        public LinkConfig getLinkConfig() {
-            return linkConfig;
-        }
-
-        public String getPayableId() {
-            return payableId;
-        }
-
-        public String getPayableUrl() {
-            return payableUrl;
-        }
-
-        public String getPayablePath() {
-            return payablePath;
-        }
-    }
 }

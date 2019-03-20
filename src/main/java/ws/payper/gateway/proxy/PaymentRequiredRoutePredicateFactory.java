@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.route.InMemoryRouteDefinitionRepository
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ServerWebExchange;
+import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.PaymentRequestVerifier;
 import ws.payper.gateway.config.PaymentEndpoint;
 import ws.payper.gateway.config.PaymentOptionType;
@@ -16,7 +17,6 @@ import ws.payper.gateway.dummy.DummyCoinPaymentEndpoint;
 import ws.payper.gateway.hedera.HederaHbarInvoicePaymentEndpoint;
 import ws.payper.gateway.repo.PayableLinkRepository;
 import ws.payper.gateway.util.PaymentUriHelper;
-import ws.payper.gateway.web.ConfigureLinkController;
 
 import java.util.function.Predicate;
 
@@ -47,13 +47,7 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
             if (paymentUriHelper.isPayableLinkPath(route)) {
                 String payableId = paymentUriHelper.extractPayableId(route);
                 if (StringUtils.isNotBlank(payableId) && payableId.equals(config.getLinkId())) {
-                    return payableLinkRepository.find(payableId).map(link -> {
-                        log.info("[{}] found link in repository", payableId);
-                        return paymentRequired(link, swe);
-                    }).orElseGet(() -> {
-                        log.info("[{}] link NOT found in repository", payableId);
-                        return false;
-                    });
+                    return payableLinkRepository.findByPayableId(payableId).map(link -> paymentRequired(link, swe)).orElse(false);
                 } else {
                     return false;
                 }
@@ -63,7 +57,7 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
         };
     }
 
-    private boolean paymentRequired(ConfigureLinkController.PayableLink link, ServerWebExchange swe) {
+    private boolean paymentRequired(PayableLink link, ServerWebExchange swe) {
         PaymentOptionType type = link.getLinkConfig().getPaymentOptionType();
         PaymentEndpoint paymentEndpoint;
         if (PaymentOptionType.DUMMY_COIN.equals(type)) {
@@ -73,7 +67,6 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
             paymentEndpoint = new HederaHbarInvoicePaymentEndpoint(account);
         }
         boolean paymentRequired = paymentRequestVerifier.isPaymentRequired(swe, link.getPayablePath(), paymentEndpoint, link.getLinkConfig().getPrice().toString());
-        log.info("[{}] payment required: {}", link.getPayableId(), paymentRequired);
         return paymentRequired;
     }
 

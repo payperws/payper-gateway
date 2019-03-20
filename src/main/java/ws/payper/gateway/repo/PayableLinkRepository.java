@@ -1,31 +1,15 @@
 package ws.payper.gateway.repo;
 
-import org.springframework.data.repository.Repository;
-import org.springframework.stereotype.Component;
-import ws.payper.gateway.web.ConfigureLinkController;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+import ws.payper.gateway.PayableLink;
 
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
-@Component
-public class PayableLinkRepository implements Repository<ConfigureLinkController.PayableLink, Long> {
+public interface PayableLinkRepository extends MongoRepository<PayableLink, String> {
 
-    private ConcurrentMap<String, ConfigureLinkController.PayableLink> payableIds = new ConcurrentHashMap<>();
+    @Override
+    <S extends PayableLink> S save(S s);
 
-    public synchronized ConfigureLinkController.PayableLink save(ConfigureLinkController.PayableLink link) {
-        String id = link.getPayableId();
-
-        if (payableIds.containsKey(id)) {
-            throw new IllegalArgumentException("Payable ID is already registered: " + id);
-        } else {
-            payableIds.put(id, link);
-        }
-
-        return link;
-    }
-
-    public synchronized Optional<ConfigureLinkController.PayableLink> find(String payableId) {
-        return Optional.ofNullable(payableIds.get(payableId));
-    }
+    Optional<PayableLink> findByPayableId(String s);
 }

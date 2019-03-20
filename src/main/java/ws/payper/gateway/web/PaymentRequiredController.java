@@ -62,7 +62,7 @@ public class PaymentRequiredController {
         if (StringUtils.isBlank(invoiceId)) {
             invoice = newInvoice(payableLinkId, title, sourceUrl, paymentOptionType, amount, currency, account);
         } else {
-            invoice = invoiceRepository.find(invoiceId).orElseThrow(
+            invoice = invoiceRepository.findByInvoiceId(invoiceId).orElseThrow(
                     () -> new IllegalArgumentException("Could not find invoice in repo. ID: " + invoiceId));
         }
         model.addAllAttributes(invoice.allParameters());

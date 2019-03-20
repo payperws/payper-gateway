@@ -7,6 +7,7 @@ import org.lightningj.lnd.wrapper.message.AddInvoiceResponse;
 import org.lightningj.lnd.wrapper.message.Invoice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import ws.payper.gateway.PaymentNetwork;
 import ws.payper.gateway.config.PaymentEndpoint;
 import ws.payper.gateway.config.PaymentOptionType;
@@ -15,6 +16,7 @@ import ws.payper.gateway.hedera.NetworkCommunicationException;
 import javax.annotation.Resource;
 import java.util.Base64;
 
+@Component
 public class LightningPaymentNetwork implements PaymentNetwork {
 
     private final Logger log = LoggerFactory.getLogger(LightningPaymentNetwork.class);
@@ -34,7 +36,7 @@ public class LightningPaymentNetwork implements PaymentNetwork {
     public boolean verifyTransaction(String paymentProof, PaymentEndpoint paymentEndpoint, String amount) {
         byte[] rHash = Base64.getDecoder().decode(paymentProof);
         try {
-            SynchronousLndAPI api = lndApiPool.getByRHash(rHash);
+            SynchronousLndAPI api = lndApiPool.getByRHash(paymentProof);
             Invoice invoice = api.lookupInvoice(null, rHash);
             return invoice.getSettled();
         } catch (StatusException | ValidationException e) {

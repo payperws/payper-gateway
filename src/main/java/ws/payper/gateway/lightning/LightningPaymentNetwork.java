@@ -7,9 +7,6 @@ import org.lightningj.lnd.wrapper.message.AddInvoiceResponse;
 import org.lightningj.lnd.wrapper.message.Invoice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import ws.payper.gateway.PaymentNetwork;
 import ws.payper.gateway.config.PaymentEndpoint;
 import ws.payper.gateway.config.PaymentOptionType;
@@ -17,14 +14,16 @@ import ws.payper.gateway.hedera.NetworkCommunicationException;
 
 import java.util.Base64;
 
-@Component
 public class LightningPaymentNetwork implements PaymentNetwork {
 
     private final Logger log = LoggerFactory.getLogger(LightningPaymentNetwork.class);
 
-    @Autowired
-    @Lazy
+    // TODO Connection pooling for LND connections!!!
     private SynchronousLndAPI api;
+
+    public LightningPaymentNetwork(SynchronousLndAPI api) {
+        this.api = api;
+    }
 
     @Override
     public PaymentOptionType getPaymentOptionType() {

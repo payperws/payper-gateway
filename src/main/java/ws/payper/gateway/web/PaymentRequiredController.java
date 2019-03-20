@@ -46,7 +46,7 @@ public class PaymentRequiredController {
 
     @RequestMapping("/pypr/payment-required")
     @ResponseStatus(code = HttpStatus.PAYMENT_REQUIRED)
-    public String paymentRequired(
+    public String paymentRequired(// TODO Remove parameters. Only link id and invoice id ar necessary.
                                   @RequestParam(value = "payableLinkId") String payableLinkId,
                                   @RequestParam(value = "title") String title,
                                   @RequestParam(value = "sourceurl") String sourceUrl,

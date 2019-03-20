@@ -37,13 +37,7 @@ public class HeaderOrParamRoutePredicateFactory extends AbstractRoutePredicateFa
             String invoiceId = getFirstNonBlank(receiptHeader, receiptParam);
 
             if (invoiceId != null) {
-                return invoiceRepository.find(invoiceId).map(invoice -> {
-                    boolean found = invoice.getPayableLinkId().equals(config.getLinkId());
-                    if (found) {
-                        log.info("[{}] [{}] invoice paid - proxying request", invoice.getPayableLinkId(), invoiceId);
-                    }
-                    return found;
-                }).orElse(false);
+                return invoiceRepository.findByInvoiceId(invoiceId).map(invoice -> invoice.getPayableLinkId().equals(config.getLinkId())).orElse(false);
             } else {
                 return false;
             }

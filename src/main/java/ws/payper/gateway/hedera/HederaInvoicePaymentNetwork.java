@@ -31,7 +31,7 @@ public class HederaInvoicePaymentNetwork implements PaymentNetwork {
 
     @Override
     public boolean verifyTransaction(String paymentProof, PaymentEndpoint paymentEndpoint, String amount) {
-        Optional<Invoice> invoice = invoiceRepository.find(paymentProof);
+        Optional<Invoice> invoice = invoiceRepository.findByInvoiceId(paymentProof);
         return invoice.map(this::verifyInvoice).orElse(false);
     }
 

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.config.PaymentOptionType;
+import ws.payper.gateway.lightning.LightningConnector;
 import ws.payper.gateway.model.CryptoCurrency;
 import ws.payper.gateway.service.RouteService;
 import ws.payper.gateway.util.PaymentUriHelper;
@@ -24,6 +25,9 @@ public class ConfigureLinkController {
 
     @Autowired
     private RouteService routeService;
+
+    @Autowired
+    private LightningConnector lightningConnector;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String showNewLinkPage() {
@@ -47,6 +51,18 @@ public class ConfigureLinkController {
 
         return routeService.registerAndRefresh(payable);
     }
+
+    @PostMapping(value = "/ln-check")
+    @ResponseBody
+    public NodeCheckResponse checkNode(@RequestBody NodeCheckRequest request) {
+        String host = request.getPubkeyHost();
+        String port = request.getRpcport();
+        String tlsCert = request.getTlsCert();
+        String macaroon = request.getInvoiceMacaroon();
+        boolean checked = lightningConnector.checkNode(host, port, tlsCert, macaroon);
+        return new NodeCheckResponse(checked);
+    }
+
 
     public static class LinkConfig {
 

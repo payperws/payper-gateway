@@ -15,6 +15,8 @@ import ws.payper.gateway.config.PaymentEndpoint;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.dummy.DummyCoinPaymentEndpoint;
 import ws.payper.gateway.hedera.HederaHbarInvoicePaymentEndpoint;
+import ws.payper.gateway.hedera.HederaHbarPaymentEndpoint;
+import ws.payper.gateway.lightning.LightningBtcPaymentEndpoint;
 import ws.payper.gateway.repo.PayableLinkRepository;
 import ws.payper.gateway.util.PaymentUriHelper;
 
@@ -62,9 +64,13 @@ public class PaymentRequiredRoutePredicateFactory extends AbstractRoutePredicate
         PaymentEndpoint paymentEndpoint;
         if (PaymentOptionType.DUMMY_COIN.equals(type)) {
             paymentEndpoint = new DummyCoinPaymentEndpoint();
+        } else if (PaymentOptionType.LIGHTNING_BTC.equals(type)) {
+            paymentEndpoint = new LightningBtcPaymentEndpoint();
+        } else if (PaymentOptionType.HEDERA_HBAR_INVOICE.equals(type)) {
+            paymentEndpoint = new HederaHbarInvoicePaymentEndpoint();
         } else {
             String account = link.getLinkConfig().getPaymentOptionArgs().get("account");
-            paymentEndpoint = new HederaHbarInvoicePaymentEndpoint(account);
+            paymentEndpoint = new HederaHbarPaymentEndpoint(account);
         }
         boolean paymentRequired = paymentRequestVerifier.isPaymentRequired(swe, link.getPayablePath(), paymentEndpoint, link.getLinkConfig().getPrice().toString());
         return paymentRequired;

@@ -1,34 +1,50 @@
 <html>
 
 <head title="Payable Links">
-<script type="text/javascript">
+    <script type="text/javascript">
+
+        var availablePaymentOptions = {};
+
         function preload() {
             preloadPaymentOptions();
-            paymentOptionSelected();
         }
 
         function preloadPaymentOptions() {
-            // GET avaialble payment options
-            // optionId
-            // optionText
-            // currency
-            // currencyName
+            var xhr = new XMLHttpRequest();
+            var url = "/pay-options";
+            xhr.open("GET", url, true);
 
-            var select = document.getElementById("payment-options");
-            var option = document.createElement("option");
-            option.textContent = "Bitcoin Lightning Network";
-            option.value = "LIGHTNING_BTC";
-            select.appendChild(option);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var json = JSON.parse(xhr.responseText);
+                    availablePaymentOptions = json["paymentOptions"];
+
+                    var select = document.getElementById("payment-options");
+
+                    for (var idx = 0; idx < availablePaymentOptions.length; idx++) {
+                        var payopt = availablePaymentOptions[idx];
+
+                        var option = document.createElement("option");
+                        option.textContent = payopt['name'];
+                        option.value = payopt['id'];
+                        select.appendChild(option);
+                    }
+
+                    paymentOptionSelected();
+                }
+            }
+            xhr.send();
         }
 
         function paymentOptionSelected() {
             var selector = document.getElementById('payment-options');
-            var value = selector[selector.selectedIndex].value;
+            var selIdx = selector.selectedIndex < 0 ? 0 : selector.selectedIndex;
+            var value = selector[selIdx].value;
 
-            var currencyId = "SATOSHI_BTC";
+            var currencyId = availablePaymentOptions[selIdx]['currency'];
             document.getElementById('currency').value = currencyId;
 
-            var currencyName = "SATS";
+            var currencyName = availablePaymentOptions[selIdx]['currencyName'];
             document.getElementById('currency-name').textContent = currencyName;
         }
 
@@ -117,7 +133,7 @@
         </tr>
         <tr>
             <td>Payment method</td>
-            <td colspan="2"><select id="payment-options"></select></td>
+            <td colspan="2"><select id="payment-options" onchange="paymentOptionSelected();"></select></td>
         </tr>
         <tr>
             <td>Amount requested per access</td>

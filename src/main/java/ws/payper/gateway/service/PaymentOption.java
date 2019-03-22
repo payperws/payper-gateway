@@ -1,10 +1,11 @@
 package ws.payper.gateway.service;
 
+import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.model.CryptoCurrency;
 
 public class PaymentOption {
 
-    private String id;
+    private PaymentOptionType id;
 
     private String name;
 
@@ -12,11 +13,11 @@ public class PaymentOption {
 
     private String currencyName;
 
-    public String getId() {
+    public PaymentOptionType getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(PaymentOptionType id) {
         this.id = id;
     }
 

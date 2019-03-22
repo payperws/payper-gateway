@@ -1,0 +1,53 @@
+<html>
+
+<head title="">
+    <script type="text/javascript">
+        var payableLinkId = '';
+        var invoiceId='';
+
+        var url = '';
+        var title;
+        var description;
+        var price;
+        var currency;
+        var pseudonym;
+        var invoice_id;
+        var qr_code;
+
+        function preload() {
+            var thisUrl = new URL(window.location);
+            var linkId = url.searchParams.get("link-id");
+            var invoiceId = url.searchParams.get("invoice-id");
+
+            var xhr = new XMLHttpRequest();
+            var url = "/pay-details?link-id=" + linkId + "&invoice-id=" + invoiceId;
+            xhr.open("GET", url, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var json = JSON.parse(xhr.responseText);
+
+                }
+            }
+            xhr.send();
+        }
+    </script>
+
+</head>
+<body onload="preload();">
+
+<p>Title: <span id="title"></span></p>
+<p>Description: <span id="description"></span></p>
+<p>Amount: <span id="price"></span><span id="currency"></span></p>
+<p>Pseudonym: <span id="pseudonym"></span></p>
+<p>Invoice: <span id="invoice_id"></span></p>
+<button id="copy" type="button" value="Open In Wallet" style="height:50px;width:150px" onclick="copy();">Open In Wallet</button>
+<button id="openInWallet" type="button" value="Open In Wallet" style="height:50px;width:150px" onclick="openInWallet();">Open In Wallet</button>
+<a id="alreadyPaid" href="#">I have already paid</a>
+<p>
+    <img id="qr_code">
+</p>
+</body>
+
+
+</html>

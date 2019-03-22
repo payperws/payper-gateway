@@ -5,13 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import ws.payper.gateway.InvoiceGenerator;
+import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.model.Invoice;
 import ws.payper.gateway.repo.InvoiceRepository;
+import ws.payper.gateway.repo.PayableLinkRepository;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,6 +36,10 @@ public class PaymentRequiredController {
             PaymentOptionType.LIGHTNING_BTC, "payment-required-lightning-btc"
     );
 
+
+    @Autowired
+    private PayableLinkRepository linkRepository;
+
     @Autowired
     private InvoiceRepository invoiceRepository;
 
@@ -47,7 +51,17 @@ public class PaymentRequiredController {
     @RequestMapping("/pypr/payment-required")
     @ResponseStatus(code = HttpStatus.PAYMENT_REQUIRED)
     public String paymentRequired(
-                                  @RequestParam(value = "payableLinkId") String payableLinkId,
+                                  @RequestParam(value = "link-id") String payableLinkId,
+                                  @RequestParam(value = "option") PaymentOptionType paymentOptionType,
+                                  @RequestParam(value = "invoice-id", required = false) String invoiceId,
+                                  Model model) {
+        return views.getOrDefault(paymentOptionType, DEFAULT_VIEW);
+    }
+
+    @RequestMapping("/pypr/payment-required-old")
+    @ResponseStatus(code = HttpStatus.PAYMENT_REQUIRED)
+    public String paymentRequiredOld(// TODO Remove parameters. Only link id and invoice id ar necessary.
+                                  @RequestParam(value = "link-id") String payableLinkId,
                                   @RequestParam(value = "title") String title,
                                   @RequestParam(value = "sourceurl") String sourceUrl,
                                   @RequestParam(value = "option") PaymentOptionType paymentOptionType,
@@ -67,6 +81,30 @@ public class PaymentRequiredController {
         }
         model.addAllAttributes(invoice.allParameters());
         return views.getOrDefault(paymentOptionType, DEFAULT_VIEW);
+    }
+
+    @RequestMapping("/pay-details")
+    @ResponseBody
+    public Invoice paymentDetails(@RequestParam(value = "link-id") String linkId,
+                                  @RequestParam(value = "invoice-id") String invoiceId) {
+
+        PayableLink link = linkRepository.findByPayableId(linkId).orElseThrow(() -> new LinkNotFoundException("linkId: " + linkId));
+
+        Invoice invoice;
+        if (StringUtils.isBlank(invoiceId)) {
+            ConfigureLinkController.LinkConfig config = link.getLinkConfig();
+            String title = config.getTitle();
+            String sourceUrl = link.getPayableUrl();
+            PaymentOptionType paymentOptionType = config.getPaymentOptionType();
+            String amount = config.getPrice().toString();
+            String currency = config.getCurrency().name();
+            invoice = newInvoice(linkId, title, sourceUrl, paymentOptionType, amount, currency, null);
+        } else {
+            invoice = invoiceRepository.findByInvoiceId(invoiceId).orElseThrow(
+                    () -> new IllegalArgumentException("Could not find invoice in repo. ID: " + invoiceId));
+        }
+
+        return invoice;
     }
 
     private Invoice newInvoice(String payableLinkId, String title, String sourceUrl,

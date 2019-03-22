@@ -49,7 +49,7 @@ public class PaymentUriHelper {
         try {
 
             URIBuilder uriBuilder = new URIBuilder(paymentRequiredBaseUrl)
-                    .addParameter("payableLinkId", payableLinkId)
+                    .addParameter("link-id", payableLinkId)
                     .addParameter("title", title)
                     .addParameter("sourceurl", sourceUrl)
                     .addParameter("option", paymentOption)

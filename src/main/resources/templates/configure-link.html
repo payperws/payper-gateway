@@ -97,17 +97,17 @@
             var pseudonym = document.getElementById('pseudonym').value;
 
             var selector = document.getElementById('payment-options');
-            var value = selector[selector.selectedIndex].value;
+            var paymentOption = selector[selector.selectedIndex].value;
             var price = document.getElementById('price').value;
             var currency = document.getElementById('currency').value;
 
             var lightningHost = document.getElementById('lightning-host').value;
             var lightningRpcPort = document.getElementById('lightning-rpc-port').value;
 
-            var lightningInvoiceMacaroon = '';
-            var lightningTlsCert = '';
+            var lightningInvoiceMacaroon = "AgEDbG5kAkcDChAvaVB7ar+cjSvHGt3ZAIUYEgEwGhYKB2FkZHJlc3MSBHJlYWQSBXdyaXRlGhcKCGludm9pY2VzEgRyZWFkEgV3cml0ZQAABiDorXdgA63Up4BRL3fgMpZ4muUOZnpU/Rp1ot4n5FCO/w==";
+            var lightningTlsCert = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNFVENDQWJpZ0F3SUJBZ0lRYTZSYUhXV1ducHpnaEdSWGRnYXdoVEFLQmdncWhrak9QUVFEQWpBMk1SOHcKSFFZRFZRUUtFeFpzYm1RZ1lYVjBiMmRsYm1WeVlYUmxaQ0JqWlhKME1STXdFUVlEVlFRREV3cHpZM2N0TW1VeApZbUUwTUI0WERURTVNRE14T1RFeE1EVXpOMW9YRFRJd01EVXhNekV4TURVek4xb3dOakVmTUIwR0ExVUVDaE1XCmJHNWtJR0YxZEc5blpXNWxjbUYwWldRZ1kyVnlkREVUTUJFR0ExVUVBeE1LYzJOM0xUSmxNV0poTkRCWk1CTUcKQnlxR1NNNDlBZ0VHQ0NxR1NNNDlBd0VIQTBJQUJJOTEydlZaRERwVEk4clpFZXZReStjOVd5cE9Jb2VRcUVVQgpvbkJTWjQ4WncvVmVpWmlwSzQwRGVpanVTY2d0ZnFpQzZtQWdjTUZTLzR1VDBzaUJGTnFqZ2Fjd2dhUXdEZ1lEClZSMFBBUUgvQkFRREFnS2tNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdnWUFHQTFVZEVRUjVNSGVDQ25OamR5MHkKWlRGaVlUU0NDV3h2WTJGc2FHOXpkSUlFZFc1cGVJSUtkVzVwZUhCaFkydGxkSWNFZndBQUFZY1FBQUFBQUFBQQpBQUFBQUFBQUFBQUFBWWNFQ2c3SmlZY0VyQkVBQVljUS9vQUFBQUFBQUFEY0doVC8vZ2NBQlljUS9vQUFBQUFBCkFBQUFRbFgvL28vS2VvY0VNdy9QSWpBS0JnZ3Foa2pPUFFRREFnTkhBREJFQWlBcFNhdGhOUHdGbUNJZ0hMMkEKK0ZIbEdrRGMwenZWeUVrSE1EUXgvTXJVT3dJZ1k1MXVsS3JwclBjcXFtK3FrMzRmM1BrN2xRZjZxSEMyem02RwpINjRla2RjPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==";
 
-            var data = JSON.stringify({"url": url, "title": title, "description": description, "pseudonym": pseudonym, "price": price, "currency": "DUMMY_COIN", "paymentOptionType": "DUMMY_COIN", "paymentOptionArgs": {}});
+            var data = JSON.stringify({"url": url, "title": title, "description": description, "pseudonym": pseudonym, "price": price, "currency": currency, "paymentOptionType": paymentOption, "paymentOptionArgs": {"pubkeyHost": lightningHost, "rpcport": lightningRpcPort, "invoiceMacaroon": lightningInvoiceMacaroon, "tlsCert": lightningTlsCert}});
             xhr.send(data);
         }
 

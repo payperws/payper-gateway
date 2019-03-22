@@ -33,7 +33,7 @@ public class PaymentRequiredController {
             PaymentOptionType.HEDERA_HBAR, DEFAULT_VIEW,
             PaymentOptionType.DUMMY_COIN, "payment-required-dummy-coin",
             PaymentOptionType.HEDERA_HBAR_INVOICE, "payment-required-hedera-invoice",
-            PaymentOptionType.LIGHTNING_BTC, "payment-required-lightning-btc"
+            PaymentOptionType.LIGHTNING_BTC, "payment-required-lightning-btc-advanced"
     );
 
     @Autowired
@@ -46,7 +46,17 @@ public class PaymentRequiredController {
 
     @RequestMapping("/pypr/payment-required")
     @ResponseStatus(code = HttpStatus.PAYMENT_REQUIRED)
-    public String paymentRequired(// TODO Remove parameters. Only link id and invoice id ar necessary.
+    public String paymentRequired(
+                                  @RequestParam(value = "payableLinkId") String payableLinkId,
+                                  @RequestParam(value = "option") PaymentOptionType paymentOptionType,
+                                  @RequestParam(value = "invoice-id", required = false) String invoiceId,
+                                  Model model) {
+        return views.getOrDefault(paymentOptionType, DEFAULT_VIEW);
+    }
+
+    @RequestMapping("/pypr/payment-required-old")
+    @ResponseStatus(code = HttpStatus.PAYMENT_REQUIRED)
+    public String paymentRequiredOld(// TODO Remove parameters. Only link id and invoice id ar necessary.
                                   @RequestParam(value = "payableLinkId") String payableLinkId,
                                   @RequestParam(value = "title") String title,
                                   @RequestParam(value = "sourceurl") String sourceUrl,

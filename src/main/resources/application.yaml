@@ -13,3 +13,5 @@ spring:
 payper:
   baseUrl: 'http://localhost:8080'
   redirectPath: 'pypr/payment-required'
+  paymentOptions:
+    - LIGHTNING_BTC

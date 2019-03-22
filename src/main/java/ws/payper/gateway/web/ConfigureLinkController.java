@@ -11,8 +11,10 @@ import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.lightning.LightningConnector;
 import ws.payper.gateway.model.CryptoCurrency;
+import ws.payper.gateway.service.PaymentOptions;
+import ws.payper.gateway.service.PaymentOptionsService;
 import ws.payper.gateway.service.RouteService;
-import ws.payper.gateway.util.PaymentUriHelper;
+import ws.payper.gateway.util.  PaymentUriHelper;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -28,6 +30,9 @@ public class ConfigureLinkController {
 
     @Autowired
     private LightningConnector lightningConnector;
+
+    @Autowired
+    private PaymentOptionsService paymentOptionsService;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String showNewLinkPage() {
@@ -63,6 +68,12 @@ public class ConfigureLinkController {
         return new NodeCheckResponse(checked);
     }
 
+
+    @RequestMapping(value = "/pay-options", method = RequestMethod.GET)
+    @ResponseBody
+    public PaymentOptions availablePaymentOptions() {
+        return paymentOptionsService.availablePaymentOptions();
+    }
 
     public static class LinkConfig {
 

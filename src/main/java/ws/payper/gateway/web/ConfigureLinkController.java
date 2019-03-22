@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.config.PaymentOptionType;
+import ws.payper.gateway.lightning.LightningConnector;
 import ws.payper.gateway.model.CryptoCurrency;
+import ws.payper.gateway.service.PaymentOptions;
+import ws.payper.gateway.service.PaymentOptionsService;
 import ws.payper.gateway.service.RouteService;
-import ws.payper.gateway.util.PaymentUriHelper;
+import ws.payper.gateway.util.  PaymentUriHelper;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -24,6 +27,12 @@ public class ConfigureLinkController {
 
     @Autowired
     private RouteService routeService;
+
+    @Autowired
+    private LightningConnector lightningConnector;
+
+    @Autowired
+    private PaymentOptionsService paymentOptionsService;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String showNewLinkPage() {
@@ -48,9 +57,34 @@ public class ConfigureLinkController {
         return routeService.registerAndRefresh(payable);
     }
 
+    @PostMapping(value = "/ln-check")
+    @ResponseBody
+    public NodeCheckResponse checkNode(@RequestBody NodeCheckRequest request) {
+        String host = request.getPubkeyHost();
+        String port = request.getRpcport();
+        String tlsCert = request.getTlsCert();
+        String macaroon = request.getInvoiceMacaroon();
+        boolean checked = lightningConnector.checkNode(host, port, tlsCert, macaroon);
+        String errorMsg = checked ? null : "Could not connect to Lightning node. Check your connection details.";
+        return new NodeCheckResponse(checked, errorMsg);
+    }
+
+
+    @RequestMapping(value = "/pay-options", method = RequestMethod.GET)
+    @ResponseBody
+    public PaymentOptions availablePaymentOptions() {
+        return paymentOptionsService.availablePaymentOptions();
+    }
+
     public static class LinkConfig {
 
         private String url;
+
+        private String title;
+
+        private String description;
+
+        private String pseudonym;
 
         private PaymentOptionType paymentOptionType;
 
@@ -60,14 +94,28 @@ public class ConfigureLinkController {
 
         private CryptoCurrency currency;
 
-        private String title;
-
         public String getUrl() {
             return url;
         }
 
         public void setUrl(String url) {
             this.url = url;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getPseudonym() {
+            return pseudonym;
+        }
+
+        public void setPseudonym(String pseudonym) {
+            this.pseudonym = pseudonym;
         }
 
         public PaymentOptionType getPaymentOptionType() {

@@ -33,7 +33,7 @@ public class PaymentRequiredController {
             PaymentOptionType.HEDERA_HBAR, DEFAULT_VIEW,
             PaymentOptionType.DUMMY_COIN, "payment-required-dummy-coin",
             PaymentOptionType.HEDERA_HBAR_INVOICE, "payment-required-hedera-invoice",
-            PaymentOptionType.LIGHTNING_BTC, "payment-required-lightning-btc"
+            PaymentOptionType.LIGHTNING_BTC, "payment-required-lightning-btc-advanced"
     );
 
 

@@ -1,7 +1,83 @@
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 
 <head title="Payable Links">
-    <script th:inline="javascript">
+    <script type="text/javascript">
+
+        var availablePaymentOptions = {};
+
+        function preload() {
+            preloadPaymentOptions();
+        }
+
+        function preloadPaymentOptions() {
+            var xhr = new XMLHttpRequest();
+            var url = "/pay-options";
+            xhr.open("GET", url, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var json = JSON.parse(xhr.responseText);
+                    availablePaymentOptions = json["paymentOptions"];
+
+                    var select = document.getElementById("payment-options");
+
+                    for (var idx = 0; idx < availablePaymentOptions.length; idx++) {
+                        var payopt = availablePaymentOptions[idx];
+
+                        var option = document.createElement("option");
+                        option.textContent = payopt['name'];
+                        option.value = payopt['id'];
+                        select.appendChild(option);
+                    }
+
+                    paymentOptionSelected();
+                }
+            }
+            xhr.send();
+        }
+
+        function paymentOptionSelected() {
+            var selector = document.getElementById('payment-options');
+            var selIdx = selector.selectedIndex < 0 ? 0 : selector.selectedIndex;
+            var value = selector[selIdx].value;
+
+            var currencyId = availablePaymentOptions[selIdx]['currency'];
+            document.getElementById('currency').value = currencyId;
+
+            var currencyName = availablePaymentOptions[selIdx]['currencyName'];
+            document.getElementById('currency-name').textContent = currencyName;
+        }
+
+        function checkLightningNode() {
+            var lightningHost = document.getElementById('lightning-host').value;
+            var lightningRpcPort = document.getElementById('lightning-rpc-port').value;
+
+            var lightningInvoiceMacaroon = "AgEDbG5kAkcDChAvaVB7ar+cjSvHGt3ZAIUYEgEwGhYKB2FkZHJlc3MSBHJlYWQSBXdyaXRlGhcKCGludm9pY2VzEgRyZWFkEgV3cml0ZQAABiDorXdgA63Up4BRL3fgMpZ4muUOZnpU/Rp1ot4n5FCO/w==";
+            var lightningTlsCert = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNFVENDQWJpZ0F3SUJBZ0lRYTZSYUhXV1ducHpnaEdSWGRnYXdoVEFLQmdncWhrak9QUVFEQWpBMk1SOHcKSFFZRFZRUUtFeFpzYm1RZ1lYVjBiMmRsYm1WeVlYUmxaQ0JqWlhKME1STXdFUVlEVlFRREV3cHpZM2N0TW1VeApZbUUwTUI0WERURTVNRE14T1RFeE1EVXpOMW9YRFRJd01EVXhNekV4TURVek4xb3dOakVmTUIwR0ExVUVDaE1XCmJHNWtJR0YxZEc5blpXNWxjbUYwWldRZ1kyVnlkREVUTUJFR0ExVUVBeE1LYzJOM0xUSmxNV0poTkRCWk1CTUcKQnlxR1NNNDlBZ0VHQ0NxR1NNNDlBd0VIQTBJQUJJOTEydlZaRERwVEk4clpFZXZReStjOVd5cE9Jb2VRcUVVQgpvbkJTWjQ4WncvVmVpWmlwSzQwRGVpanVTY2d0ZnFpQzZtQWdjTUZTLzR1VDBzaUJGTnFqZ2Fjd2dhUXdEZ1lEClZSMFBBUUgvQkFRREFnS2tNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdnWUFHQTFVZEVRUjVNSGVDQ25OamR5MHkKWlRGaVlUU0NDV3h2WTJGc2FHOXpkSUlFZFc1cGVJSUtkVzVwZUhCaFkydGxkSWNFZndBQUFZY1FBQUFBQUFBQQpBQUFBQUFBQUFBQUFBWWNFQ2c3SmlZY0VyQkVBQVljUS9vQUFBQUFBQUFEY0doVC8vZ2NBQlljUS9vQUFBQUFBCkFBQUFRbFgvL28vS2VvY0VNdy9QSWpBS0JnZ3Foa2pPUFFRREFnTkhBREJFQWlBcFNhdGhOUHdGbUNJZ0hMMkEKK0ZIbEdrRGMwenZWeUVrSE1EUXgvTXJVT3dJZ1k1MXVsS3JwclBjcXFtK3FrMzRmM1BrN2xRZjZxSEMyem02RwpINjRla2RjPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==";
+
+            var xhr = new XMLHttpRequest();
+            var url = "/ln-check";
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var json = JSON.parse(xhr.responseText);
+                    var connected = json['nodeOk'];
+                    if (connected) {
+                        document.getElementById('node-check-error').textContent = 'Node Ok.';
+                    } else {
+                        document.getElementById('node-check-error').textContent = json['errorMsg'];
+                    }
+                }
+            }
+
+            var data = JSON.stringify({"pubkeyHost": lightningHost, "rpcport": lightningRpcPort, "invoiceMacaroon": lightningInvoiceMacaroon, "tlsCert": lightningTlsCert});
+            xhr.send(data);
+
+            // Set error text
+        }
+
         function submit() {
             var xhr = new XMLHttpRequest();
             var url = "/link";
@@ -17,31 +93,89 @@
 
             var url = document.getElementById('url').value;
             var title = document.getElementById('title').value;
+            var description = document.getElementById('description').value;
+            var pseudonym = document.getElementById('pseudonym').value;
+
+            var selector = document.getElementById('payment-options');
+            var paymentOption = selector[selector.selectedIndex].value;
             var price = document.getElementById('price').value;
-            var data = JSON.stringify({"url": url, "title": title, "price": price, "currency": "DUMMY_COIN", "paymentOptionType": "DUMMY_COIN", "paymentOptionArgs": {}});
+            var currency = document.getElementById('currency').value;
+
+            var lightningHost = document.getElementById('lightning-host').value;
+            var lightningRpcPort = document.getElementById('lightning-rpc-port').value;
+
+            var lightningInvoiceMacaroon = "AgEDbG5kAkcDChAvaVB7ar+cjSvHGt3ZAIUYEgEwGhYKB2FkZHJlc3MSBHJlYWQSBXdyaXRlGhcKCGludm9pY2VzEgRyZWFkEgV3cml0ZQAABiDorXdgA63Up4BRL3fgMpZ4muUOZnpU/Rp1ot4n5FCO/w==";
+            var lightningTlsCert = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNFVENDQWJpZ0F3SUJBZ0lRYTZSYUhXV1ducHpnaEdSWGRnYXdoVEFLQmdncWhrak9QUVFEQWpBMk1SOHcKSFFZRFZRUUtFeFpzYm1RZ1lYVjBiMmRsYm1WeVlYUmxaQ0JqWlhKME1STXdFUVlEVlFRREV3cHpZM2N0TW1VeApZbUUwTUI0WERURTVNRE14T1RFeE1EVXpOMW9YRFRJd01EVXhNekV4TURVek4xb3dOakVmTUIwR0ExVUVDaE1XCmJHNWtJR0YxZEc5blpXNWxjbUYwWldRZ1kyVnlkREVUTUJFR0ExVUVBeE1LYzJOM0xUSmxNV0poTkRCWk1CTUcKQnlxR1NNNDlBZ0VHQ0NxR1NNNDlBd0VIQTBJQUJJOTEydlZaRERwVEk4clpFZXZReStjOVd5cE9Jb2VRcUVVQgpvbkJTWjQ4WncvVmVpWmlwSzQwRGVpanVTY2d0ZnFpQzZtQWdjTUZTLzR1VDBzaUJGTnFqZ2Fjd2dhUXdEZ1lEClZSMFBBUUgvQkFRREFnS2tNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdnWUFHQTFVZEVRUjVNSGVDQ25OamR5MHkKWlRGaVlUU0NDV3h2WTJGc2FHOXpkSUlFZFc1cGVJSUtkVzVwZUhCaFkydGxkSWNFZndBQUFZY1FBQUFBQUFBQQpBQUFBQUFBQUFBQUFBWWNFQ2c3SmlZY0VyQkVBQVljUS9vQUFBQUFBQUFEY0doVC8vZ2NBQlljUS9vQUFBQUFBCkFBQUFRbFgvL28vS2VvY0VNdy9QSWpBS0JnZ3Foa2pPUFFRREFnTkhBREJFQWlBcFNhdGhOUHdGbUNJZ0hMMkEKK0ZIbEdrRGMwenZWeUVrSE1EUXgvTXJVT3dJZ1k1MXVsS3JwclBjcXFtK3FrMzRmM1BrN2xRZjZxSEMyem02RwpINjRla2RjPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==";
+
+            var data = JSON.stringify({"url": url, "title": title, "description": description, "pseudonym": pseudonym, "price": price, "currency": currency, "paymentOptionType": paymentOption, "paymentOptionArgs": {"pubkeyHost": lightningHost, "rpcport": lightningRpcPort, "invoiceMacaroon": lightningInvoiceMacaroon, "tlsCert": lightningTlsCert}});
             xhr.send(data);
         }
 
-    </script>
+        function validationErrors() {
+        }
+
+</script>
 </head>
-<body>
+
+<body onload="preload();">
     <p>Create a Payable Link</p>
     <table>
         <tr>
-            <td>URL</td>
-            <td colspan="2"><input id="url" type="text"></td>
+            <td>URL with content</td>
+            <td colspan="2"><input id="url" type="text"/></td>
         </tr>
         <tr>
-            <td>Title</td>
-            <td colspan="2"><input id="title" type="text"></td>
+            <td>Content title</td>
+            <td colspan="2"><input id="title" type="text"/></td>
         </tr>
         <tr>
-            <td>Price</td>
+            <td>Content description (optional)</td>
+            <td colspan="2"><textarea id="description"></textarea></td>
+        </tr>
+        <tr>
+            <td>Your name or pseudonym (optional)</td>
+            <td colspan="2"><input id="pseudonym" type="text"/></td>
+        </tr>
+        <tr>
+            <td>Payment method</td>
+            <td colspan="2"><select id="payment-options" onchange="paymentOptionSelected();"></select></td>
+        </tr>
+        <tr>
+            <td>Amount requested per access</td>
             <td><input id="price" type="text"></td>
-            <td>Dummy Coins</td>
+            <td><span id="currency-name"></span></td>
+            <td><input id="currency" type="hidden" value="SATOSHI_BTC"></td>
+        </tr>
+
+        <!--DYNAMIC FIELDS FOR LIGHTNING OPTION-->
+        <tr>
+            <td>Lightning Node host / IP address</td>
+            <td colspan="2"><input id="lightning-host" type="text"/></td>
         </tr>
         <tr>
-            <td colspan="3" onclick="submit()"><button>Create</button></td>
+            <td>Node RPC Port number</td>
+            <td colspan="2"><input id="lightning-rpc-port" type="text"/></td>
+        </tr>
+        <tr>
+            <td>Invoice Macaroon</td>
+            <td colspan="2"><input id="lightning-invoice-macaroon" type="file"/></td>
+        </tr>
+        <tr>
+            <td>TLS Certificate</td>
+            <td colspan="2"><input id="lightning-tls-cert" type="file"/></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <span id="node-check-error"></span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" onclick="checkLightningNode();"><button>Check Node Connection</button></td>
+        </tr>
+        <!--END DYNAMIC FIELDS -->
+
+        <tr>
+            <td colspan="3" onclick="submit();"><button>Create</button></td>
         </tr>
     </table>
 </body>

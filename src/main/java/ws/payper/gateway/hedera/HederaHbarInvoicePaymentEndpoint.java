@@ -5,14 +5,7 @@ import ws.payper.gateway.config.PaymentOptionType;
 
 public class HederaHbarInvoicePaymentEndpoint extends PaymentEndpoint {
 
-    private String account;
-
-    public HederaHbarInvoicePaymentEndpoint(String account) {
+    public HederaHbarInvoicePaymentEndpoint() {
         super(PaymentOptionType.HEDERA_HBAR_INVOICE);
-        this.account = account;
-    }
-
-    public String getAccount() {
-        return account;
     }
 }

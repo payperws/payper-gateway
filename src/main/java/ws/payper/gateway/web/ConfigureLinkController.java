@@ -80,6 +80,12 @@ public class ConfigureLinkController {
 
         private String url;
 
+        private String title;
+
+        private String description;
+
+        private String pseudonym;
+
         private PaymentOptionType paymentOptionType;
 
         private Map<String, String> paymentOptionArgs;
@@ -88,14 +94,28 @@ public class ConfigureLinkController {
 
         private CryptoCurrency currency;
 
-        private String title;
-
         public String getUrl() {
             return url;
         }
 
         public void setUrl(String url) {
             this.url = url;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getPseudonym() {
+            return pseudonym;
+        }
+
+        public void setPseudonym(String pseudonym) {
+            this.pseudonym = pseudonym;
         }
 
         public PaymentOptionType getPaymentOptionType() {

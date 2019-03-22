@@ -65,7 +65,8 @@ public class ConfigureLinkController {
         String tlsCert = request.getTlsCert();
         String macaroon = request.getInvoiceMacaroon();
         boolean checked = lightningConnector.checkNode(host, port, tlsCert, macaroon);
-        return new NodeCheckResponse(checked);
+        String errorMsg = checked ? null : "Could not connect to Lightning node. Check your connection details.";
+        return new NodeCheckResponse(checked, errorMsg);
     }
 
 

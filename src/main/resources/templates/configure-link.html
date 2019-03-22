@@ -63,7 +63,12 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     var json = JSON.parse(xhr.responseText);
-                    alert('Got node response. Checked: ' + json['nodeOk']);
+                    var connected = json['nodeOk'];
+                    if (connected) {
+                        document.getElementById('node-check-error').textContent = 'Node Ok.';
+                    } else {
+                        document.getElementById('node-check-error').textContent = json['errorMsg'];
+                    }
                 }
             }
 
@@ -158,6 +163,11 @@
         <tr>
             <td>TLS Certificate</td>
             <td colspan="2"><input id="lightning-tls-cert" type="file"/></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <span id="node-check-error"></span>
+            </td>
         </tr>
         <tr>
             <td colspan="3" onclick="checkLightningNode();"><button>Check Node Connection</button></td>

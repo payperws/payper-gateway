@@ -14,4 +14,7 @@ payper:
   baseUrl: 'http://localhost:8080'
   redirectPath: 'pypr/payment-required'
   paymentOptions:
-    - LIGHTNING_BTC
+    - id: LIGHTNING_BTC
+      name: "Bitcoin Lightning Network"
+      currency: SATOSHI_BTC
+      currencyName: "SATS"

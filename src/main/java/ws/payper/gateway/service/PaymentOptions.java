@@ -9,13 +9,13 @@ import java.util.List;
 @ConfigurationProperties("payper")
 public class PaymentOptions {
 
-    private List<String> paymentOptions;
+    private List<PaymentOption> paymentOptions;
 
-    public List<String> getPaymentOptions() {
+    public List<PaymentOption> getPaymentOptions() {
         return paymentOptions;
     }
 
-    public void setPaymentOptions(List<String> paymentOptions) {
+    public void setPaymentOptions(List<PaymentOption> paymentOptions) {
         this.paymentOptions = paymentOptions;
     }
 }

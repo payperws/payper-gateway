@@ -50,6 +50,8 @@
                     document.getElementById('pseudonym').textContent = pseudonym;
                     document.getElementById('invoice_id').textContent = payReq;
                     document.getElementById('pay_req_qr_code').src = payReqQrCode;
+
+                    poll();
                 }
             }
             xhr.send();
@@ -77,6 +79,48 @@
             window.open(payableUrl + '?x_payment_receipt=' + encodeURIComponent(invoiceId), '_self');
         }
 
+
+        async function poll() {
+            var retries = 1000;
+            var sleep = 1000;
+            var is402 = true;
+
+            while (is402 && (retries > 0)) {
+                console.log("Polling...  URL = " + payableUrl + "; Header = " + invoiceId);
+
+                var newXHR = new XMLHttpRequest();
+                newXHR.open('GET', payableUrl);
+                newXHR.setRequestHeader('X-Payment-Receipt', invoiceId);
+
+                newXHR.onreadystatechange = function() {
+                    if (newXHR.readyState == 4) {
+                        if (newXHR.status != 402) {
+                            is402 = false;
+                            console.log('Not 402. Might be that the payment was verified!');
+                        }
+                    }
+                };
+
+                newXHR.send();
+
+                retries--;
+
+                if (is402) {
+                    await pause(retries, sleep);
+                }
+            }
+
+            if (!is402) {
+                window.open(payableUrl + "?x_payment_receipt=" + encodeURIComponent(invoiceId), "_self");
+            }
+        }
+
+        function pause(retries, sleep) {
+            return new Promise(resolve => setTimeout(() => {
+                console.log(`Retries left: ${retries}`);
+                resolve();
+            }, sleep));
+        }
     </script>
 
 </head>

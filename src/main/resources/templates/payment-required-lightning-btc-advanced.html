@@ -2,35 +2,81 @@
 
 <head title="">
     <script type="text/javascript">
-        var payableLinkId = '';
-        var invoiceId='';
-
-        var url = '';
-        var title;
-        var description;
-        var price;
-        var currency;
-        var pseudonym;
-        var invoice_id;
-        var qr_code;
+        var payableUrl;
+        var invoiceId;
+        var payReq;
 
         function preload() {
             var thisUrl = new URL(window.location);
-            var linkId = url.searchParams.get("link-id");
-            var invoiceId = url.searchParams.get("invoice-id");
+            var linkId = thisUrl.searchParams.get("link-id");
+            invoiceId = thisUrl.searchParams.get("invoice-id");
 
             var xhr = new XMLHttpRequest();
-            var url = "/pay-details?link-id=" + linkId + "&invoice-id=" + invoiceId;
+            var url = "/pay-details?link-id=" + linkId;
+            if(invoiceId !== null && invoiceId !== '') {
+                url += "&invoice-id=" + invoiceId;
+            }
             xhr.open("GET", url, true);
 
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     var json = JSON.parse(xhr.responseText);
 
+                    var title = json['payableLink']['linkConfig']['title'];
+                    var description = json['payableLink']['linkConfig']['description'];
+                    var amount = json['payableLink']['linkConfig']['price'];
+                    var currency = json['payableLink']['linkConfig']['currency'];
+                    var pseudonym = json['payableLink']['linkConfig']['pseudonym'];
+                    var payReqQrCode = "data:image/jpeg;base64," + json['paymentOptionParameters']['pay_req_qr_code'];
+
+                    payableUrl = json['payableLink']['payableUrl'];
+                    invoiceId = json['invoiceId'];
+                    payReq = json['paymentOptionParameters']['pay_req'];
+
+                    console.log(payableUrl);
+                    console.log(title);
+                    console.log(description);
+                    console.log(amount);
+                    console.log(currency);
+                    console.log(pseudonym);
+                    console.log(invoiceId);
+                    console.log(payReq);
+                    console.log(payReqQrCode);
+
+                    document.getElementById('title').textContent = title;
+                    document.getElementById('description').textContent = description;
+                    document.getElementById('price').textContent = amount;
+                    document.getElementById('currency').textContent = currency;
+                    document.getElementById('pseudonym').textContent = pseudonym;
+                    document.getElementById('invoice_id').textContent = payReq;
+                    document.getElementById('pay_req_qr_code').src = payReqQrCode;
                 }
             }
             xhr.send();
         }
+
+        function selectThis(sel ){
+            selection = window.getSelection();
+            range     = document.createRange();
+
+            if( typeof sel === 'undefined'){
+                sel = document.getElementById("invoice_id")
+            }
+
+            range.selectNodeContents(sel);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand("copy")
+        }
+
+        function openInWallet() {
+            window.open('lightning:' + payReq, '_blank')
+        }
+
+        function alreadyPaid() {
+            window.open(payableUrl + '?x_payment_receipt=' + encodeURIComponent(invoiceId), '_self');
+        }
+
     </script>
 
 </head>
@@ -40,13 +86,14 @@
 <p>Description: <span id="description"></span></p>
 <p>Amount: <span id="price"></span><span id="currency"></span></p>
 <p>Pseudonym: <span id="pseudonym"></span></p>
-<p>Invoice: <span id="invoice_id"></span></p>
-<button id="copy" type="button" value="Open In Wallet" style="height:50px;width:150px" onclick="copy();">Open In Wallet</button>
+<p>Invoice: <span id="invoice_id" onClick="selectThis(this);"></span></p>
+<button id="copy" type="button" value="Copy Invoice" style="height:50px;width:150px" onclick="selectThis();">Copy Invoice</button>
 <button id="openInWallet" type="button" value="Open In Wallet" style="height:50px;width:150px" onclick="openInWallet();">Open In Wallet</button>
-<a id="alreadyPaid" href="#">I have already paid</a>
+<a id="alreadyPaid" href="#" onclick="alreadyPaid();">I have already paid</a>
 <p>
-    <img id="qr_code">
+    <img id="pay_req_qr_code">
 </p>
+
 </body>
 
 

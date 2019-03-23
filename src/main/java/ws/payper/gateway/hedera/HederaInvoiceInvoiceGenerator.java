@@ -1,8 +1,10 @@
 package ws.payper.gateway.hedera;
 
 import org.springframework.stereotype.Component;
+import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.model.Invoice;
 import ws.payper.gateway.InvoiceGenerator;
+import ws.payper.gateway.web.ConfigureLinkController;
 import ws.payper.gateway.web.InvoiceRequest;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.util.QrCodeGenerator;
@@ -21,10 +23,11 @@ public class HederaInvoiceInvoiceGenerator implements InvoiceGenerator {
     private QrCodeGenerator qrCodeGenerator;
 
     @Override
-    public Invoice newInvoice(InvoiceRequest invoiceRequest) {
-        PaymentOptionType paymentOptionType = invoiceRequest.getPaymentOptionType();
-        String amount = invoiceRequest.getAmount();
-        String account = invoiceRequest.getAccount();
+    public Invoice newInvoice(PayableLink link) {
+        ConfigureLinkController.LinkConfig linkConfig = link.getLinkConfig();
+        PaymentOptionType paymentOptionType = linkConfig.getPaymentOptionType();
+        String amount = linkConfig.getPrice().toString();
+        String account = "unknown-account";// invoiceRequest.getAccount();
 
         Map<String, String> params = new HashMap<>();
         params.put("account", account);
@@ -33,16 +36,16 @@ public class HederaInvoiceInvoiceGenerator implements InvoiceGenerator {
         // TODO Workaround until Hedera Wallet can scan memos from QR codes
         amount = amendAmount(amount, invoiceId);
 
-        String contentDescription = MessageFormat.format("{0} [ {1} ]", invoiceRequest.getTitle(), invoiceRequest.getUrl());
+        String contentDescription = MessageFormat.format("{0} [ {1} ]", linkConfig.getTitle(), linkConfig.getUrl());
         params.put("content_title", contentDescription);
-        params.put("url", invoiceRequest.getUrl().toString());
+        params.put("url", linkConfig.getUrl());
         params.put("amount", amount);
         String hederaAppLink = generateHederaAppLink(account, amount, invoiceId);
         params.put("qr_code", getQrCode(hederaAppLink));
         params.put("pay_req", hederaAppLink);
         params.put("invoice_id", invoiceId);
 
-        return new Invoice(invoiceId, invoiceRequest.getPayableLinkId(), paymentOptionType, amount, params);
+        return new Invoice(invoiceId, link, params);
     }
 
     private String generateHederaAppLink(String account, String amount, String memo) {

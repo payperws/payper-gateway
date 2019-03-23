@@ -19,6 +19,7 @@ public class InvoiceRequest {
     private final String currency;
 
     private String payableLinkId;
+    private String description;
 
     public InvoiceRequest(String payableLinkId, String title, URL url, PaymentOptionType paymentOptionType, String amount, String currency) {
         this.payableLinkId = payableLinkId;
@@ -63,5 +64,13 @@ public class InvoiceRequest {
 
     public void setPayableLinkId(String payableLinkId) {
         this.payableLinkId = payableLinkId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

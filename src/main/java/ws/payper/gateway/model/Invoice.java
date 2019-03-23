@@ -1,5 +1,6 @@
 package ws.payper.gateway.model;
 
+import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.config.PaymentOptionType;
 
 import java.util.HashMap;
@@ -9,62 +10,17 @@ public class Invoice {
 
     private String invoiceId;
 
-    private PaymentOptionType paymentOptionType;
-
-    private String price;
+    private PayableLink payableLink;
 
     private Map<String, String> paymentOptionParameters;
-
-    private String payableLinkId;
 
     public Invoice() {
     }
 
-    public Invoice(String invoiceId, String payableLinkId, PaymentOptionType paymentOptionType, String price, Map<String, String> paymentOptionParameters) {
+    public Invoice(String invoiceId, PayableLink link, Map<String, String> params) {
         this.invoiceId = invoiceId;
-        this.payableLinkId = payableLinkId;
-        this.paymentOptionType = paymentOptionType;
-        this.price = price;
-        this.paymentOptionParameters = paymentOptionParameters;
-    }
-
-    public PaymentOptionType getPaymentOptionType() {
-        return paymentOptionType;
-    }
-
-    public void setPaymentOptionType(PaymentOptionType paymentOptionType) {
-        this.paymentOptionType = paymentOptionType;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public Map<String, String> getPaymentOptionParameters() {
-        return paymentOptionParameters;
-    }
-
-    public void setPaymentOptionParameters(Map<String, String> paymentOptionParameters) {
-        this.paymentOptionParameters = paymentOptionParameters;
-    }
-
-    public Map<String, String> allParameters() {
-        Map<String, String> allParams = new HashMap<>(paymentOptionParameters);
-        allParams.put("paymentOptionType", paymentOptionType.name());
-        allParams.put("price", price);
-        return allParams;
-    }
-
-    public String getPayableLinkId() {
-        return payableLinkId;
-    }
-
-    public void setPayableLinkId(String payableLinkId) {
-        this.payableLinkId = payableLinkId;
+        this.payableLink = link;
+        this.paymentOptionParameters = params;
     }
 
     public String getInvoiceId() {
@@ -73,5 +29,21 @@ public class Invoice {
 
     public void setInvoiceId(String invoiceId) {
         this.invoiceId = invoiceId;
+    }
+
+    public PayableLink getPayableLink() {
+        return payableLink;
+    }
+
+    public void setPayableLink(PayableLink payableLink) {
+        this.payableLink = payableLink;
+    }
+
+    public Map<String, String> getPaymentOptionParameters() {
+        return paymentOptionParameters;
+    }
+
+    public void setPaymentOptionParameters(Map<String, String> paymentOptionParameters) {
+        this.paymentOptionParameters = paymentOptionParameters;
     }
 }

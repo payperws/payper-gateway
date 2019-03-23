@@ -28,7 +28,7 @@ public class LndApiPool {
 
     public SynchronousLndAPI getByRHash(String rHash) {
         Invoice invoice = invoiceRepository.findByInvoiceId(rHash).orElseThrow(() -> new IllegalStateException("Could not find invoice: " + rHash));
-        return getByPayableLinkId(invoice.getPayableLinkId());
+        return getByPayableLinkId(invoice.getPayableLink().getPayableId());
     }
 
     public SynchronousLndAPI getByPayableLinkId(String payableLinkId) {

@@ -40,21 +40,12 @@ public class PaymentUriHelper {
         PaymentOptionType paymentOptionType = linkConfig.getPaymentOptionType();
 
         String payableLinkId = payable.getPayableId();
-        String title = linkConfig.getTitle();
-        String sourceUrl = payable.getPayableUrl();
-        String paymentOption = paymentOptionType.name();
-        String amount = linkConfig.getPrice().toString();
-        String currency = linkConfig.getCurrency().name();
 
         try {
 
             URIBuilder uriBuilder = new URIBuilder(paymentRequiredBaseUrl)
                     .addParameter("link-id", payableLinkId)
-                    .addParameter("title", title)
-                    .addParameter("sourceurl", sourceUrl)
-                    .addParameter("option", paymentOption)
-                    .addParameter("amount", amount)
-                    .addParameter("currency", currency);
+                    .addParameter("option", paymentOptionType.name());
 
             if (PaymentOptionType.HEDERA_HBAR.equals(paymentOptionType)) {
                 String account = linkConfig.getPaymentOptionArgs().get("account");

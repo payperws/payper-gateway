@@ -6,7 +6,7 @@ import ws.payper.gateway.web.InvoiceRequest;
 
 public interface InvoiceGenerator {
 
-    Invoice newInvoice(InvoiceRequest request);
+    Invoice newInvoice(PayableLink link);
 
     PaymentOptionType getPaymentOptionType();
 }

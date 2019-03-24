@@ -33,11 +33,6 @@ public class DummyCoinInvoiceGenerator implements InvoiceGenerator {
         String dummyWalletUrl = dummyWalletUrl(link, invoiceId);
         ConfigureLinkController.LinkConfig linkConfig = link.getLinkConfig();
         Map<String, String> args = Map.of(
-                "content_title", linkConfig.getTitle(),
-                "url", linkConfig.getUrl(),
-                "amount", linkConfig.getPrice().toString(),
-                "currency", linkConfig.getCurrency().name(),
-                "invoice_id", invoiceId,
                 "qr_code", getQrCode(dummyWalletUrl),
                 "open_in_wallet", dummyWalletUrl
         );

@@ -18,11 +18,11 @@ payper:
       name: "Bitcoin Lightning Network"
       currency: SATOSHI_BTC
       currencyName: "SATS"
+    - id: DUMMY_COIN
+      name: "Dummy Network"
+      currency: DUMMY_COIN
+      currencyName: "Dummy Coin"
 #    - id: HEDERA_HBAR
 #      name: "Hedera Hashgraph"
 #      currency: HBAR
 #      currencyName: "HBar"
-#    - id: DUMMY_COIN
-#      name: "Dummy Network"
-#      currency: DUMMY_COIN
-#      currencyName: "Dummy Coin"

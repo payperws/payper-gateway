@@ -33,16 +33,6 @@
                     invoiceId = json['invoiceId'];
                     payReq = json['paymentOptionParameters']['pay_req'];
 
-                    console.log(payableUrl);
-                    console.log(title);
-                    console.log(description);
-                    console.log(amount);
-                    console.log(currency);
-                    console.log(pseudonym);
-                    console.log(invoiceId);
-                    console.log(payReq);
-                    console.log(payReqQrCode);
-
                     document.getElementById('title').textContent = title;
                     document.getElementById('description').textContent = description;
                     document.getElementById('price').textContent = amount;
@@ -50,6 +40,8 @@
                     document.getElementById('pseudonym').textContent = pseudonym;
                     document.getElementById('invoice_id').textContent = payReq;
                     document.getElementById('pay_req_qr_code').src = payReqQrCode;
+
+                    console.log('Data loaded');
 
                     poll();
                 }
@@ -76,43 +68,46 @@
         }
 
         function alreadyPaid() {
-            window.open(payableUrl + '?x_payment_receipt=' + encodeURIComponent(invoiceId), '_self');
+            window.open(payableUrl + '?x_payment_receipt=' + encodeURIComponent(invoiceId) + '&invoice_id', '_self');
         }
 
 
+        var POLL_INTERVAL = 1000;
+        var inProgress = false;
+        var done = false;
+
         async function poll() {
-            var retries = 1000;
-            var sleep = 1000;
-            var is402 = true;
+            setInterval(pollOnce, POLL_INTERVAL);
+            pollOnce();
+        }
 
-            while (is402 && (retries > 0)) {
-                console.log("Polling...  URL = " + payableUrl + "; Header = " + invoiceId);
+        function pollOnce() {
+            if (inProgress || done) {
+                console.log('...');
+                return;
+            }
+            inProgress = true;
 
-                var newXHR = new XMLHttpRequest();
-                newXHR.open('GET', payableUrl);
-                newXHR.setRequestHeader('X-Payment-Receipt', invoiceId);
+            console.log("Polling...  URL = " + payableUrl + "; Header = " + invoiceId);
 
-                newXHR.onreadystatechange = function() {
-                    if (newXHR.readyState == 4) {
-                        if (newXHR.status != 402) {
-                            is402 = false;
-                            console.log('Not 402. Might be that the payment was verified!');
-                        }
+            var newXHR = new XMLHttpRequest();
+            newXHR.open('GET', payableUrl);
+            newXHR.setRequestHeader('X-Payment-Receipt', invoiceId);
+            newXHR.setRequestHeader('X-Payment-Quick-Check', 'true');
+
+            newXHR.onreadystatechange = function() {
+                if (newXHR.readyState == 4) {
+                    if (newXHR.status != 402) {
+                        is402 = false;
+                        done = true;
+                        console.log('Not 402. Might be that the payment was verified!');
+                        window.open(payableUrl + "?x_payment_receipt=" + encodeURIComponent(invoiceId), "_self");
                     }
-                };
-
-                newXHR.send();
-
-                retries--;
-
-                if (is402) {
-                    await pause(retries, sleep);
                 }
-            }
+                inProgress = false;
+            };
 
-            if (!is402) {
-                window.open(payableUrl + "?x_payment_receipt=" + encodeURIComponent(invoiceId), "_self");
-            }
+            newXHR.send();
         }
 
         function pause(retries, sleep) {

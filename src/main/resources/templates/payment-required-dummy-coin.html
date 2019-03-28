@@ -98,17 +98,20 @@
             console.log("Polling...  URL = " + payableUrl + "; Header = " + invoiceId);
 
             var newXHR = new XMLHttpRequest();
-            newXHR.open('GET', payableUrl);
-            newXHR.setRequestHeader('X-Payment-Receipt', invoiceId);
-            newXHR.setRequestHeader('X-Payment-Quick-Check', 'true');
+            newXHR.open('GET', "/verify" + "?x_payment_receipt=" + encodeURIComponent(invoiceId));
 
             newXHR.onreadystatechange = function() {
                 if (newXHR.readyState == 4) {
-                    if (newXHR.status != 402) {
-                        is402 = false;
-                        done = true;
-                        console.log('Not 402. Might be that the payment was verified!');
-                        window.open(payableUrl + "?x_payment_receipt=" + encodeURIComponent(invoiceId), "_self");
+                    if (newXHR.status == 200) {
+                        var json = JSON.parse(newXHR.responseText);
+                        var verified = json['verified'];
+                        if (verified == true) {
+                            done = true;
+                            console.log('Request verified!');
+                            window.open(payableUrl + "?x_payment_receipt=" + encodeURIComponent(invoiceId), "_self");
+                        } else {
+                            console.log('Request NOT verified!');
+                        }
                     }
                 }
                 inProgress = false;

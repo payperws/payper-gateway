@@ -86,4 +86,9 @@ public class PaymentRequestVerifier {
         boolean transactionVerified = getPaymentNetwork(type).verifyTransaction(paymentProof, paymentEndpoint, amount);
         return !transactionVerified;
     }
+
+    public boolean verifyReceipt(PaymentEndpoint paymentEndpoint, String paymentProof, String amount) {
+        PaymentOptionType type = paymentEndpoint.getType();
+        return getPaymentNetwork(type).verifyTransaction(paymentProof, paymentEndpoint, amount);
+    }
 }

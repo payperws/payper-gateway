@@ -2,14 +2,15 @@ package ws.payper.gateway.service;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ValidationException extends RuntimeException {
 
     private ValidationErrorDetails details;
 
-    public ValidationException(String message, List<InvalidField> invalidFields) {
-        this.details = new ValidationErrorDetails(message, invalidFields);
+    public ValidationException(String message, List<Error> errors) {
+        this.details = new ValidationErrorDetails(message, errors);
     }
 
     @Override
@@ -25,19 +26,19 @@ public class ValidationException extends RuntimeException {
 
         private String message;
 
-        private List<InvalidField> invalidFields;
+        private List<Error> errors;
 
-        public ValidationErrorDetails(String message, List<InvalidField> invalidFields) {
+        public ValidationErrorDetails(String message, List<Error> errors) {
             this.message = message;
-            this.invalidFields = invalidFields;
+            this.errors = errors;
         }
 
         public String getMessage() {
             return message;
         }
 
-        public List<InvalidField> getInvalidFields() {
-            return invalidFields;
+        public List<Error> getErrors() {
+            return errors;
         }
     }
 
@@ -45,7 +46,7 @@ public class ValidationException extends RuntimeException {
 
         private String message;
 
-        private List<InvalidField> invalidField;
+        private List<Error> error;
 
         public Builder message(String message) {
             this.message = message;
@@ -53,32 +54,32 @@ public class ValidationException extends RuntimeException {
         }
 
         public Builder field(String fieldKey, Arg... args) {
-            InvalidField field = new InvalidField(fieldKey, Arrays.asList(args));
-            this.invalidField.add(field);
+            Error field = new Error(fieldKey, Arrays.asList(args));
+            this.error.add(field);
             return this;
         }
 
         public ValidationException build() {
-            return new ValidationException(message, invalidField);
+            return new ValidationException(message, error);
         }
     }
 
-    public static class InvalidField {
+    public static class Error {
 
         private String key;
 
-        private List<Arg> args;
+        private List<Arg> args = new ArrayList<>();
 
-        public InvalidField(String key) {
+        public Error(String key) {
             this.key = key;
         }
 
-        public InvalidField(String key, String... args) {
+        public Error(String key, Arg... args) {
             this.key = key;
             this.args = Arrays.asList(args);
         }
 
-        public InvalidField(String key, List<Arg> args) {
+        public Error(String key, List<Arg> args) {
             this.key = key;
             this.args = args;
         }
@@ -101,6 +102,10 @@ public class ValidationException extends RuntimeException {
         public Arg(String key, String value) {
             this.key = key;
             this.value = value;
+        }
+
+        public static Arg of(String key, String value) {
+            return new Arg(key, value);
         }
 
         public String getKey() {

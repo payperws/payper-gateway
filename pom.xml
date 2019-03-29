@@ -72,6 +72,12 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>27.1-jre</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-commons -->
 
 		<dependency>

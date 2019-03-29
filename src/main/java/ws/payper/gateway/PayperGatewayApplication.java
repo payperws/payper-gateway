@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.http.codec.support.DefaultServerCodecConfigurer;
 import ws.payper.gateway.proxy.CustomRedirectToGatewayFilterFactory;
 import ws.payper.gateway.proxy.HeaderOrParamRoutePredicateFactory;
 import ws.payper.gateway.proxy.PaymentRequiredRoutePredicateFactory;
@@ -42,6 +43,11 @@ public class PayperGatewayApplication {
     @Bean
     public HeaderOrParamRoutePredicateFactory headerOrParamRoutePredicateFactory() {
         return new HeaderOrParamRoutePredicateFactory();
+    }
+
+    @Bean
+    public DefaultServerCodecConfigurer serverCodecConfigurer() {
+        return new DefaultServerCodecConfigurer();
     }
 
     @EventListener(ApplicationReadyEvent.class)

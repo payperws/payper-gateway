@@ -14,8 +14,6 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @ExceptionHandler(value = { ValidationException.class })
     protected ResponseEntity<Object> validation(ValidationException ex, WebRequest request) {
-
-        String bodyOfResponse = "This should be application specific";
         return handleExceptionInternal(ex, ex.getDetails(),
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }

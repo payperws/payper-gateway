@@ -25,6 +25,7 @@ public class HederaInvoicePaymentNetwork implements PaymentNetwork {
     private List<HederaBuyer> buyers = new ArrayList<>();
 
     private final List<HederaBuyer> hardcodedBuyers = List.of(
+            HederaBuyer.of("0.0.1016"),
             HederaBuyer.of("0.0.1011")
     );
 

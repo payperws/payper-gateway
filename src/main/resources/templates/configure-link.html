@@ -104,13 +104,29 @@
             var price = document.getElementById('price').value;
             var currency = document.getElementById('currency').value;
 
+            var accountId = document.getElementById('hedera-account').value;
+
             var lightningHost = document.getElementById('lightning-host').value;
             var lightningRpcPort = document.getElementById('lightning-rpc-port').value;
-
             var lightningInvoiceMacaroon = INV_MACAROON;
             var lightningTlsCert = TLS_CERT;
 
-            var data = JSON.stringify({"url": url, "title": title, "description": description, "pseudonym": pseudonym, "price": price, "currency": currency, "paymentOptionType": paymentOption, "paymentOptionArgs": {"pubkeyHost": lightningHost, "rpcport": lightningRpcPort, "invoiceMacaroon": lightningInvoiceMacaroon, "tlsCert": lightningTlsCert}});
+            var data = JSON.stringify({
+                "url": url,
+                "title": title,
+                "description": description,
+                "pseudonym": pseudonym,
+                "price": price,
+                "currency": currency,
+                "paymentOptionType": paymentOption,
+                "paymentOptionArgs": {
+                    "account": accountId,
+                    "pubkeyHost": lightningHost,
+                    "rpcport": lightningRpcPort,
+                    "invoiceMacaroon": lightningInvoiceMacaroon,
+                    "tlsCert": lightningTlsCert
+                }
+            });
             xhr.send(data);
         }
 
@@ -148,6 +164,12 @@
             <td><input id="price" type="text"></td>
             <td><span id="currency-name"></span></td>
             <td><input id="currency" type="hidden" value="SATOSHI_BTC"></td>
+        </tr>
+
+        <!--DYNAMIC FIELDS FOR HEDERA OPTION-->
+        <tr>
+            <td>Account ID</td>
+            <td colspan="2"><input id="hedera-account" type="text"/></td>
         </tr>
 
         <!--DYNAMIC FIELDS FOR LIGHTNING OPTION-->

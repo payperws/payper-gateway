@@ -1,4 +1,4 @@
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
@@ -7,414 +7,141 @@
     <!-- <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet"> -->
     <link href="https://fonts.googleapis.com/css?family=Muli:400,700" rel="stylesheet">
     <!-- <link rel="stylesheet" type="text/css" href="css.css"> -->
-    <script th:inline="javascript">
-    /*<![CDATA[*/
-    var url = /*[[${url}]]*/ 'https://payable.example.com/some-content';
-    var invoice_id = /*[[${invoice_id}]]*/ '2fe84032-68de-4f35-9e34-a548ab290738';
-    var pay_req = /*[[${pay_req}]]*/ 'https://hedera.app.link/5vuEEQhtLQ?acc=0.0.1209&action=payRequest&a=500008520&n=2fe84032-68de-4f35-9e34-a548ab290738';
-    /*]]>*/
+    <script type="text/javascript">
+        var payableUrl;
+        var invoiceId;
+        var payReq;
+        var openInWalletUrl;
 
-    var polling = (invoice_id != '2fe84032-68de-4f35-9e34-a548ab290738');
-    var retries = 50;
-    var sleep = 2000;
+        function preload() {
+            var thisUrl = new URL(window.location);
+            var linkId = thisUrl.searchParams.get("link-id");
+            invoiceId = thisUrl.searchParams.get("invoice-id");
 
-    async function poll(polling, retries, sleep) {
-        var is402 = true;
+            var xhr = new XMLHttpRequest();
+            var url = "/pay-details?link-id=" + linkId;
+            if(invoiceId !== null && invoiceId !== '') {
+                url += "&invoice-id=" + invoiceId;
+            }
+            xhr.open("GET", url, true);
 
-        while (is402 && polling && (retries > 0)) {
-            console.log("Polling...  URL = " + url + "; Header = " + invoice_id);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var json = JSON.parse(xhr.responseText);
+
+                    var title = json['payableLink']['linkConfig']['title'];
+                    var description = json['payableLink']['linkConfig']['description'];
+                    var amount = json['payableLink']['linkConfig']['price'];
+                    var currency = json['payableLink']['linkConfig']['currency'];
+                    var pseudonym = json['payableLink']['linkConfig']['pseudonym'];
+                    var qrCode = "data:image/jpeg;base64," + json['paymentOptionParameters']['qr_code'];
+
+                    payableUrl = json['payableLink']['payableUrl'];
+                    invoiceId = json['invoiceId'];
+                    openInWalletUrl = json['paymentOptionParameters']['open_in_wallet'];
+
+                    document.getElementById('title').textContent = title;
+                    document.getElementById('description').textContent = description;
+                    document.getElementById('price').textContent = amount;
+                    document.getElementById('currency').textContent = currency;
+                    document.getElementById('pseudonym').textContent = pseudonym;
+                    document.getElementById('invoice_id').textContent = invoiceId;
+                    document.getElementById('qr_code').src = qrCode;
+
+                    console.log('Data loaded');
+
+                    poll();
+                }
+            }
+            xhr.send();
+        }
+
+        function selectThis(sel ){
+            selection = window.getSelection();
+            range     = document.createRange();
+
+            if( typeof sel === 'undefined'){
+                sel = document.getElementById("invoice_id");
+            }
+
+            range.selectNodeContents(sel);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand("copy");
+        }
+
+        function openInWallet() {
+            window.open(openInWalletUrl);
+        }
+
+        function alreadyPaid() {
+            window.open(payableUrl + '?x_payment_receipt=' + encodeURIComponent(invoiceId) + '&invoice_id', '_self');
+        }
+
+
+        var POLL_INTERVAL = 1000;
+        var inProgress = false;
+        var done = false;
+
+        async function poll() {
+            setInterval(pollOnce, POLL_INTERVAL);
+            pollOnce();
+        }
+
+        function pollOnce() {
+            if (inProgress || done) {
+                console.log('...');
+                return;
+            }
+            inProgress = true;
+
+            console.log("Polling...  URL = " + payableUrl + "; Header = " + invoiceId);
 
             var newXHR = new XMLHttpRequest();
-            newXHR.open('GET', url);
-            newXHR.setRequestHeader('X-Payment-Receipt', invoice_id);
+            newXHR.open('GET', "/verify" + "?x_payment_receipt=" + encodeURIComponent(invoiceId));
 
             newXHR.onreadystatechange = function() {
                 if (newXHR.readyState == 4) {
-                    if (newXHR.status != 402) {
-                        is402 = false;
-                        console.log('Not 402. Might be that the payment was verified!');
+                    if (newXHR.status == 200) {
+                        var json = JSON.parse(newXHR.responseText);
+                        var verified = json['verified'];
+                        if (verified == true) {
+                            done = true;
+                            console.log('Request verified!');
+                            window.open(payableUrl + "?x_payment_receipt=" + encodeURIComponent(invoiceId), "_self");
+                        } else {
+                            console.log('Request NOT verified!');
+                        }
                     }
                 }
+                inProgress = false;
             };
 
             newXHR.send();
-
-            retries--;
-
-            if (is402) {
-                await pause(retries, sleep);
-            }
         }
 
-        if (!is402) {
-            window.open(url + "?x_payment_receipt=" + encodeURIComponent(invoice_id), "_self");
+        function pause(retries, sleep) {
+            return new Promise(resolve => setTimeout(() => {
+                console.log(`Retries left: ${retries}`);
+                resolve();
+            }, sleep));
         }
-    }
-
-    function pause(retries, sleep) {
-        return new Promise(resolve => setTimeout(() => {
-            console.log(`Retries left: ${retries}`);
-            resolve();
-        }, sleep));
-    }
-
-    poll(polling, retries, sleep);
-
-    function selectThis(sel ){
-        selection = window.getSelection();
-        range     = document.createRange();
-        
-        if( typeof sel === 'undefined'){
-            sel = document.getElementById("am-invoice")
-        }
-
-        range.selectNodeContents(sel);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        document.execCommand("copy")
-
-        document.getElementsByClassName("snack-wrap")[0].style.visibility = "visible";
-        var snack = document.getElementById("close");
-        snack.removeAttribute("checked");
-    }
-
     </script>
-    <style type="text/css">
-    * {
-        font-family: 'Muli', sans-serif;
-        font-size: 12px;
-        line-height: 1;
-        -ms-text-size-adjust: 100%;
-        -webkit-text-size-adjust: 100%;
-        -webkit-font-smoothing: antialiased;
-        border: 0
-    }
-
-    html {
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        background-color: transparent;
-    }
-
-    .bckmask {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: blue;
-        opacity: 0.24;
-    }
-
-    .bodybck {
-
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: url(am-bck.jpg) no-repeat 50% fixed;
-    }
-
-
-    .am-body {
-        border: 0;
-        border-top: 6.42px solid rgba(242, 200, 70, .98);
-        background: white;
-        background: rgba(245, 247, 248, 0.9);
-        vertical-align: middle;
-        width: 100%;
-        height: -webkit-fill-available;
-        margin: auto auto;
-        margin-top: 50px;
-
-        position: relative;
-        max-width: 375px;
-        max-height: 720px;
-        padding-top: 15px;
-        box-shadow: 0 0 42px 0 rgba(0, 0, 0, .42);
-        text-align: center;
-        border-radius: 4.2px;
-        word-break: break-all;
-        font
-    }
-
-    .am-button2 {
-        background-color: rgba(24, 42, 64, 1);
-        height: 42px !important;
-        font-weight: 420;
-        width: 142px;
-        font-size: 16px;
-        color: white;
-        text-transform: uppercase;
-        margin: 0 auto;
-        ;
-        display: inline-block;
-        transition: .242s;
-
-    }
-
-    .am-button {
-        background-color: rgba(24, 42, 64, 0);
-
-        height: 42px !important;
-        font-weight: 420;
-        width: 142px;
-        font-size: 12px;
-        font-weight: 800;
-        color: rgba(81, 142, 228, 1);
-        color: rgba(58, 129, 226, 1);
-        text-transform: uppercase;
-        ;
-        display: inline-block;
-        transition: .242s;
-    }
-
-    p {
-        padding-left: 0px !important;
-        margin-left: 6.42%;
-        margin-right: 6.42%;
-        display: table;
-    }
-
-    p img {
-        width: 224px;
-        height: 224px;
-        min-width: 224px;
-        min-height: 224px;
-        margin-top: 10px;
-        border:0;
-    }
-
-    .am-bottom {
-        font-size: 15.24px;
-        border: 0;
-        color: white;
-        position: absolute;
-        letter-spacing: -2px;
-        bottom: -23px;
-        left: -0.5px;
-    }
-
-    .am-value {
-        color: grey;
-        font-size: 11px;
-    }
-
-
-    .am-title {
-        line-height: 0.1
-    }
-
-
-    .am-fill {
-        width: 100%;
-        height: 562px;
-        background: white;
-    }
-
-    .am-second-part {
-        overflow: hidden;
-        background: white;
-    }
-
-    .am-spacer {
-        margin-top: -4.2px;
-    }
-
-    .am-logo {
-        margin-top: -42px;
-        margin-left: 5px;
-        z-index: 42;
-        padding-left: 24px;
-        font-size: 24px;
-        font-weight: 800;
-        color: white;
-    }
-
-    .am-logo-i {
-        margin-left: 4.2px;
-        z-index: 42;
-        position: absolute;
-        margin-top: -42px;
-    }
-
-    ::selection {
-        background: transparent;
-    }
-
-    ::-moz-selection {
-        background: transparent;
-    }
-
-    #am-invoice {
-
-        -webkit-touch-callout: text;
-        -webkit-user-select: text;
-        -khtml-user-select: text;
-        -moz-user-select: text;
-        -ms-user-select: text;
-        user-select: text;
-    }
-
-
-    .snack-wrap {
-        display: block;
-        position: fixed;
-        bottom: 0px;
-        left: 10px;
-        padding: 0px;
-    }
-
-    .snackbar {
-        display: block;
-        background: #222;
-        border: #f2f2f2;
-        padding: 5px;
-        color: #fff;
-        font-size: 18px !important;
-        position: relative;
-        /*left: 50%;*/
-        bottom: -70px;
-        transition: bottom 0.5s ease-in-out;
-        z-index: 9;
-
-        width: 354px;
-    }
-
-    .snackbar p {
-        /*width: 360px;*/
-        font-size: 14px;
-    }
-
-    .snackclose,
-    label {
-        bottom: -70px;
-        position: absolute;
-        border: 0;
-    }
-
-    .snackclose {
-        display: none;
-        z-index: 10;
-    }
-
-    label {
-        z-index: 11;
-        display: block;
-        width: 100%;
-        height: 100%;
-        color: rgba(255, 255, 255, 0.8);
-        cursor: pointer;
-    }
-
-    .animated {
-        animation-name: snackbar-show;
-        animation-duration: 0.42s;
-        animation-direction: forwards;
-        animation-timing-function: ease-in-out;
-        animation-delay: 0.42s;
-        animation-fill-mode: forwards;
-    }
-
-    .snackclose:checked~.snackbar,
-    .snackclose:checked,
-    .snackclose:checked+label {
-        animation-name: snackbar-hide;
-        animation-delay: 0s;
-    }
-
-    @keyframes snackbar-show {
-        0% {
-            bottom: -70px;
-        }
-
-        90%,
-        95% {
-            bottom: 15px;
-        }
-
-        92.5%,
-        100% {
-            bottom: 10px;
-        }
-    }
-
-    @keyframes snackbar-hide {
-
-        0%,
-        7.5% {
-            bottom: 10px;
-        }
-
-        5%,
-        10% {
-            bottom: 15px;
-        }
-
-        100% {
-            bottom: -70px;
-        }
-    }
-    </style>
 </head>
 
-<body>
-    <div class="am-logo-i">
-        <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="42px" height="42px" viewBox="0 0 242 242" preserveAspectRatio="xMidYMid meet">
-            <g transform="translate(0,242) scale(0.124,-0.124)" stroke="none">
-                <path stroke-width="142" stroke="rgba(0,0,0,0.142)" fill="rgba(242, 200, 70, .98)" d="m724 1700 c202 -50 350 -211 382 -413 12 -79 5 -169 -14 -194 -7 -9 -64 -45 -127 -80 -63 -35 -133 -75 -155 -87 -22 -13 -62 -36 -90 -52 -27 -16 -57 -33 -65 -38 -81 -50 -178 -100 -193 -100 -33 0 -134 58 -191 111 -106 97 -159 219 -159 364 0 103 17 167 71 259 109 186 333 281 541 230z m1138 -225"></path>
-            </g>
-        </svg>
-        <div class="am-logo">payper</div>
-    </div>
-    <div class="bodybck">
-        <div class="bckmask">
-        </div>
-    </div>
-    <div class="am-body">
-        <div class="am-first-part">
-            <p><strong class="am-title">CONTENT</strong></p>
-            <p><span class="am-value" th:text="${content_title}"></span></p>
-            <p class="am-spacer"> </p>
-            <p><strong class="am-title">URL</strong></p>
-            <p><span class="am-value" th:text="${url}"></span></p>
-            <p class="am-spacer"></p>
-            <p><strong class="am-title">AMOUNT</strong></p>
-            <p><span class="am-value" th:text="${amount}">100000000</span><span class="am-value"> tinybars</span></p>
-        </div>
-        <div class="am-second-part">
-            <div class="am-fill">
-                <span class="am-imgleft"></span>
-                <p style="margin:auto;margin-top:20px">
-                    <img onclick="window.open('lightning:' + pay_req, '_blank')" th:src="@{'data:image/jpeg;base64,'+${qr_code}}">
-                    <span class="am-imgright"></span>
-                </p>
-                <p><strong class="am-title">INVOICE</strong></p>
-                <p><span title="Click to copy to clipboard" id="am-invoice"  onClick="selectThis(this)" class="am-value" th:text="${pay_req}"></span></p>
-                <p style="margin-top:20px">
-                    <button class="am-button" style="width:164px" onclick="window.open('lightning:' + pay_req, '_blank')">Open In Wallet</button>
-                    <button class="am-button" style="height:30px" onclick="window.open(url + '?x_payment_receipt=' + encodeURIComponent(invoice_id), '_self');">Already Paid</button>
-                    <span>&nbsp</span>
-                    <button onClick="selectThis()" class="am-button" style="height:30px">Copy Invoice</button>
-                </p>
-                <div class="am-bottom">
-                    &#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;&#9660;
-                </div>
-            </div>
-        </div>
-        <!--<p>Hash: <strong th:text="${invoice_id}">2fe84032-68de-4f35-9e34-a548ab290738</strong></p>-->
-    </div>
-    <div class="snack-wrap" style="visibility:hidden;">
-        <input type="checkbox" checked class="snackclose animated" id="close" /><label class="snacklable animated" for="close"></label>
-        <div class="snackbar animated">
-            <p>Invoice has been copied to clipboard.</p>
-        </div>
-    </div>
+<body onload="preload();">
+
+<p>Title:   <span id="title"></span></p>
+<p>Description: <span id="description"></span></p>
+<p>Cost:    <span id="price"></span> <span id="currency"></span></p>
+<p>Pseudonym: <span id="pseudonym"></span></p>
+<p>Invoice: <span id="invoice_id" onClick="selectThis(this);"></span></p>
+<button id="copy" type="button" value="Copy Invoice" style="height:50px;width:150px" onclick="selectThis();">Copy Invoice</button>
+<button id="openInWallet" type="button" value="Open In Wallet" style="height:50px;width:150px" onclick="openInWallet();">Open In Wallet</button>
+<a id="alreadyPaid" href="#" onclick="alreadyPaid();">I have already paid</a>
+<p>
+    <img id="qr_code">
+</p>
 </body>
 
 </html>

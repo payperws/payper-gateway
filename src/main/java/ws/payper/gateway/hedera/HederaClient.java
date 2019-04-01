@@ -74,11 +74,15 @@ public class HederaClient {
         List<HederaTransactionRecord> payerRecords;
         try {
             payerRecords = verifyingAccount.getRecords(payer.shardNum, payer.realmNum, payer.accountNum);
-            Optional<HederaTransactionRecord> first = payerRecords.stream()
-                    .filter(record -> memoMatches(memo, record))
-                    .filter(record -> amountPaid(price, payer, payee, record))
-                    .findFirst();
-            return first.isPresent();
+            if (payerRecords == null) {
+                return false;
+            } else {
+                Optional<HederaTransactionRecord> first = payerRecords.stream()
+                        .filter(record -> memoMatches(memo, record))
+                        .filter(record -> amountPaid(price, payer, payee, record))
+                        .findFirst();
+                return first.isPresent();
+            }
         } catch (Exception e) {
             throw new RuntimeException("Could no verify transaction", e);
         }

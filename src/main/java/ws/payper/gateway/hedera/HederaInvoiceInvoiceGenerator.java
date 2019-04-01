@@ -5,7 +5,6 @@ import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.model.Invoice;
 import ws.payper.gateway.InvoiceGenerator;
 import ws.payper.gateway.web.ConfigureLinkController;
-import ws.payper.gateway.web.InvoiceRequest;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.util.QrCodeGenerator;
 
@@ -25,16 +24,15 @@ public class HederaInvoiceInvoiceGenerator implements InvoiceGenerator {
     @Override
     public Invoice newInvoice(PayableLink link) {
         ConfigureLinkController.LinkConfig linkConfig = link.getLinkConfig();
-        PaymentOptionType paymentOptionType = linkConfig.getPaymentOptionType();
         String amount = linkConfig.getPrice().toString();
-        String account = "unknown-account";// invoiceRequest.getAccount();
+
+        String account = linkConfig.getPaymentOptionArgs().get("account");
 
         Map<String, String> params = new HashMap<>();
         params.put("account", account);
         String invoiceId = generateInvoiceId();
 
-        // TODO Workaround until Hedera Wallet can scan memos from QR codes
-        amount = amendAmount(amount, invoiceId);
+        amount = amendAmountWorkaround(false, amount, invoiceId);
 
         String contentDescription = MessageFormat.format("{0} [ {1} ]", linkConfig.getTitle(), linkConfig.getUrl());
         params.put("content_title", contentDescription);
@@ -54,13 +52,21 @@ public class HederaInvoiceInvoiceGenerator implements InvoiceGenerator {
         return MessageFormat.format("https://hedera.app.link/5vuEEQhtLQ?acc={0}&action={1}&a={2}&n={3}", account, action, amount, memo);
     }
 
-    private String amendAmount(String amount, String invoiceId) {
+    /**
+     * TODO Workaround until Hedera Wallet can scan memos from QR codes
+     * @param enabled true to amend the amount in order to use it to identify the transaction
+     * @param amount initial amount
+     * @param invoiceId used as seed to add to the amount
+     * @return ammended amount
+     */
+    private String amendAmountWorkaround(boolean enabled, String amount, String invoiceId) {
+        if (!enabled) {
+            return amount;
+        }
+
         Long initialAmount = Long.parseLong(amount);
-
         BigInteger fourDigitIntId = new BigInteger(invoiceId.getBytes()).mod(new BigInteger("10000"));
-
         Long amendedAmount = initialAmount + fourDigitIntId.longValue();
-
         return String.valueOf(amendedAmount);
     }
 

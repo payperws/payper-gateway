@@ -23,7 +23,7 @@
                     availablePaymentOptions = json["paymentOptions"];
 
                     if (availablePaymentOptions.length > 1) {
-                        var select = document.getElementById("payment-options");
+                        var select = document.getElementById("plpaymentmethods");
 
                         for (var idx = 0; idx < availablePaymentOptions.length; idx++) {
                             var payopt = availablePaymentOptions[idx];
@@ -40,13 +40,36 @@
             xhr.send();
         }
 
+        var fieldsMap = new Map([
+            ['HEDERA_HBAR',   ["plhederaaccount"]],
+            ['LIGHTNING_BTC', ["plLightningHost", "plLightningGrpcPort", "plLightningMacaroon", "plLightningTls"]],
+            ['DUMMY_COIN',    []],
+        ]);
+
         function paymentOptionSelected() {
-            var optionIdx = 0;
+            optionIdx = 0;
             if (availablePaymentOptions.length > 1) {
-                var selector = document.getElementById('payment-options');
+                var selector = document.getElementById('plpaymentmethods');
                 optionIdx = selector.selectedIndex < 0 ? 0 : selector.selectedIndex;
                 // var value = selector[optionIdx].value;
+            } else {
+                document.getElementById('plpaymentmethods').hidden = true;
+                document.getElementById('plpaymentmethods-lb').hidden = true;
             }
+
+            var selected = availablePaymentOptions[optionIdx];
+            hidePaymentOptionFields();
+
+            var optionElements = [];
+
+            if (selected.id == 'HEDERA_HBAR_INVOICE') {
+                optionElements = ["plhederaaccount"];
+            } else if (selected.id == 'LIGHTNING_BTC') {
+                optionElements = ["plLightningHost", "plLightningGrpcPort", "plLightningMacaroon", "plLightningTls"];
+            } else if (selected.id == 'DUMMY_COIN') {
+                optionElements = [];
+            }
+            displayFields(optionElements)
 
             var currencyId = availablePaymentOptions[optionIdx]['currency'];
             // TODO remember currency selection
@@ -57,9 +80,28 @@
             // document.getElementById('currency-name').textContent = currencyName;
         }
 
+        function displayFields(elementIds) {
+            for (var idx in elementIds) {
+                var elementId = elementIds[idx];
+                document.getElementById(elementId).hidden = false;
+                document.getElementById(elementId + "-lb").hidden = false;
+            }
+        }
+
+        function hidePaymentOptionFields() {
+            for (var elements of fieldsMap.values()) {
+                for (var idx in elements) {
+                    var elementId = elements[idx];
+                    //console.log(elementId);
+                    document.getElementById(elementId).hidden = true;
+                    document.getElementById(elementId + "-lb").hidden = true;
+                }
+            }
+        }
+
         function checkLightningNode() {
-            var lightningHost = document.getElementById('lightning-host').value;
-            var lightningRpcPort = document.getElementById('lightning-rpc-port').value;
+            var lightningHost = document.getElementById('plLightningHost').value;
+            var lightningRpcPort = document.getElementById('plLightningGrpcPort').value;
 
             var lightningInvoiceMacaroon = INV_MACAROON;
             var lightningTlsCert = TLS_CERT;
@@ -112,22 +154,20 @@
 
             var url = document.getElementById('plurl').value;
             var title = document.getElementById('pltitle').value;
-            // var description = document.getElementById('description').value;
-            var description = "";
-            // var pseudonym = document.getElementById('pseudonym').value;
-            var pseudonym = "";
+            var description = document.getElementById('pldescription').value;
+            var pseudonym = document.getElementById('plpseudonym').value;
 
-            var selector = document.getElementById('payment-options');
+            var selector = document.getElementById('plpaymentmethods');
             var paymentOption = availablePaymentOptions[optionIdx].id;
             var price = document.getElementById('plprice').value;
             var currency = availablePaymentOptions[optionIdx].currency;
 
-            var accountId = document.getElementById('placcount').value;
+            var accountId = document.getElementById('plhederaaccount').value;
 
-            // var lightningHost = document.getElementById('lightning-host').value;
-            // var lightningRpcPort = document.getElementById('lightning-rpc-port').value;
-            // var lightningInvoiceMacaroon = INV_MACAROON;
-            // var lightningTlsCert = TLS_CERT;
+            var lightningHost = document.getElementById('plLightningHost').value;
+            var lightningRpcPort = document.getElementById('plLightningGrpcPort').value;
+            var lightningInvoiceMacaroon = INV_MACAROON;
+            var lightningTlsCert = TLS_CERT;
 
             var data = JSON.stringify({
                 "url": url,
@@ -139,10 +179,10 @@
                 "paymentOptionType": paymentOption,
                 "paymentOptionArgs": {
                     "account": accountId,
-                    // "pubkeyHost": lightningHost,
-                    // "rpcport": lightningRpcPort,
-                    // "invoiceMacaroon": lightningInvoiceMacaroon,
-                    // "tlsCert": lightningTlsCert
+                    "pubkeyHost": lightningHost,
+                    "rpcport": lightningRpcPort,
+                    "invoiceMacaroon": lightningInvoiceMacaroon,
+                    "tlsCert": lightningTlsCert
                 }
             });
             xhr.send(data);
@@ -165,8 +205,17 @@
             localStorage.setItem("pl-night", currentMode);
         }
 
-        function createInput(containerData, name, label, emptyValue) {
-            var inHTML = '<div class="pl-label ns">' + label + '</div><input id="' + name + '" class="pl-input ns" type="text" placeholder="' + emptyValue + '">'
+        function createInput(containerData, name, label, emptyValue, type) {
+            var input;
+            if (type == 'text') {
+                input = '<input id="' + name + '" class="pl-input ns" type="text" placeholder="' + emptyValue + '">'
+            } else if (type == 'select') {
+                input = '<select id="' + name + '" onchange="paymentOptionSelected();" class="pl-input ns" placeholder="' + emptyValue + '"/>'
+            } else if (type == 'file') {
+                input = '<input id="' + name + '" class="pl-input ns" type="file" placeholder="' + emptyValue + '">'
+            }
+
+            var inHTML = '<div id="' + name + '-lb"' + '" class="pl-label ns">' + label + '</div>' + input;
             var newD = document.createElement("div");
             newD.innerHTML = inHTML;
             containerData.appendChild(newD);
@@ -189,26 +238,70 @@
                 [
                     "plurl",
                     "URL",
-                    "Paste a link with content"
+                    "Paste a link with content",
+                    "text"
                 ],
                 [
                     "pltitle",
                     "Content title",
-                    "Enter a title for buyers"
+                    "Enter a title for buyers",
+                    "text"
                 ],
                 [
                     "pldescription",
                     "Content description (optional)",
-                    "Add a short description"
+                    "Add a short description",
+                    "text"
+                ],
+                [
+                    "plpseudonym",
+                    "Your name or pseudonym (optional)",
+                    "Your name or pseudonym (optional)",
+                    "text"
+                ],
+                [
+                    "plpaymentmethods",
+                    "Payment method",
+                    "Payment method",
+                    "select"
                 ],
                 [
                     "plprice",
                     "Amount requested per access",
-                    "Paste a link with content"],
+                    "Amount",
+                    "text"
+                ],
+                // Hedera Fields
                 [
-                    "placcount",
+                    "plhederaaccount",
                     "Account ID",
-                    "Enter your Account ID"
+                    "Enter your Account ID",
+                    "text"
+                ],
+                // Lightning Network Fields
+                [
+                    "plLightningHost",
+                    "Lightning Node host / IP address",
+                    "Lightning Node host / IP address",
+                    "text"
+                ],
+                [
+                    "plLightningGrpcPort",
+                    "Node RPC Port number",
+                    "Node RPC Port number",
+                    "text"
+                ],
+                [
+                    "plLightningMacaroon",
+                    "Invoice Macaroon",
+                    "Invoice Macaroon",
+                    "file"
+                ],
+                [
+                    "plLightningTls",
+                    "TLS Certificate",
+                    "TLS Certificate",
+                    "file"
                 ]
             ]
 
@@ -217,7 +310,7 @@
             // containerData.innerHTML += '';
 
             data.forEach(function (d) {
-                createInput(containerData, d[0], d[1], d[2]);
+                createInput(containerData, d[0], d[1], d[2], d[3]);
             });
 
             containerData.innerHTML +=
@@ -227,31 +320,30 @@
                 calculateScale();
         });
 
-        function  calculateScale(){
-                var scaleCont = document.getElementsByClassName("pl-form")[0];
+        var scalingEnabled = false;
 
-                    var scaleValue = (window.innerHeight-87)/scaleCont.clientHeight;
-                    if( scaleValue<1 )
-                    {
-                        if(scaleValue<0.2){
-                            scaleValue = 0.2;
-                        }
+        function calculateScale() {
+            if (!scalingEnabled) {
+                return;
+            }
 
-                        var scaleStr = ".pl-form{transform-origin: 0% 12%;transform:scale("+scaleValue+");} ";
-
-
-                         if(scaleValue<0.5){
-                            scaleStr+=" .pl-footer {height:6px !important;border-bottom:2px solid #F8C829!important;} .pl-footer div {font-size:4px !important;}"
-                        }
-
-                        document.getElementById("dinamycSizes").innerHTML = scaleStr;
-                    }
-                    else{
-                        document.getElementById("dinamycSizes").innerHTML = "";
-                    }
+            var scaleCont = document.getElementsByClassName("pl-form")[0];
+            var scaleValue = (window.innerHeight-87)/scaleCont.clientHeight;
+            if( scaleValue<1 ) {
+                if(scaleValue<0.2){
+                    scaleValue = 0.2;
                 }
+                var scaleStr = ".pl-form{transform-origin: 0% 12%;transform:scale("+scaleValue+");} ";
 
-
+                if(scaleValue<0.5){
+                    scaleStr+=" .pl-footer {height:6px !important;border-bottom:2px solid #F8C829!important;} .pl-footer div {font-size:4px !important;}"
+                }
+                document.getElementById("dinamycSizes").innerHTML = scaleStr;
+            }
+            else {
+                document.getElementById("dinamycSizes").innerHTML = "";
+            }
+        }
     </script>
     <style id="switchStyle">
     </style>

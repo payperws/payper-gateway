@@ -1,12 +1,12 @@
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 
 <head title="Payable Links">
-    <script type="text/javascript">
-
+    <script th:inline="javascript">
         var TLS_CERT = 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNFVENDQWJpZ0F3SUJBZ0lRYTZSYUhXV1ducHpnaEdSWGRnYXdoVEFLQmdncWhrak9QUVFEQWpBMk1SOHcKSFFZRFZRUUtFeFpzYm1RZ1lYVjBiMmRsYm1WeVlYUmxaQ0JqWlhKME1STXdFUVlEVlFRREV3cHpZM2N0TW1VeApZbUUwTUI0WERURTVNRE14T1RFeE1EVXpOMW9YRFRJd01EVXhNekV4TURVek4xb3dOakVmTUIwR0ExVUVDaE1XCmJHNWtJR0YxZEc5blpXNWxjbUYwWldRZ1kyVnlkREVUTUJFR0ExVUVBeE1LYzJOM0xUSmxNV0poTkRCWk1CTUcKQnlxR1NNNDlBZ0VHQ0NxR1NNNDlBd0VIQTBJQUJJOTEydlZaRERwVEk4clpFZXZReStjOVd5cE9Jb2VRcUVVQgpvbkJTWjQ4WncvVmVpWmlwSzQwRGVpanVTY2d0ZnFpQzZtQWdjTUZTLzR1VDBzaUJGTnFqZ2Fjd2dhUXdEZ1lEClZSMFBBUUgvQkFRREFnS2tNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdnWUFHQTFVZEVRUjVNSGVDQ25OamR5MHkKWlRGaVlUU0NDV3h2WTJGc2FHOXpkSUlFZFc1cGVJSUtkVzVwZUhCaFkydGxkSWNFZndBQUFZY1FBQUFBQUFBQQpBQUFBQUFBQUFBQUFBWWNFQ2c3SmlZY0VyQkVBQVljUS9vQUFBQUFBQUFEY0doVC8vZ2NBQlljUS9vQUFBQUFBCkFBQUFRbFgvL28vS2VvY0VNdy9QSWpBS0JnZ3Foa2pPUFFRREFnTkhBREJFQWlBcFNhdGhOUHdGbUNJZ0hMMkEKK0ZIbEdrRGMwenZWeUVrSE1EUXgvTXJVT3dJZ1k1MXVsS3JwclBjcXFtK3FrMzRmM1BrN2xRZjZxSEMyem02RwpINjRla2RjPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==';
         var INV_MACAROON = 'AgEDbG5kAkcDChAix1VqDMpXRww9TrJDurJDEgEwGhYKB2FkZHJlc3MSBHJlYWQSBXdyaXRlGhcKCGludm9pY2VzEgRyZWFkEgV3cml0ZQAABiBgxJCrX9mLKFklyvjRnpyiNl4LtUaNMCE1XBFu8gPihg==';
 
         var availablePaymentOptions = {};
+        var optionIdx = 0;
 
         function preload() {
             preloadPaymentOptions();
@@ -22,38 +22,86 @@
                     var json = JSON.parse(xhr.responseText);
                     availablePaymentOptions = json["paymentOptions"];
 
-                    var select = document.getElementById("payment-options");
+                    if (availablePaymentOptions.length > 1) {
+                        var select = document.getElementById("plpaymentmethods");
 
-                    for (var idx = 0; idx < availablePaymentOptions.length; idx++) {
-                        var payopt = availablePaymentOptions[idx];
+                        for (var idx = 0; idx < availablePaymentOptions.length; idx++) {
+                            var payopt = availablePaymentOptions[idx];
 
-                        var option = document.createElement("option");
-                        option.textContent = payopt['name'];
-                        option.value = payopt['id'];
-                        select.appendChild(option);
+                            var option = document.createElement("option");
+                            option.textContent = payopt['name'];
+                            option.value = payopt['id'];
+                            select.appendChild(option);
+                        }
                     }
-
                     paymentOptionSelected();
                 }
             }
             xhr.send();
         }
 
+        var fieldsMap = new Map([
+            ['HEDERA_HBAR',   ["plhederaaccount"]],
+            ['LIGHTNING_BTC', ["plLightningHost", "plLightningGrpcPort", "plLightningMacaroon", "plLightningTls"]],
+            ['DUMMY_COIN',    []],
+        ]);
+
         function paymentOptionSelected() {
-            var selector = document.getElementById('payment-options');
-            var selIdx = selector.selectedIndex < 0 ? 0 : selector.selectedIndex;
-            var value = selector[selIdx].value;
+            optionIdx = 0;
+            if (availablePaymentOptions.length > 1) {
+                var selector = document.getElementById('plpaymentmethods');
+                optionIdx = selector.selectedIndex < 0 ? 0 : selector.selectedIndex;
+                // var value = selector[optionIdx].value;
+            } else {
+                document.getElementById('plpaymentmethods').hidden = true;
+                document.getElementById('plpaymentmethods-lb').hidden = true;
+            }
 
-            var currencyId = availablePaymentOptions[selIdx]['currency'];
-            document.getElementById('currency').value = currencyId;
+            var selected = availablePaymentOptions[optionIdx];
+            hidePaymentOptionFields();
 
-            var currencyName = availablePaymentOptions[selIdx]['currencyName'];
-            document.getElementById('currency-name').textContent = currencyName;
+            var optionElements = [];
+
+            if (selected.id == 'HEDERA_HBAR_INVOICE') {
+                optionElements = ["plhederaaccount"];
+            } else if (selected.id == 'LIGHTNING_BTC') {
+                optionElements = ["plLightningHost", "plLightningGrpcPort", "plLightningMacaroon", "plLightningTls"];
+            } else if (selected.id == 'DUMMY_COIN') {
+                optionElements = [];
+            }
+            displayFields(optionElements)
+
+            var currencyId = availablePaymentOptions[optionIdx]['currency'];
+            // TODO remember currency selection
+            // document.getElementById('currency').value = currencyId;
+
+            var currencyName = availablePaymentOptions[optionIdx]['currencyName'];
+            // TODO set currency label
+            // document.getElementById('currency-name').textContent = currencyName;
+        }
+
+        function displayFields(elementIds) {
+            for (var idx in elementIds) {
+                var elementId = elementIds[idx];
+                document.getElementById(elementId).hidden = false;
+                document.getElementById(elementId + "-lb").hidden = false;
+            }
+        }
+
+        function hidePaymentOptionFields() {
+            for (var elements of fieldsMap.values()) {
+                for (var idx in elements) {
+                    var elementId = elements[idx];
+                    //console.log(elementId);
+                    document.getElementById(elementId).hidden = true;
+                    document.getElementById(elementId + "-lb").hidden = true;
+                }
+            }
         }
 
         function checkLightningNode() {
-            var lightningHost = document.getElementById('lightning-host').value;
-            var lightningRpcPort = document.getElementById('lightning-rpc-port').value;
+            var lightningHost = document.getElementById('plLightningHost').value;
+            var lightningRpcPort = document.getElementById('plLightningGrpcPort').value;
 
             var lightningInvoiceMacaroon = INV_MACAROON;
             var lightningTlsCert = TLS_CERT;
@@ -82,6 +130,16 @@
         }
 
         function submit() {
+            var accepted = document.getElementById('acceptlt').checked;
+
+            if (accepted) {
+                submitValidData();
+            } else {
+
+            }
+        }
+
+        function submitValidData() {
             var xhr = new XMLHttpRequest();
             var url = "/link";
             xhr.open("POST", url, true);
@@ -94,20 +152,20 @@
                 }
             };
 
-            var url = document.getElementById('url').value;
-            var title = document.getElementById('title').value;
-            var description = document.getElementById('description').value;
-            var pseudonym = document.getElementById('pseudonym').value;
+            var url = document.getElementById('plurl').value;
+            var title = document.getElementById('pltitle').value;
+            var description = document.getElementById('pldescription').value;
+            var pseudonym = document.getElementById('plpseudonym').value;
 
-            var selector = document.getElementById('payment-options');
-            var paymentOption = selector[selector.selectedIndex].value;
-            var price = document.getElementById('price').value;
-            var currency = document.getElementById('currency').value;
+            var selector = document.getElementById('plpaymentmethods');
+            var paymentOption = availablePaymentOptions[optionIdx].id;
+            var price = document.getElementById('plprice').value;
+            var currency = availablePaymentOptions[optionIdx].currency;
 
-            var accountId = document.getElementById('hedera-account').value;
+            var accountId = document.getElementById('plhederaaccount').value;
 
-            var lightningHost = document.getElementById('lightning-host').value;
-            var lightningRpcPort = document.getElementById('lightning-rpc-port').value;
+            var lightningHost = document.getElementById('plLightningHost').value;
+            var lightningRpcPort = document.getElementById('plLightningGrpcPort').value;
             var lightningInvoiceMacaroon = INV_MACAROON;
             var lightningTlsCert = TLS_CERT;
 
@@ -133,76 +191,599 @@
         function validationErrors() {
         }
 
-</script>
+        var currentMode = 0;
+        function switchMode() {
+            if (currentMode == 0) {
+                currentMode = 1;
+                document.getElementById("switchStyle").innerHTML = ".pl-copy-image{filter:invert(0%);}  svg{filter:invert(100%);} input{filter:invert(12%) !important;} .pl-main{filter:invert(100%);} body{background-color:#0A0907 !important;"
+            }
+            else {
+                currentMode = 0;
+                document.getElementById("switchStyle").innerHTML = ""
+            }
+
+            localStorage.setItem("pl-night", currentMode);
+        }
+
+        function createInput(containerData, name, label, emptyValue, type) {
+            var input;
+            if (type == 'text') {
+                input = '<input id="' + name + '" class="pl-input ns" type="text" placeholder="' + emptyValue + '">'
+            } else if (type == 'select') {
+                input = '<select id="' + name + '" onchange="paymentOptionSelected();" class="pl-input ns" placeholder="' + emptyValue + '"/>'
+            } else if (type == 'file') {
+                input = '<input id="' + name + '" class="pl-input ns" type="file" placeholder="' + emptyValue + '">'
+            }
+
+            var inHTML = '<div id="' + name + '-lb"' + '" class="pl-label ns">' + label + '</div>' + input;
+            var newD = document.createElement("div");
+            newD.innerHTML = inHTML;
+            containerData.appendChild(newD);
+        }
+
+        document.addEventListener("DOMContentLoaded", function (event) {
+
+            var nightMode=localStorage.getItem("pl-night");
+            if(nightMode == 1){
+                currentMode = 0;
+                switchMode();
+            }
+            else{
+                currentMode = 1;
+                switchMode();
+            }
+
+
+            var data = [
+                [
+                    "plurl",
+                    "URL",
+                    "Paste a link with content",
+                    "text"
+                ],
+                [
+                    "pltitle",
+                    "Content title",
+                    "Enter a title for buyers",
+                    "text"
+                ],
+                [
+                    "pldescription",
+                    "Content description (optional)",
+                    "Add a short description",
+                    "text"
+                ],
+                [
+                    "plpseudonym",
+                    "Your name or pseudonym (optional)",
+                    "Your name or pseudonym (optional)",
+                    "text"
+                ],
+                [
+                    "plpaymentmethods",
+                    "Payment method",
+                    "Payment method",
+                    "select"
+                ],
+                [
+                    "plprice",
+                    "Amount requested per access",
+                    "Amount",
+                    "text"
+                ],
+                // Hedera Fields
+                [
+                    "plhederaaccount",
+                    "Account ID",
+                    "Enter your Account ID",
+                    "text"
+                ],
+                // Lightning Network Fields
+                [
+                    "plLightningHost",
+                    "Lightning Node host / IP address",
+                    "Lightning Node host / IP address",
+                    "text"
+                ],
+                [
+                    "plLightningGrpcPort",
+                    "Node RPC Port number",
+                    "Node RPC Port number",
+                    "text"
+                ],
+                [
+                    "plLightningMacaroon",
+                    "Invoice Macaroon",
+                    "Invoice Macaroon",
+                    "file"
+                ],
+                [
+                    "plLightningTls",
+                    "TLS Certificate",
+                    "TLS Certificate",
+                    "file"
+                ]
+            ]
+
+            var containerData = document.getElementsByClassName("pl-data")[0];
+
+            // containerData.innerHTML += '';
+
+            data.forEach(function (d) {
+                createInput(containerData, d[0], d[1], d[2], d[3]);
+            });
+
+            containerData.innerHTML +=
+                '<input type="checkbox" id="acceptlt"><label class="pl-acceptlt ns"  for="acceptlt">I have read and agree with the Payable Links <a href="#">Terms and Conditions</a> </br>and <a href="#">Privacy Notice.</a></label>' +
+                '<div class="pl-create ns" onclick="submit()"><button>CREATE LINK</button></div>';
+
+                calculateScale();
+        });
+
+        var scalingEnabled = false;
+
+        function calculateScale() {
+            if (!scalingEnabled) {
+                return;
+            }
+
+            var scaleCont = document.getElementsByClassName("pl-form")[0];
+            var scaleValue = (window.innerHeight-87)/scaleCont.clientHeight;
+            if( scaleValue<1 ) {
+                if(scaleValue<0.2){
+                    scaleValue = 0.2;
+                }
+                var scaleStr = ".pl-form{transform-origin: 0% 12%;transform:scale("+scaleValue+");} ";
+
+                if(scaleValue<0.5){
+                    scaleStr+=" .pl-footer {height:6px !important;border-bottom:2px solid #F8C829!important;} .pl-footer div {font-size:4px !important;}"
+                }
+                document.getElementById("dinamycSizes").innerHTML = scaleStr;
+            }
+            else {
+                document.getElementById("dinamycSizes").innerHTML = "";
+            }
+        }
+    </script>
+    <style id="switchStyle">
+    </style>
+    <style id="dinamycSizes1">
+     .pl-form-info {
+            font-size: 30px;
+            width: 410px;
+        }
+
+        ::placeholder {
+            color: rgba(105, 105, 105, 0.5);
+            opacity: 1;
+            font-size: 16px;
+        }
+
+        .pl-label {
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .pl-input {
+            font-size: 16px;
+            height: 46px;
+            margin-bottom: 20px;
+        }
+    </style>
+    <style id="dinamycSizes">
+
+
+
+        .pl-form{
+            transform-origin: 0% 12%;
+            transform:scale(1);
+        }
+    </style>
+
+
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Montserrat:200,600');
+        @import url('https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700');
+
+        body {
+            background-color: #F5F6F8;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 0;
+            margin: 0;
+        }
+
+        input[type="checkbox"]:checked,
+        [type="checkbox"]:not(:checked) {
+            position: absolute;
+            left: -9999px;
+        }
+
+        input[type="checkbox"]:checked+label,
+        input[type="checkbox"]:not(:checked)+label {
+            position: relative;
+            padding-left: 28px;
+            cursor: pointer;
+            line-height: 20px;
+            display: inline-block;
+            color: #747474;
+        }
+
+        input[type="checkbox"]:checked+label:before,
+        input[type="checkbox"]:not(:checked)+label:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #747474;
+            border-radius: 2px;
+            background: #fff;
+        }
+
+        input[type="checkbox"]:checked+label:after,
+        input[type="checkbox"]:not(:checked)+label:after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #F8C829;
+            border-radius: 2px;
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            -webkit-transition: all 0.2s ease;
+            transition: all 0.2s ease;
+        }
+
+        input[type="checkbox"]:not(:checked)+label:after {
+            opacity: 0;
+            -webkit-transform: scale(0);
+            transform: scale(0);
+        }
+
+        input[type="checkbox"]:checked+label:after {
+            opacity: 1;
+            -webkit-transform: scale(1);
+            transform: scale(1);
+        }
+
+
+
+        .pl-main {
+            z-index: 2;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: calc(100%);
+            /* animation-duration: 4s;
+            animation-timing-function: ease-out; */
+        }
+
+        .ns {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .pl-blue {
+            color: rgb(41, 104, 248);
+        }
+
+
+
+        .pl-header {
+            z-index: 2;
+            min-width: 800px;
+            color: rgba(154, 154, 154, 1);
+            display: flex;
+            position: fixed;
+            align-items: center;
+            justify-content: center;
+            height: 93px;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            background-color: rgba(255, 255, 255, 0.99);
+        }
+
+        .pl-header .active {
+            color: rgba(154, 154, 154, 0.5);
+        }
+
+        .pl-menu div {
+            padding-left: 42px;
+        }
+
+        .pl-logo {
+            margin-left: 10px;
+            position: fixed;
+            left: 0px;
+            width: 60.42px;
+            height: 60.42px;
+            min-width: 60.42px;
+            min-height: 60p.42x;
+
+        }
+
+        .pl-title div {
+            /* margin-left:20%; */
+            /* margin-top:32px; */
+            padding-left: 100px;
+        }
+
+        .pl-title {
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 0;
+            top: 0;
+
+            width: 242px;
+            height: 93px;
+            overflow: hidden;
+            min-width: 142px;
+            letter-spacing: 0.60px;
+        }
+
+        .pl-menu {
+            letter-spacing: 0.60px;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding-right: 42px;
+            min-width: 1320px;
+
+        }
+
+        /* .pl-m1 {
+            min-width: 100px;
+        }
+
+        .pl-m2 {
+            min-width: 130px;
+        }
+
+        .pl-m3 {
+            min-width: 100px;
+        }
+
+        .pl-m5 {
+            min-width: 130px;
+        } */
+
+        .pl-label {
+            font-family: 'Open Sans', sans-serif;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            color: rgb(41, 104, 248);
+            font-weight: bold;
+        }
+
+        .pl-input:focus {
+            outline: none;
+            border: 1px solid rgba(41, 104, 248, 0.3);
+        }
+
+        .pl-input {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+            padding-left: 20px;
+            padding-right: 20px;
+
+            border: 1px solid rgba(0, 0, 0, 0.0);
+            border-radius: 4px;
+            width: 550px;
+
+        }
+
+        .pl-create {
+            padding-bottom: 120px;
+        }
+
+        .pl-create button:active {
+            margin-top: 1px;
+            margin-left: 1px;
+            border: 1px solid rgba(41, 104, 248, 0.34);
+        }
+
+        .pl-create button:hover {
+            border: 1px solid rgba(41, 104, 248, 0.14);
+        }
+
+
+        .pl-create button {
+            border: 1px solid rgba(41, 104, 248, 0.0);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.60px;
+            color: white;
+            outline: none;
+            width: 215.5px;
+            height: 46px;
+            border-radius: 6px;
+            background-color: #F8C829;
+            box-shadow: 0px 1px 10px rgba(41, 104, 248, 0.24);
+            border: none;
+
+        }
+
+        .pl-acceptlt {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 100;
+            margin-top: 20px;
+            margin-bottom: 39px;
+            color: #696969;
+        }
+
+        .pl-acceptlt a {
+            color: #696969;
+        }
+
+        .pl-form {
+            min-width: 800px;
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pl-form-info {
+            margin-top: 128px;
+            margin-left: -100px;
+            font-weight: bold;
+            color: #2968F8;
+            /* font-size: 32px; */
+        }
+
+        .pl-footer div {
+            padding-right: 120px;
+            padding-left: 120px;
+        }
+
+        .pl-footer {
+            border-bottom: 12px solid #F8C829;
+            min-width: 920px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 72px;
+            background-color: #2968F8;
+            color: white;
+            text-align: center;
+            z-index: 1;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        ul.breadcrumb {
+            position:absolute;
+            width:300px;
+            margin-top:88px;
+            z-index: 1;
+            margin-left: -164px;
+            list-style: none;
+        }
+
+        ul.breadcrumb li {
+            line-height: 28px;
+            align-items: left;
+            justify-content: center;
+            display: inline-flex;
+            font-size: 16px;
+        }
+
+        ul.breadcrumb li+li:before {
+            padding: 8px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 300;
+            color: #170F2A;
+            content: ">\00a0";
+        }
+
+        ul.breadcrumb li a {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 300;
+            color: #170F2A;
+            text-decoration: none;
+        }
+
+        ul.breadcrumb li a.active {
+            line-height: 42px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 24px;
+            font-weight: 200;
+            color: #170F2A;
+            text-decoration: none;
+        }
+
+        ul.breadcrumb li a:hover {
+            color: #170F2A;
+            text-decoration: underline;
+        }
+
+        ul.breadcrumb li a.active:hover {
+            color: #170F2A;
+            text-decoration: none;
+        }
+    </style>
 </head>
 
-<body onload="preload();">
-    <p>Create a Payable Link</p>
-    <table>
-        <tr>
-            <td>URL with content</td>
-            <td colspan="2"><input id="url" type="text"/></td>
-        </tr>
-        <tr>
-            <td>Content title</td>
-            <td colspan="2"><input id="title" type="text"/></td>
-        </tr>
-        <tr>
-            <td>Content description (optional)</td>
-            <td colspan="2"><textarea id="description"></textarea></td>
-        </tr>
-        <tr>
-            <td>Your name or pseudonym (optional)</td>
-            <td colspan="2"><input id="pseudonym" type="text"/></td>
-        </tr>
-        <tr>
-            <td>Payment method</td>
-            <td colspan="2"><select id="payment-options" onchange="paymentOptionSelected();"></select></td>
-        </tr>
-        <tr>
-            <td>Amount requested per access</td>
-            <td><input id="price" type="text"></td>
-            <td><span id="currency-name"></span></td>
-            <td><input id="currency" type="hidden" value="SATOSHI_BTC"></td>
-        </tr>
+<body onload="preload();" onresize="calculateScale()">
+<div class="pl-main">
+    <div class="pl-header ns">
+        <div class="pl-blue pl-title">
+            <div>PAYABLE LINKS</div>
+        </div>
 
-        <!--DYNAMIC FIELDS FOR HEDERA OPTION-->
-        <tr>
-            <td>Account ID</td>
-            <td colspan="2"><input id="hedera-account" type="text"/></td>
-        </tr>
+        <div class="pl-logo" onClick="switchMode()">
 
-        <!--DYNAMIC FIELDS FOR LIGHTNING OPTION-->
-        <tr>
-            <td>Lightning Node host / IP address</td>
-            <td colspan="2"><input id="lightning-host" type="text"/></td>
-        </tr>
-        <tr>
-            <td>Node RPC Port number</td>
-            <td colspan="2"><input id="lightning-rpc-port" type="text"/></td>
-        </tr>
-        <tr>
-            <td>Invoice Macaroon</td>
-            <td colspan="2"><input id="lightning-invoice-macaroon" type="file"/></td>
-        </tr>
-        <tr>
-            <td>TLS Certificate</td>
-            <td colspan="2"><input id="lightning-tls-cert" type="file"/></td>
-        </tr>
-        <tr>
-            <td colspan="3">
-                <span id="node-check-error"></span>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="3" onclick="checkLightningNode();"><button>Check Node Connection</button></td>
-        </tr>
-        <!--END DYNAMIC FIELDS -->
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%"
+                 height="100%" viewBox="0 0 42 42" >
+                <svg viewBox="142 442 42 42">
+                    <g transform="translate(4.42 42.42)">
+                        <g transform="translate(1.42 4.42)">
+                            <circle fill="rgba(255,230,132,1)" cx="156.1614990234375" cy="415.2" r="18.7"></circle>
+                            <circle fill="rgba(255,191,0,1)" cx="156.1614990234375" cy="415.2" r="16.42"></circle>
+                            <g transform="translate(4.2 7.7242)">
+                                <path fill="white"
+                                      d="M 142.0480804443359 406.9642944335938 C 142.0480804443359 404.8582153320312 143.7572021484375 403.1491088867188 145.8603515625 403.1491088867188 L 150.7833709716797 403.1491088867188 L 150.7833709716797 400.81201171875 L 145.8603515625 400.81201171875 C 142.4657440185547 400.81201171875 139.7080078125 403.5667724609375 139.7080078125 406.9642944335938 C 139.7080078125 410.3588256835938 142.4657440185547 413.1166076660156 145.8603515625 413.1166076660156 L 150.7833709716797 413.1166076660156 L 150.7833709716797 410.7795104980469 L 145.8603515625 410.7795104980469 C 143.7572021484375 410.7795104980469 142.0480804443359 409.0673828125 142.0480804443359 406.9642944335938 Z M 147.0925750732422 408.1935119628906 L 156.9356384277344 408.1935119628906 L 156.9356384277344 405.7319946289062 L 147.0925750732422 405.7319946289062 L 147.0925750732422 408.1935119628906 Z M 158.1678771972656 400.81201171875 L 153.2448425292969 400.81201171875 L 153.2448425292969 403.1491088867188 L 158.1678771972656 403.1491088867188 C 160.2709808349609 403.1491088867188 161.9801330566406 404.8582153320312 161.9801330566406 406.9642944335938 C 161.9801330566406 409.0673828125 160.2709808349609 410.7795104980469 158.1678771972656 410.7795104980469 L 153.2448425292969 410.7795104980469 L 153.2448425292969 413.1166076660156 L 158.1678771972656 413.1166076660156 C 161.5624694824219 413.1166076660156 164.3201751708984 410.3588256835938 164.3201751708984 406.9642944335938 C 164.3201751708984 403.5667724609375 161.5624694824219 400.81201171875 158.1678771972656 400.81201171875 Z" />
+                            </g>
+                            <g transform="translate(-247.9 232.2) rotate(-45)">
+                                <path d="M139.9,415.2 a1,1 0 0,0 32.8,0" fill="rgba(0,0,0,0.08)" />
+                            </g>
+                        </g>
+                    </g>
+                </svg>
+            </svg>
 
-        <tr>
-            <td colspan="3" onclick="submit();"><button>Create</button></td>
-        </tr>
-    </table>
+        </div>
+
+        <div class="pl-menu">
+            <div class="pl-m1">MANIFESTO</div>
+            <div class="pl-m2">HOW IT WORKS</div>
+            <div class="pl-m3">CRYPTOCURRENCIES</div>
+            <div class="pl-m4">PRICING</div>
+            <div class="pl-m5 active">CREATE LINK</div>
+        </div>
+    </div>
+
+
+    <div class="pl-form">
+
+        <div class="pl-data">
+            <ul class="ns breadcrumb">
+                <li><a class="active">CREATE LINK</a></li>
+                <!-- <li><a class="active" href="./link">PAYABLE LINK</a></li> -->
+            </ul>
+            <div class="ns pl-form-info">Create a Payable Link to </br>share with your followers</div>
+        </div>
+    </div>
+
+    <div class="ns pl-footer">
+        <div>Report a problem</div>
+        <div>Payable Links service provided by Sellter Network</div>
+    </div>
+</div>
+
+
 </body>
 
 </html>

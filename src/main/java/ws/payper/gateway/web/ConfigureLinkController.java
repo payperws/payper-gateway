@@ -11,9 +11,7 @@ import ws.payper.gateway.PayableLink;
 import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.lightning.LightningConnector;
 import ws.payper.gateway.model.CryptoCurrency;
-import ws.payper.gateway.service.PaymentOptions;
-import ws.payper.gateway.service.PaymentOptionsService;
-import ws.payper.gateway.service.RouteService;
+import ws.payper.gateway.service.*;
 import ws.payper.gateway.util.  PaymentUriHelper;
 
 import java.math.BigDecimal;
@@ -21,6 +19,9 @@ import java.util.Map;
 
 @Controller
 public class ConfigureLinkController {
+
+    @Autowired
+    private ValidatorService validator;
 
     @Autowired
     private PaymentUriHelper uriBuilder;
@@ -49,6 +50,8 @@ public class ConfigureLinkController {
     @ResponseBody
     public
     Mono<PayableLink> newLink(@RequestBody LinkConfig link) {
+        validator.newLink(link);
+
         String payableId = RandomStringUtils.randomAlphanumeric(10);
         String payableUrl = uriBuilder.payableUri(payableId).toString();
         String payablePath = uriBuilder.payablePath(payableId);

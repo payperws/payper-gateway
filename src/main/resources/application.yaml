@@ -4,7 +4,7 @@ logging.level.com.hedera.sdk.node.HederaNode: WARN
 spring:
   data:
     mongodb:
-      uri: "mongodb+srv://<user>:<pass>@<host>/test?retryWrites=true"
+      uri: "mongodb+srv://admin:y5JkSZj2aLlGmbIy@cluster0-j05v4.mongodb.net/test?retryWrites=true"
       database: pl-test
   profiles:
 #    include: 'dev'

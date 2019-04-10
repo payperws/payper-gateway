@@ -85,16 +85,47 @@
                 var elementId = elementIds[idx];
                 document.getElementById(elementId).hidden = false;
                 document.getElementById(elementId + "-lb").hidden = false;
+                try {
+                    document.getElementById(elementId + "-hlp").style.visibility = "visible";
+                }catch(e){}
+
+                try {
+                    document.getElementById(elementId + "-lb2").hidden = false;
+                }catch(e){}
+
+                try {
+                    document.getElementById(elementId + "-lbb").hidden = false;
+                }catch(e){}
+
+
             }
         }
 
         function hidePaymentOptionFields() {
+            // try{
+            //     var toolList = document.getElementsByClassName("pg-hlp");
+            //     for( var i=0;i<toolList.length;i++){
+            //         toolList[i].style.visibility = "hidden";
+            //     }
+            // }catch(e){}
             for (var elements of fieldsMap.values()) {
                 for (var idx in elements) {
                     var elementId = elements[idx];
-                    //console.log(elementId);
+                    // console.log(elementId);
                     document.getElementById(elementId).hidden = true;
                     document.getElementById(elementId + "-lb").hidden = true;
+                    try {
+                        document.getElementById(elementId + "-lb2").hidden = true;
+                    }catch(e){}
+
+                    try {
+                        document.getElementById(elementId + "-lbb").hidden = true;
+                    }catch(e){}
+
+                    try {
+                        document.getElementById(elementId + "-hlp").style.visibility = "hidden";
+
+                    }catch(e){}
                 }
             }
         }
@@ -130,7 +161,7 @@
         }
 
         function submit() {
-            var accepted = document.getElementById('acceptlt').checked;
+            var accepted = true;//document.getElementById('acceptlt').checked;
 
             if (accepted) {
                 submitValidData();
@@ -205,21 +236,84 @@
             localStorage.setItem("pl-night", currentMode);
         }
 
-        function createInput(containerData, name, label, emptyValue, type) {
+        function createInput(containerData, name, label, emptyValue, type, tooltext) {
             var input;
+            var addClass = "";
             if (type == 'text') {
                 input = '<input id="' + name + '" class="pl-input ns" type="text" placeholder="' + emptyValue + '">'
             } else if (type == 'select') {
                 input = '<select id="' + name + '" onchange="paymentOptionSelected();" class="pl-input ns" placeholder="' + emptyValue + '"/>'
             } else if (type == 'file') {
-                input = '<input id="' + name + '" class="pl-input ns" type="file" placeholder="' + emptyValue + '">'
+                addClass = "pl-label-file"
+                input = '<input onChange="updateFileName(this,\'ufn'+name+'\' )" id="' + name + '" class="pl-input ns pl-file" type="file" placeholder="' + emptyValue + '"/>' +
+                    '<label id="'+name+'-lbb" for="' + name + '" /><div class="pl-upload-fileName ns" id="ufn'+name+'">&nbsp</div><span class="pl-upload ns">UPLOAD</span></label>'
             }
+            // var tooltext = 'In order to use Lightning Network and be able to receive direct micropayments for your content, you need to have a Lightning Node configured. Enter the host name or IP address for your Node.';
+            var helpElem = ""
 
-            var inHTML = '<div id="' + name + '-lb"' + '" class="pl-label ns">' + label + '</div>' + input;
+            if(tooltext){
+                var toolTip = 'onmousemove="showTooltip(this,evt, \''+ tooltext +'\');" onmouseout="hideTooltip();"';
+
+                helpElem ='<svg id="'+ name+'-hlp"class="pg-hlp ns" '+ toolTip +'><use xlink:href="#pl-hlp" width="20px" height="20px"></use></svg>'
+            }
+            var inHTML = '<div id="' + name + '-lb"' + '" class="pl-label ns '+addClass+'">' + label + '</div>' +helpElem+ input;
             var newD = document.createElement("div");
+            if(type == 'file'){
+                if(name == "plLightningMacaroon"){
+                    inHTML = '<div id="' + name + '-lb2"' + '" class="pl-label ns">Node files</div>' + inHTML;
+                }
+
+                newD.className="pl-file-padd"
+            }
             newD.innerHTML = inHTML;
             containerData.appendChild(newD);
         }
+
+        var namePR = "nav-page-";
+        function showPage( pageNr ){
+            try{
+                var mnuList = document.getElementsByClassName("pl-mn");
+
+                for( var i=0;i<mnuList.length;i++){
+                    var m = mnuList[i];
+                    m.classList.remove("pl-active-menu");
+                    if(m.className.indexOf("pl-mn"+pageNr)!== -1 ){
+                        m.classList.add( "pl-active-menu");
+                    }
+
+                }
+
+            }catch(e){
+                console.log(e)
+            }
+            for(var i=1;i<=3;i++){
+                try{
+                    document.getElementsByClassName(namePR+i)[0].style.visibility = (i==pageNr)?"visible":"hidden";
+                    document.getElementsByClassName(namePR+i)[0].style.opacity = (i==pageNr)?"1":"0";
+                }catch (e) {}
+            }
+        }
+
+        function updateFileName(inElem,inLabel ){
+            try{
+                document.getElementById(inLabel).innerHTML = inElem.files[0].name
+            }catch (e) {}
+
+        }
+
+        function showTooltip(theElem, evt, text) {
+            var tooltip = document.getElementById("pl-tooltip");
+            tooltip.innerHTML = text;
+            tooltip.style.display = "block";
+            tooltip.style.left =theElem.getBoundingClientRect().x + 42 + 'px';
+            tooltip.style.top =theElem.getBoundingClientRect().y - 42 + 'px';
+        }
+
+        function hideTooltip() {
+            var tooltip = document.getElementById("pl-tooltip");
+            tooltip.style.display = "none";
+        }
+
 
         document.addEventListener("DOMContentLoaded", function (event) {
 
@@ -233,89 +327,147 @@
                 switchMode();
             }
 
-
+            var currentNavPage ="1";
             var data = [
                 [
                     "plurl",
                     "URL",
-                    "Paste a link with content",
-                    "text"
+                    "Paste URL here",
+                    "text",
+                    "1",
+                    "Paste here a simple URL containing any digital content, which you would like to turn into a payable link."
                 ],
                 [
                     "pltitle",
                     "Content title",
                     "Enter a title for buyers",
-                    "text"
+                    "text",
+                    "1",
+                    "Write a title for the content hosted on the link, to be displayed on the payment page."
                 ],
                 [
                     "pldescription",
                     "Content description (optional)",
                     "Add a short description",
-                    "text"
+                    "text",
+                    "1",
+                    "Write a description of the content offered, to let followers know what content they are purchasing. Information is displayed on the payment page."
                 ],
                 [
                     "plpseudonym",
                     "Your name or pseudonym (optional)",
                     "Your name or pseudonym (optional)",
-                    "text"
+                    "text",
+                    "1",
+                    "Write your name or your company`s name, to inform followers who the content owner is. Information is displayed on payment page."
                 ],
                 [
                     "plpaymentmethods",
                     "Payment method",
                     "Payment method",
-                    "select"
+                    "select",
+                    "2"
                 ],
                 [
                     "plprice",
                     "Amount requested per access",
                     "Amount",
-                    "text"
+                    "text",
+                    "2",
+                    "Enter the amount you would like to receive for each access, from your followers. Information is displayed on the payment page."
                 ],
                 // Hedera Fields
                 [
                     "plhederaaccount",
                     "Account ID",
                     "Enter your Account ID",
-                    "text"
+                    "text",
+                    "2",
+                    "Enter a Hedera Hashgraph account ID where you would like to receive the direct payments from your followers."
                 ],
                 // Lightning Network Fields
                 [
                     "plLightningHost",
                     "Lightning Node host / IP address",
                     "Lightning Node host / IP address",
-                    "text"
+                    "text",
+                    "2",
+                    "In order to use Lightning Network and be able to receive direct micropayments for your content, you need to have a Lightning Node configured. Enter the host name or IP address for your Node."
                 ],
                 [
                     "plLightningGrpcPort",
                     "Node RPC Port number",
                     "Node RPC Port number",
-                    "text"
+                    "text",
+                    "2",
+                    "In order for us to generate invoices on your behalf, we need a connection to your node`s RPC port that must be open and listening for outside connections."
                 ],
                 [
                     "plLightningMacaroon",
                     "Invoice Macaroon",
                     "Invoice Macaroon",
-                    "file"
+                    "file",
+                    "2",
+                    "To allow us to generate invoices on your behalf we need access to your invoice.macaroon file. You can find it in the network directory of your LND node (~/.lnd/data/chain/bitcoin/mainnet/ invoice.macaroon)."
                 ],
                 [
                     "plLightningTls",
                     "TLS Certificate",
                     "TLS Certificate",
-                    "file"
-                ]
+                    "file",
+                    "2",
+                    "In order to verify that you are the owner of the node, we need the tls.cert file. You can find it in your LND node`s configuration directory<br> (~/.lnd/tls.cert)."
+                ],
+
             ]
 
             var containerData = document.getElementsByClassName("pl-data")[0];
 
-            // containerData.innerHTML += '';
+            function createPage( container, pageNr ){
+                var newPage = document.createElement("div");
+                    newPage.className = namePR+pageNr;
+                    container.appendChild(newPage);
+                    newPage.style.visibility = "hidden";
+
+                    newPage.style.position = "absolute"
+
+                    return newPage;
+            }
+
+            var currentPageDiv= createPage(containerData,currentNavPage )
+            currentPageDiv.style.visibility = "visible";
+
 
             data.forEach(function (d) {
-                createInput(containerData, d[0], d[1], d[2], d[3]);
+                if( d[4]!= currentNavPage ){
+                    if(currentNavPage == "1"){
+                        var nextButton = document.createElement("div");
+                        currentPageDiv.appendChild(nextButton);
+                        nextButton.outerHTML = '<div class="pl-create ns" onclick="showPage(2)"><button class="pl-fr">Next &gt</button></div>'
+                    }
+
+
+                    currentNavPage = d[4];
+                    currentPageDiv= createPage(containerData,currentNavPage )
+                }
+
+                createInput(currentPageDiv, d[0], d[1], d[2], d[3], d[5]);
             });
 
-            containerData.innerHTML +=
-                '<input type="checkbox" id="acceptlt"><label class="pl-acceptlt ns"  for="acceptlt">I have read and agree with the Payable Links <a href="#">Terms and Conditions</a> </br>and <a href="#">Privacy Notice.</a></label>' +
-                '<div class="pl-create ns" onclick="submit()"><button>CREATE LINK</button></div>';
+
+                var backButton = document.createElement("div");
+                currentPageDiv.appendChild(backButton);
+                backButton.outerHTML = '<div class="pl-create ns" ><button class="pl-grey" onclick="showPage(1)">&lt Back</button><button class="pl-fr" onclick="submit()" >CREATE LINK</button></div>'
+
+                //
+                // var createLink = document.createElement("div");
+                // currentPageDiv.appendChild(createLink);
+                // createLink.outerHTML =
+                //     // '<div class="nav-page-3">'+
+                //     // '<input type="checkbox" id="acceptlt"><label class="pl-acceptlt ns"  for="acceptlt">I have read and agree with the Payable Links <a href="#">Terms and Conditions</a> </br>and <a href="#">Privacy Notice.</a></label>' +
+                //
+
+
 
                 calculateScale();
         });
@@ -348,6 +500,112 @@
     <style id="switchStyle">
     </style>
     <style id="dinamycSizes1">
+
+        #pl-tooltip {
+            background: #989191;
+            z-index: 9999;
+            color:white;
+            border-radius: 6px;
+            padding: 24px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 200;
+            max-width: 274px;
+        }
+
+        input[type="file"] {
+            border: 0;
+            clip: rect(0, 0, 0, 0);
+            height: 1px;
+            overflow: hidden;
+            padding: 0;
+            position: absolute !important;
+            white-space: nowrap;
+            width: 1px;
+        }
+        input[type="file"] +label{
+            margin-top: -40px;
+            float: right;
+        }
+
+        .pl-label-file{
+            color:#696969 !important;
+            font-size: 16px !important;
+            font-weight: 200 !important;
+        }
+
+        .pl-upload-fileName{
+            position: absolute;
+            overflow: hidden;
+            max-width: 320px;
+            width:320px;
+            margin-top:0px;
+            color:#696969;
+            padding: 10px;
+            left: 164px;
+            font-size: 12px;
+            background-color: white;
+            border-radius:6px;
+        }
+
+        select{
+        background:white;
+        }
+        .pl-file-padd{
+            margin-top: 0px;
+            margin-bottom: 13px;
+        }
+
+        #plLightningTls-hlp,#plLightningMacaroon-hlp{
+            margin-left: 400px;
+            left: -280px;
+            margin-top: -42px !important;
+
+        }
+
+        .pg-hlp{
+            position: absolute;
+            float:right;
+            margin-top: 0px;
+            right: -41px;
+            width: 42px;
+            height: 42px;
+        }
+        .pl-upload {
+            width: 101px;
+            background:white;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            color: #696969;
+            cursor: pointer;
+            display: inline-block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            outline: none;
+            position: relative;
+            padding-top:10px;
+            padding-bottom:10px;
+            border:1px solid rgba(154,154,154,0.13);
+            box-shadow: 0px 2px 2px rgba(154, 154, 154, 0.34);
+            text-align: center;
+            vertical-align: center;
+        }
+
+
+        .pl-file{
+            float:right;
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+      .pl-fr{
+        float: right;
+      }
+
+
      .pl-form-info {
             font-size: 30px;
             width: 410px;
@@ -368,7 +626,7 @@
         .pl-input {
             font-size: 16px;
             height: 46px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
     </style>
     <style id="dinamycSizes">
@@ -586,7 +844,8 @@
         }
 
         .pl-create {
-            padding-bottom: 120px;
+            padding-bottom: 42px;
+            padding-top: 42px;
         }
 
         .pl-create button:active {
@@ -614,7 +873,10 @@
             background-color: #F8C829;
             box-shadow: 0px 1px 10px rgba(41, 104, 248, 0.24);
             border: none;
+        }
 
+        button.pl-grey{
+            background-color:#9A9A9A;
         }
 
         .pl-acceptlt {
@@ -640,10 +902,10 @@
 
         .pl-form-info {
             margin-top: 128px;
-            margin-left: -100px;
+            /*margin-left: -100px;*/
             font-weight: bold;
-            color: #2968F8;
-            /* font-size: 32px; */
+            color: #696969;
+             font-size: 20px;
         }
 
         .pl-footer div {
@@ -727,6 +989,20 @@
 </head>
 
 <body onload="preload();" onresize="calculateScale()">
+<div id="pl-tooltip" display="none" style="position: absolute; display: none;"></div>
+<svg width="0" height="0">
+<defs>
+        <svg  xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42">
+            <g id="pl-hlp">
+                <circle cx="22" cy="22" r="7" stroke="#707070" stroke-width="1" fill="none" />
+                <text style = "font: 11px sans-serif; " x="18.5" y="26.5" fill="#707070">?</text>
+            </g>
+        </svg>
+</defs>
+</svg>
+
+
+
 <div class="pl-main">
     <div class="pl-header ns">
         <div class="pl-blue pl-title">
@@ -767,13 +1043,63 @@
 
 
     <div class="pl-form">
+<style>
+    .pl-mnu{
+        margin-top: 20px;
+        margin-bottom: 20px;
 
+    }
+
+    .pl-mn{
+        color:#696969;
+        margin-right: 82px;
+    }
+
+    .pl-count{
+        border:1px solid #696969;
+        border-radius: 99em;
+        padding:10px;
+        padding-left:16px;
+        padding-right:16px;
+        width: 20px;
+        margin-right: 10px;
+    }
+
+    .pl-active-menu .pl-count{
+        border:1px solid transparent;
+        background-color: #2968F8;
+        color:white;
+        box-shadow: 0px 3px 6px rgba(154, 154, 154, 0.16);
+    }
+
+
+    hr {
+        display: block;
+        width: 60px;
+        overflow: hidden;
+        margin-top: -11px;
+        margin-left:146px;
+        border:1.5px solid #696969;
+    }
+    .hr2 {
+        display: block;
+        width: 60px;
+        overflow: hidden;
+        margin-top: -11px;
+        margin-left:364px;
+        border:1.5px solid #696969;
+    }
+</style>
         <div class="pl-data">
-            <ul class="ns breadcrumb">
-                <li><a class="active">CREATE LINK</a></li>
-                <!-- <li><a class="active" href="./link">PAYABLE LINK</a></li> -->
-            </ul>
-            <div class="ns pl-form-info">Create a Payable Link to </br>share with your followers</div>
+            <div class="ns pl-form-info">Create a Payable Link</div>
+            <div class="pl-mnu ns">
+                <spam onClick="showPage(1)" class="pl-mn pl-active-menu pl-mn1"><spam class="pl-count">1</spam><spam>CONTENT</spam></spam>
+                <spam onClick="showPage(2)" class="pl-mn pl-mn2"><spam class="pl-count">2</spam><spam>PAYMENT</spam></spam>
+                <spam onClick="" class="pl-mn pl-mn3"><spam class="pl-count">3</spam><spam>SHARE</spam></spam> <hr class="hr2">
+                <hr>
+            </div>
+            <br>
+
         </div>
     </div>
 

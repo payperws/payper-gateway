@@ -26,6 +26,8 @@ absorb reduce pledge banner cup child latin net style work oil future corn teach
 
 lnc getinfo
 
-lnc connect 03eb66fc8c3f1b7196c0700c96499ff73275dde8488e959f30e4f5c9972f29cb3e@51.15.207.34:9735
+lnc connect 0328bcc23cd1485ec0bdb95023a18d6332c53bb107eb03cce3d9b399061dfdaf9b@51.15.207.34:9735
 
-lnc openchannel --node_key=03eb66fc8c3f1b7196c0700c96499ff73275dde8488e959f30e4f5c9972f29cb3e --local_amt=10000000
+lnc newaddress np2wkh
+
+lnc openchannel --node_key=0328bcc23cd1485ec0bdb95023a18d6332c53bb107eb03cce3d9b399061dfdaf9b --local_amt=10000000

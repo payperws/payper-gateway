@@ -1,3 +1,19 @@
+ssh payper@51.15.207.34
+
+killall lnd
+
+rm -rf ~/.lnd/data ~/.lnd/log
+
+screen -r lnd
+
+lnc create
+
+lnc getinfo
+
+---------------------------
+
+ssh lnd@212.47.234.65
+
 killall lnd
 
 rm -rf ~/.lnd/data ~/.lnd/log
@@ -7,6 +23,8 @@ screen -r lnd
 lnc create
 
 absorb reduce pledge banner cup child latin net style work oil future corn teach moment clinic cruise zebra pumpkin siege burst tongue layer brisk
+
+lnc getinfo
 
 lnc connect 03eb66fc8c3f1b7196c0700c96499ff73275dde8488e959f30e4f5c9972f29cb3e@51.15.207.34:9735
 

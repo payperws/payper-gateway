@@ -31,9 +31,12 @@
 
                     var title = json['payableLink']['linkConfig']['title'];
                     var description = json['payableLink']['linkConfig']['description'];
-                    var amount = json['payableLink']['linkConfig']['price'];
+                    var unformattedAmount = json['payableLink']['linkConfig']['price'];
+                    var amount = numberWithCommas(unformattedAmount);
+
                     var account = json['paymentOptionParameters']['account'];
-                    var currency = json['payableLink']['linkConfig']['currency'];
+                    // var currency = json['payableLink']['linkConfig']['currency'];
+                    var currency = "tiny bars";
                     var pseudonym = json['payableLink']['linkConfig']['pseudonym'];
                     var qrCode = "data:image/jpeg;base64," + json['paymentOptionParameters']['qr_code'];
 
@@ -60,6 +63,10 @@
                 }
             }
             xhr.send();
+        }
+
+        function numberWithCommas(x) {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
         function selectThis(sel ){

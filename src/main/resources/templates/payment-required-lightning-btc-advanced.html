@@ -25,7 +25,8 @@
                     var title = json['payableLink']['linkConfig']['title'];
                     var description = json['payableLink']['linkConfig']['description'];
                     var amount = json['payableLink']['linkConfig']['price'];
-                    var currency = json['payableLink']['linkConfig']['currency'];
+                    // var currency = json['payableLink']['linkConfig']['currency'];
+                    var currency = "sats";
                     var pseudonym = json['payableLink']['linkConfig']['pseudonym'];
                     var payReqQrCode = "data:image/jpeg;base64," + json['paymentOptionParameters']['pay_req_qr_code'];
 
@@ -34,11 +35,11 @@
                     payReq = json['paymentOptionParameters']['pay_req'];
 
                     document.getElementById('title').textContent = title;
-                    document.getElementById('description').textContent = description;
+                    // document.getElementById('description').textContent = description;
                     document.getElementById('price').textContent = amount;
                     document.getElementById('currency').textContent = currency;
-                    document.getElementById('pseudonym').textContent = pseudonym;
-                    document.getElementById('invoice_id').textContent = payReq;
+                    // document.getElementById('pseudonym').textContent = pseudonym;
+                    // document.getElementById('invoice_id').textContent = payReq;
                     document.getElementById('pay_req_qr_code').src = payReqQrCode;
 
                     console.log('Data loaded');
@@ -54,13 +55,13 @@
             range     = document.createRange();
 
             if( typeof sel === 'undefined'){
-                sel = document.getElementById("invoice_id")
+                sel = document.getElementById("invoiceId");
             }
 
             range.selectNodeContents(sel);
             selection.removeAllRanges();
             selection.addRange(range);
-            document.execCommand("copy")
+            document.execCommand("copy");
         }
 
         function openInWallet() {
@@ -68,7 +69,7 @@
         }
 
         function alreadyPaid() {
-            window.open(payableUrl + '?x_payment_receipt=' + encodeURIComponent(invoiceId) + '&invoice_id', '_self');
+            window.open(payableUrl + '?x_payment_receipt=' + encodeURIComponent(invoiceId) + '&invoiceId', '_self');
         }
 
 
@@ -91,17 +92,20 @@
             console.log("Polling...  URL = " + payableUrl + "; Header = " + invoiceId);
 
             var newXHR = new XMLHttpRequest();
-            newXHR.open('GET', payableUrl);
-            newXHR.setRequestHeader('X-Payment-Receipt', invoiceId);
-            newXHR.setRequestHeader('X-Payment-Quick-Check', 'true');
+            newXHR.open('GET', "/verify" + "?x_payment_receipt=" + encodeURIComponent(invoiceId));
 
             newXHR.onreadystatechange = function() {
                 if (newXHR.readyState == 4) {
-                    if (newXHR.status != 402) {
-                        is402 = false;
-                        done = true;
-                        console.log('Not 402. Might be that the payment was verified!');
-                        window.open(payableUrl + "?x_payment_receipt=" + encodeURIComponent(invoiceId), "_self");
+                    if (newXHR.status == 200) {
+                        var json = JSON.parse(newXHR.responseText);
+                        var verified = json['verified'];
+                        if (verified == true) {
+                            done = true;
+                            console.log('Request verified!');
+                            window.open(payableUrl + "?x_payment_receipt=" + encodeURIComponent(invoiceId), "_self");
+                        } else {
+                            console.log('Request NOT verified!');
+                        }
                     }
                 }
                 inProgress = false;
@@ -117,23 +121,230 @@
             }, sleep));
         }
     </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Montserrat:100,200,600');
+        @import url('https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700');
 
+        body {
+            background-color: #2968F8;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: normal;
+            padding: 0;
+            margin: 0;
+        }
+
+        .pl-main {
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pl-p-form {
+
+            display: flex;
+            align-items: center;
+            justify-content: top;
+            flex-direction: column;
+            background-color: rgba(23, 15, 42, 0.12);
+            width: 494px;
+            height: 725px;
+            border-radius: 6px;
+        }
+
+        .pl-title{
+            padding-top:42px;
+            color:rgba(255,255,255,0.8);
+        }
+
+        .padtop,.pl-price,.pl-payment,.pl-payment-val,.pl-payment-info, .pl-qrcode,.pl-create{
+            padding-top:14px;
+        }
+
+        .pl-price{
+            color:#F8C829;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .pl-payment{
+            width: 364px;
+            color:white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .pl-payment-val{
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 300;
+            color:#F8C829;
+            font-weight:normal;
+        }
+
+        .pl-qrcode{
+
+            border-radius: 6px;
+            color:white;
+        }
+
+        .pl-payment-info{
+            width: 250px;
+            line-height: 24px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 300;
+            color:white;
+        }
+
+        .pl-create {
+            padding-bottom: 120px;
+        }
+
+        .pl-create button:active {
+            margin-top: 1px;
+            margin-left: 1px;
+            border: 1px solid rgba(41, 104, 248, 0.34);
+        }
+
+        .pl-create button:hover {
+            border: 1px solid rgba(41, 104, 248, 0.14);
+        }
+
+
+        .pl-create button {
+            border: 1px solid rgba(41, 104, 248, 0.0);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.60px;
+            color: white;
+            outline: none;
+            width: 215.5px;
+            height: 46px;
+            border-radius: 6px;
+            background-color: #F8C829;
+            box-shadow: 0px 1px 10px rgba(41, 104, 248, 0.24);
+            border: none;
+
+        }
+
+        .pl-footer {
+
+            border-bottom: 12px solid #F8C829;
+            min-width: 920px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 72px;
+            background-color: white;
+            color: white;
+            text-align: center;
+            z-index: 1;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        .pl-footer-p {
+            position: absolute;
+            bottom:0;
+            /* top:0; */
+        }
+
+        .pl-blue {
+            color: rgb(41, 104, 248);
+        }
+
+        .pl-p-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 242px;
+            height: 93px;
+            overflow: hidden;
+            letter-spacing: 0.60px;
+
+            }
+            .pl-p-title-n{
+                margin-left: 10px;
+            }
+
+            .pl-logo{
+                width: 32.42px;
+                height: 32.42px;
+                min-width: 32.42px;
+                min-height: 32.42x;
+            }
+
+    </style>
 </head>
 <body onload="preload();">
+<div class="pl-main">
+    <div class="pl-p-form">
 
-<p>Title: <span id="title"></span></p>
-<p>Description: <span id="description"></span></p>
-<p>Amount: <span id="price"></span> <span id="currency"></span></p>
-<p>Pseudonym: <span id="pseudonym"></span></p>
-<p>Invoice: <span id="invoice_id" onClick="selectThis(this);"></span></p>
-<button id="copy" type="button" value="Copy Invoice" style="height:50px;width:150px" onclick="selectThis();">Copy Invoice</button>
-<button id="openInWallet" type="button" value="Open In Wallet" style="height:50px;width:150px" onclick="openInWallet();">Open In Wallet</button>
-<a id="alreadyPaid" href="#" onclick="alreadyPaid();">I have already paid</a>
-<p>
-    <img id="pay_req_qr_code">
-</p>
+        <div class="pl-title"><span id="title">New Article about Micro-payments</span></div>
+        <div class="pl-price"><span id="price">0.5</span> <span id="currency">free credits</span></div>
+<!--
+        <div class="pl-payment">Invoice ID</br>
+            <div class="pl-payment-val" id="invoice_id">2fe84032-68de-4f35-9e34-a548ab290738</div>
+        </div>
+-->
+
+        <div class="pl-qrcode"> Scan QR code </div>
+
+        <div class="pl-qrcode">
+            <img id="pay_req_qr_code" width="250px"class="pl-qrcode" src="">
+        </div>
+        <div class="pl-payment-info">After authorising the payment return to this page to view the content</div>
+
+
+
+        <div class="pl-create">
+            <button type="button" value="Open In Wallet"  onclick="openInWallet();">Open In Wallet</button>
+        </div>
+    </div>
+
+
+    <div class="ns pl-footer pl-footer-p">
+
+        <div class="pl-blue pl-p-title">
+            <div class="pl-logo" onClick="switchMode()">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%"
+                     height="100%" viewBox="0 0 42 42">
+                    <svg viewBox="142 442 42 42">
+                        <g transform="translate(4.42 42.42)">
+                            <g transform="translate(1.42 4.42)">
+                                <circle fill="rgba(255,230,132,1)" cx="156.1614990234375" cy="415.2" r="18.7"></circle>
+                                <circle fill="rgba(255,191,0,1)" cx="156.1614990234375" cy="415.2" r="16.42"></circle>
+                                <g transform="translate(4.2 7.7242)">
+                                    <path fill="white"
+                                          d="M 142.0480804443359 406.9642944335938 C 142.0480804443359 404.8582153320312 143.7572021484375 403.1491088867188 145.8603515625 403.1491088867188 L 150.7833709716797 403.1491088867188 L 150.7833709716797 400.81201171875 L 145.8603515625 400.81201171875 C 142.4657440185547 400.81201171875 139.7080078125 403.5667724609375 139.7080078125 406.9642944335938 C 139.7080078125 410.3588256835938 142.4657440185547 413.1166076660156 145.8603515625 413.1166076660156 L 150.7833709716797 413.1166076660156 L 150.7833709716797 410.7795104980469 L 145.8603515625 410.7795104980469 C 143.7572021484375 410.7795104980469 142.0480804443359 409.0673828125 142.0480804443359 406.9642944335938 Z M 147.0925750732422 408.1935119628906 L 156.9356384277344 408.1935119628906 L 156.9356384277344 405.7319946289062 L 147.0925750732422 405.7319946289062 L 147.0925750732422 408.1935119628906 Z M 158.1678771972656 400.81201171875 L 153.2448425292969 400.81201171875 L 153.2448425292969 403.1491088867188 L 158.1678771972656 403.1491088867188 C 160.2709808349609 403.1491088867188 161.9801330566406 404.8582153320312 161.9801330566406 406.9642944335938 C 161.9801330566406 409.0673828125 160.2709808349609 410.7795104980469 158.1678771972656 410.7795104980469 L 153.2448425292969 410.7795104980469 L 153.2448425292969 413.1166076660156 L 158.1678771972656 413.1166076660156 C 161.5624694824219 413.1166076660156 164.3201751708984 410.3588256835938 164.3201751708984 406.9642944335938 C 164.3201751708984 403.5667724609375 161.5624694824219 400.81201171875 158.1678771972656 400.81201171875 Z" />
+                                </g>
+                                <g transform="translate(-247.9 232.2) rotate(-45)">
+                                    <path d="M139.9,415.2 a1,1 0 0,0 32.8,0" fill="rgba(0,0,0,0.08)" />
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                </svg>
+            </div>
+            <div class="pl-p-title-n">PAYABLE LINKS</div>
+        </div>
+
+    </div>
+</div>
 
 </body>
-
 
 </html>

@@ -44,6 +44,8 @@
 
                     console.log('Data loaded');
 
+                    document.getElementById('form-div').style.visibility = 'visible';
+
                     poll();
                 }
             }
@@ -144,7 +146,7 @@
         }
 
         .pl-p-form {
-
+            visibility: hidden;
             display: flex;
             align-items: center;
             justify-content: top;
@@ -291,7 +293,7 @@
 </head>
 <body onload="preload();">
 <div class="pl-main">
-    <div class="pl-p-form">
+    <div id="form-div" class="pl-p-form">
 
         <div class="pl-title"><span id="title">New Article about Micro-payments</span></div>
         <div class="pl-price"><span id="price">0.5</span> <span id="currency">free credits</span></div>

@@ -382,11 +382,21 @@
         }
 
         .pl-form-info {
-            margin-top: 0px;
-            margin-left: -100px;
+            margin-top: 128px;
+            margin-bottom: 32px;
+            margin-left: 0px;
             font-weight: bold;
-            color: #2968F8;
-            font-size: 32px;
+            color: #696969;
+            font-size: 20px;
+        }
+
+        .pl-form-info2 {
+            margin-top: -128px;
+            font-family: 'Open Sans', sans-serif;
+            margin-left: 0px;
+            font-weight: bold;
+            color: #170F2A;
+            font-size: 30px;
         }
 
         .pl-footer div {
@@ -504,7 +514,7 @@
 
         .pl-center {
             display: flex;
-            align-items: center;
+            align-items: top;
             justify-content: flex-end;
             height: 100%;
         }
@@ -544,6 +554,61 @@
 
         .pl-link-go:visited{
             color: #2968F8;
+        }
+
+        .pl-mnu{
+            margin-top: 20px;
+            margin-bottom: 220px;
+
+        }
+
+        .pl-mn{
+            color:#696969;
+            margin-right: 82px;
+        }
+
+        .pl-count{
+            border:1px solid #696969;
+            border-radius: 99em;
+            padding:10px;
+            padding-left:16px;
+            padding-right:16px;
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .pl-active-menu .pl-count{
+            border:1px solid transparent;
+            background-color: #2968F8;
+            color:white;
+            box-shadow: 0px 3px 6px rgba(154, 154, 154, 0.16);
+        }
+
+        .pl-active-menu .pl-ul-yellow::before{
+            width:34px;
+            position: absolute;
+            margin-top: 24px;
+            margin-left: 10px;
+            content: "";
+            border :2.5px solid #F8C829;
+        }
+
+
+        hr {
+            display: block;
+            width: 60px;
+            overflow: hidden;
+            margin-top: -11px;
+            margin-left:146px;
+            border:1.5px solid #696969;
+        }
+        .hr2 {
+            display: block;
+            width: 60px;
+            overflow: hidden;
+            margin-top: -11px;
+            margin-left:364px;
+            border:1.5px solid #696969;
         }
 
     </style>
@@ -592,17 +657,23 @@
     <div class="pl-form">
 
         <div class="pl-data">
-            <ul class="ns breadcrumb">
-                <li><a href="./">CREATE LINK</a></li>
-                <li><a class="active">PAYABLE LINK</a></li>
-            </ul>
 
             <div class="pl-center">
+
+
                 <div>
-                    <div class="ns pl-form-info">Copy to clipboard</br>& share away</div>
+                    <div class="ns pl-form-info">Create a Payable Link</div>
+                    <div class="pl-mnu ns">
+                        <spam onClick="showPage(1)" class="pl-mn  pl-mn1"><spam class="pl-count">1</spam><spam class="pl-ul-yellow">CONTENT</spam></spam>
+                        <spam onClick="showPage(2)" class="pl-mn pl-mn2"><spam class="pl-count">2</spam><spam  class="pl-ul-yellow">PAYMENT</spam></spam>
+                        <spam onClick="" class="pl-mn pl-active-menu pl-mn3"><spam class="pl-count">3</spam><spam  class="pl-ul-yellow">SHARE</spam></spam> <hr class="hr2">
+                        <hr>
+                    </div>
+
+                    <div class="ns pl-form-info2">Copy to clipboard & share away</div>
                     <div class="pl-inclip"> Text has been copied to clipboard. </div>
                     <div class="pl-copy" onclick="copyLink()">
-                        <div id="link_span" th:text="${payableLink}">https://payablelinks.com/8ZD5dUGT3Uhttps://payablelinks.com/8ZD5dUGT3Uhttps://payablelinks.com/8ZD5dUGT3Uhttps://payablelinks.com/8ZD5dUGT3Uhttps://payablelinks.com/8ZD5dUGT3U</div>
+                        <div id="link_span" th:text="${payableLink}"></div>
                         <div>
                             <svg class="pl-copy-image" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                 <defs>
@@ -626,7 +697,7 @@
                             <button class="pl-copy-button ns" id="copy_button">COPY</button></div>
                     </div>
                     </br>
-                    <div><a class="pl-link-go ns" onclick="goToPaymentPage();" href="#">Go to your payment page</button></div>
+                    <div><a class="pl-link-go ns" onclick="goToPaymentPage();" href="#">View your payment page</button></div>
                 </div>
             </div>
         </div>

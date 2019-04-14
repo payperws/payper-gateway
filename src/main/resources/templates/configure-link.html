@@ -162,7 +162,7 @@
         }
 
         function submit() {
-            var accepted = true;//document.getElementById('acceptlt').checked;
+            var accepted =document.getElementById('acceptlt').checked;
 
             if (accepted) {
                 submitValidData();
@@ -458,7 +458,8 @@
 
                 var backButton = document.createElement("div");
                 currentPageDiv.appendChild(backButton);
-                backButton.outerHTML = '<div class="pl-create ns" ><button class="pl-grey" onclick="showPage(1)">&lt Back</button><button class="pl-fr" onclick="submit()" >CREATE LINK</button></div>'
+                backButton.outerHTML = '<input type="checkbox" id="acceptlt"><label class="pl-acceptlt ns"  for="acceptlt">I have read and agree with the Payable Links <a href="#">Terms and Conditions</a> </br>and <a href="#">Privacy Notice.</a></label>'+
+                    '<div class="pl-create ns" ><button class="pl-grey" onclick="showPage(1)">&lt Back</button><button class="pl-fr" onclick="submit()" >CREATE LINK</button></div>'
 
                 //
                 // var createLink = document.createElement("div");
@@ -822,7 +823,7 @@
         .pl-label {
             font-family: 'Open Sans', sans-serif;
             padding-top: 10px;
-            padding-bottom: 10px;
+            padding-bottom: 5px;
             color: rgb(41, 104, 248);
             font-weight: bold;
         }
@@ -845,7 +846,7 @@
         }
 
         .pl-create {
-            padding-bottom: 42px;
+            padding-bottom: 32px;
             padding-top: 42px;
         }
 
@@ -885,7 +886,7 @@
             font-size: 16px;
             font-weight: 100;
             margin-top: 20px;
-            margin-bottom: 39px;
+            margin-bottom: 0px;
             color: #696969;
         }
 
@@ -903,7 +904,7 @@
 
         .pl-form-info {
             margin-top: 128px;
-            /*margin-left: -100px;*/
+            margin-bottom: 32px;
             font-weight: bold;
             color: #696969;
              font-size: 20px;
@@ -1073,6 +1074,15 @@
         box-shadow: 0px 3px 6px rgba(154, 154, 154, 0.16);
     }
 
+    .pl-active-menu .pl-ul-yellow::before{
+        width:34px;
+        position: absolute;
+        margin-top: 24px;
+        margin-left: 20px;
+        content: "";
+        border :2.5px solid #F8C829;
+    }
+
 
     hr {
         display: block;
@@ -1094,12 +1104,12 @@
         <div class="pl-data">
             <div class="ns pl-form-info">Create a Payable Link</div>
             <div class="pl-mnu ns">
-                <spam onClick="showPage(1)" class="pl-mn pl-active-menu pl-mn1"><spam class="pl-count">1</spam><spam>CONTENT</spam></spam>
-                <spam onClick="showPage(2)" class="pl-mn pl-mn2"><spam class="pl-count">2</spam><spam>PAYMENT</spam></spam>
-                <spam onClick="" class="pl-mn pl-mn3"><spam class="pl-count">3</spam><spam>SHARE</spam></spam> <hr class="hr2">
+                <spam onClick="showPage(1)" class="pl-mn pl-active-menu pl-mn1"><spam class="pl-count">1</spam><spam class="pl-ul-yellow">CONTENT</spam></spam>
+                <spam onClick="showPage(2)" class="pl-mn pl-mn2"><spam class="pl-count">2</spam><spam  class="pl-ul-yellow">PAYMENT</spam></spam>
+                <spam onClick="" class="pl-mn pl-mn3"><spam class="pl-count">3</spam><spam  class="pl-ul-yellow">SHARE</spam></spam> <hr class="hr2">
                 <hr>
             </div>
-            <br>
+
 
         </div>
     </div>

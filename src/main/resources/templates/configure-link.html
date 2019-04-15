@@ -2,13 +2,12 @@
 
 <head>
     <title>Payable Links</title>
-    <link href="favicon.png" rel="icon"  type="image/x-icon" />
+    <link href="favicon.png" rel="icon" type="image/x-icon"/>
 
     <script th:inline="javascript">
 
-
-        var TLS_CERT     = 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNBRENDQWFhZ0F3SUJBZ0lSQVBMeFlhR25PWktWamxLOXFheHdHeFl3Q2dZSUtvWkl6ajBFQXdJd05qRWYKTUIwR0ExVUVDaE1XYkc1a0lHRjFkRzluWlc1bGNtRjBaV1FnWTJWeWRERVRNQkVHQTFVRUF4TUtjMk4zTFhCaAplWEJsY2pBZUZ3MHhPVEEwTVRRd05ERTJNak5hRncweU1EQTJNRGd3TkRFMk1qTmFNRFl4SHpBZEJnTlZCQW9UCkZteHVaQ0JoZFhSdloyVnVaWEpoZEdWa0lHTmxjblF4RXpBUkJnTlZCQU1UQ25OamR5MXdZWGx3WlhJd1dUQVQKQmdjcWhrak9QUUlCQmdncWhrak9QUU1CQndOQ0FBUStydjJDMnhDS3lIbEg5S0pzbWlhTTM5V1o4NzRwYUZXTgptbHlHUjlwSEJiRjRqSlRuMXJreFJxcDVMUnk1STlkSnN2VFk1Tm9WakZxOVM1dzlkbDh0bzRHVU1JR1JNQTRHCkExVWREd0VCL3dRRUF3SUNwREFQQmdOVkhSTUJBZjhFQlRBREFRSC9NRzRHQTFVZEVRUm5NR1dDQ25OamR5MXcKWVhsd1pYS0NDV3h2WTJGc2FHOXpkSUlFZFc1cGVJSUtkVzVwZUhCaFkydGxkSWNFZndBQUFZY1FBQUFBQUFBQQpBQUFBQUFBQUFBQUFBWWNFQ2c3SmlZY0VyQkVBQVljUS9vQUFBQUFBQUFEY0doVC8vZ2NBQlljRU13L1BJakFLCkJnZ3Foa2pPUFFRREFnTklBREJGQWlFQW5tVTN5b2FqZE5kQzlibWd6WWpsN2Q1SWlEanp2YkduQXNPWnJhZm0KYjFnQ0lGYnRTNnRJZzY0OE5GUHBQd2E0VS8wR1NQY1BEWnYwVmw1QU9pRUVVNUNrCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K';
-        var INV_MACAROON = 'AgEDbG5kAkcDChB2f81YI+GITiY5I1nn7xnGEgEwGhYKB2FkZHJlc3MSBHJlYWQSBXdyaXRlGhcKCGludm9pY2VzEgRyZWFkEgV3cml0ZQAABiAc/LAeX8o0PDwm560MWJD4zZUBxrQ+K8t75dP30wq4bA==';
+        var TLS_CERT = '';
+        var INV_MACAROON = '';
 
         var availablePaymentOptions = {};
         var optionIdx = 0;
@@ -40,15 +39,23 @@
                         }
                     }
                     paymentOptionSelected();
+                    showPage(1);
                 }
             }
             xhr.send();
         }
 
+        var fieldsMapPage1 = [
+            'plurl',
+            'pltitle',
+            'pldescription',
+            'plpseudonym',
+        ];
+
         var fieldsMap = new Map([
-            ['HEDERA_HBAR',   ["plhederaaccount"]],
+            ['HEDERA_HBAR', ["plhederaaccount"]],
             ['LIGHTNING_BTC', ["plLightningHost", "plLightningGrpcPort", "plLightningMacaroon", "plLightningTls"]],
-            ['DUMMY_COIN',    []],
+            ['DUMMY_COIN', []],
         ]);
 
         function paymentOptionSelected() {
@@ -74,7 +81,14 @@
             } else if (selected.id == 'DUMMY_COIN') {
                 optionElements = [];
             }
+
             displayFields(optionElements)
+
+            try {
+                document.getElementById("plprice-hlp").style.visibility = "visible";
+            } catch (e) {
+            }
+
 
             var currencyId = availablePaymentOptions[optionIdx]['currency'];
             // TODO remember currency selection
@@ -86,51 +100,85 @@
         }
 
         function displayFields(elementIds) {
+            try {
+                var toolList = document.getElementsByClassName("pg-hlp");
+                for (var i = 0; i < toolList.length; i++) {
+                    toolList[i].style.visibility = "hidden";
+                }
+            } catch (e) {
+            }
+
             for (var idx in elementIds) {
                 var elementId = elementIds[idx];
-                document.getElementById(elementId).hidden = false;
-                document.getElementById(elementId + "-lb").hidden = false;
+                console.log(elementId)
+                try {
+                    document.getElementById(elementId).hidden = false;
+                } catch (e) {
+                }
+
+                try {
+                    document.getElementById(elementId + "-lb").hidden = false;
+                } catch (e) {
+                }
+
                 try {
                     document.getElementById(elementId + "-hlp").style.visibility = "visible";
-                }catch(e){}
+                } catch (e) {
+                }
 
                 try {
                     document.getElementById(elementId + "-lb2").hidden = false;
-                }catch(e){}
+                } catch (e) {
+                }
 
                 try {
                     document.getElementById(elementId + "-lbb").hidden = false;
-                }catch(e){}
-
+                } catch (e) {
+                }
 
             }
         }
 
         function hidePaymentOptionFields() {
-            // try{
-            //     var toolList = document.getElementsByClassName("pg-hlp");
-            //     for( var i=0;i<toolList.length;i++){
-            //         toolList[i].style.visibility = "hidden";
-            //     }
-            // }catch(e){}
+            try {
+                var toolList = document.getElementsByClassName("pg-hlp");
+                for (var i = 0; i < toolList.length; i++) {
+                    toolList[i].style.visibility = "hidden";
+                }
+            } catch (e) {
+            }
+
             for (var elements of fieldsMap.values()) {
                 for (var idx in elements) {
+
+                    console.log(elements[idx])
                     var elementId = elements[idx];
-                    // console.log(elementId);
-                    document.getElementById(elementId).hidden = true;
-                    document.getElementById(elementId + "-lb").hidden = true;
+
+                    try {
+                        document.getElementById(elementId).hidden = true;
+                    } catch (e) {
+                    }
+
+                    try {
+                        document.getElementById(elementId + "-lb").hidden = true;
+                    } catch (e) {
+                    }
+
+
                     try {
                         document.getElementById(elementId + "-lb2").hidden = true;
-                    }catch(e){}
+                    } catch (e) {
+                    }
 
                     try {
                         document.getElementById(elementId + "-lbb").hidden = true;
-                    }catch(e){}
+                    } catch (e) {
+                    }
 
                     try {
                         document.getElementById(elementId + "-hlp").style.visibility = "hidden";
-
-                    }catch(e){}
+                    } catch (e) {
+                    }
                 }
             }
         }
@@ -159,14 +207,19 @@
                 }
             }
 
-            var data = JSON.stringify({"pubkeyHost": lightningHost, "rpcport": lightningRpcPort, "invoiceMacaroon": lightningInvoiceMacaroon, "tlsCert": lightningTlsCert});
+            var data = JSON.stringify({
+                "pubkeyHost": lightningHost,
+                "rpcport": lightningRpcPort,
+                "invoiceMacaroon": lightningInvoiceMacaroon,
+                "tlsCert": lightningTlsCert
+            });
             xhr.send(data);
 
             // Set error text
         }
 
         function submit() {
-            var accepted =document.getElementById('acceptlt').checked;
+            var accepted = document.getElementById('acceptlt').checked;
 
             if (accepted) {
                 submitValidData();
@@ -228,12 +281,12 @@
         }
 
         var currentMode = 0;
+
         function switchMode() {
             if (currentMode == 0) {
                 currentMode = 1;
                 document.getElementById("switchStyle").innerHTML = ".pl-copy-image{filter:invert(0%);}  svg{filter:invert(100%);} input{filter:invert(12%) !important;} .pl-main{filter:invert(100%);} body{background-color:#0A0907 !important;"
-            }
-            else {
+            } else {
                 currentMode = 0;
                 document.getElementById("switchStyle").innerHTML = ""
             }
@@ -250,59 +303,108 @@
                 input = '<select id="' + name + '" onchange="paymentOptionSelected();" class="pl-input ns" placeholder="' + emptyValue + '"/>'
             } else if (type == 'file') {
                 addClass = "pl-label-file"
-                input = '<input onChange="updateFileName(this,\'ufn'+name+'\' )" id="' + name + '" class="pl-input ns pl-file" type="file" placeholder="' + emptyValue + '"/>' +
-                    '<label id="'+name+'-lbb" for="' + name + '" /><div class="pl-upload-fileName ns" id="ufn'+name+'">&nbsp</div><span class="pl-upload ns">UPLOAD</span></label>'
+                input = '<input onChange="updateFileName(this,\'ufn' + name + '\' )" id="' + name + '" class="pl-input ns pl-file" type="file" placeholder="' + emptyValue + '"/>' +
+                    '<label id="' + name + '-lbb" for="' + name + '" /><div class="pl-upload-fileName ns" id="ufn' + name + '">&nbsp</div><span class="pl-upload ns">UPLOAD</span></label>'
             }
             // var tooltext = 'In order to use Lightning Network and be able to receive direct micropayments for your content, you need to have a Lightning Node configured. Enter the host name or IP address for your Node.';
             var helpElem = ""
 
-            if(tooltext){
-                var toolTip = 'onmousemove="showTooltip(this,evt, \''+ tooltext +'\');" onmouseout="hideTooltip();"';
+            if (tooltext) {
+                var toolTip = 'onmousemove="showTooltip(this,evt, \'' + tooltext + '\');" onmouseout="hideTooltip();"';
 
-                helpElem ='<svg id="'+ name+'-hlp"class="pg-hlp ns" '+ toolTip +'><use xlink:href="#pl-hlp" width="20px" height="20px"></use></svg>'
+                helpElem = '<svg id="' + name + '-hlp"class="pg-hlp ns" ' + toolTip + '><use xlink:href="#pl-hlp" width="20px" height="20px"></use></svg>'
             }
-            var inHTML = '<div id="' + name + '-lb"' + '" class="pl-label ns '+addClass+'">' + label + '</div>' +helpElem+ input;
+            var inHTML = '<div id="' + name + '-lb"' + '" class="pl-label ns ' + addClass + '">' + label + '</div>' + helpElem + input;
             var newD = document.createElement("div");
-            if(type == 'file'){
-                if(name == "plLightningMacaroon"){
+            if (type == 'file') {
+                if (name == "plLightningMacaroon") {
                     inHTML = '<div id="' + name + '-lb2"' + '" class="pl-label ns">Node files</div>' + inHTML;
                 }
 
-                newD.className="pl-file-padd"
+                newD.className = "pl-file-padd"
             }
             newD.innerHTML = inHTML;
             containerData.appendChild(newD);
         }
 
         var namePR = "nav-page-";
-        function showPage( pageNr ){
-            try{
+
+        function showPage(pageNr) {
+
+            var hf = document.getElementsByClassName("pg-hlp");
+            for (var r = 0; r < hf.length; r++) {
+                try {
+                    document.getElementById(hf[r].id.split('-')[0] + "-hlp").style.visibility = "hidden";
+                } catch (e) {
+                }
+            }
+
+            if (pageNr == "1") {
+                fieldsMapPage1.forEach(function (elementId) {
+                    try {
+                        document.getElementById(elementId + "-hlp").style.visibility = "visible";
+                    } catch (e) {
+                    }
+                });
+            } else {
+                paymentOptionSelected();
+
+                try {
+                    document.getElementById("plprice-hlp").style.visibility = "visible";
+                } catch (e) {
+                }
+
+            }
+
+            try {
                 var mnuList = document.getElementsByClassName("pl-mn");
 
-                for( var i=0;i<mnuList.length;i++){
+                for (var i = 0; i < mnuList.length; i++) {
                     var m = mnuList[i];
                     m.classList.remove("pl-active-menu");
-                    if(m.className.indexOf("pl-mn"+pageNr)!== -1 ){
-                        m.classList.add( "pl-active-menu");
+                    if (m.className.indexOf("pl-mn" + pageNr) !== -1) {
+                        m.classList.add("pl-active-menu");
                     }
 
                 }
 
-            }catch(e){
+            } catch (e) {
                 console.log(e)
             }
-            for(var i=1;i<=3;i++){
-                try{
-                    document.getElementsByClassName(namePR+i)[0].style.visibility = (i==pageNr)?"visible":"hidden";
-                    document.getElementsByClassName(namePR+i)[0].style.opacity = (i==pageNr)?"1":"0";
-                }catch (e) {}
+            for (var i = 1; i <= 3; i++) {
+                try {
+                    document.getElementsByClassName(namePR + i)[0].style.visibility = (i == pageNr) ? "visible" : "hidden";
+                    document.getElementsByClassName(namePR + i)[0].style.opacity = (i == pageNr) ? "1" : "0";
+                } catch (e) {
+                }
             }
         }
 
-        function updateFileName(inElem,inLabel ){
-            try{
-                document.getElementById(inLabel).innerHTML = inElem.files[0].name
-            }catch (e) {}
+        function updateFileName(inElem, inLabel) {
+            try {
+
+                document.getElementById(inLabel).innerHTML = inElem.files[0].name;
+
+                var file = inElem.files[0];
+                var reader = new FileReader();
+
+                reader.onload = (function (theFile) {
+                    return function (e) {
+                        var binaryData = e.target.result;
+
+                        if (inLabel == 'ufnplLightningMacaroon') {
+                            INV_MACAROON = window.btoa(binaryData);
+                        } else {
+                            TLS_CERT = window.btoa(binaryData);
+                        }
+
+                    };
+                })(file);
+
+                reader.readAsBinaryString(file);
+            } catch (e) {
+                console.log(e)
+            }
 
         }
 
@@ -310,8 +412,8 @@
             var tooltip = document.getElementById("pl-tooltip");
             tooltip.innerHTML = text;
             tooltip.style.display = "block";
-            tooltip.style.left =theElem.getBoundingClientRect().x + 42 + 'px';
-            tooltip.style.top =theElem.getBoundingClientRect().y - 42 + 'px';
+            tooltip.style.left = theElem.getBoundingClientRect().x + 42 + 'px';
+            tooltip.style.top = theElem.getBoundingClientRect().y - 42 + 'px';
         }
 
         function hideTooltip() {
@@ -322,17 +424,16 @@
 
         document.addEventListener("DOMContentLoaded", function (event) {
 
-            var nightMode=localStorage.getItem("pl-night");
-            if(nightMode == 1){
+            var nightMode = localStorage.getItem("pl-night");
+            if (nightMode == 1) {
                 currentMode = 0;
                 switchMode();
-            }
-            else{
+            } else {
                 currentMode = 1;
                 switchMode();
             }
 
-            var currentNavPage ="1";
+            var currentNavPage = "1";
             var data = [
                 [
                     "plurl",
@@ -428,24 +529,24 @@
 
             var containerData = document.getElementsByClassName("pl-data")[0];
 
-            function createPage( container, pageNr ){
+            function createPage(container, pageNr) {
                 var newPage = document.createElement("div");
-                    newPage.className = namePR+pageNr;
-                    container.appendChild(newPage);
-                    newPage.style.visibility = "hidden";
+                newPage.className = namePR + pageNr;
+                container.appendChild(newPage);
+                newPage.style.visibility = "hidden";
 
-                    newPage.style.position = "absolute"
+                newPage.style.position = "absolute"
 
-                    return newPage;
+                return newPage;
             }
 
-            var currentPageDiv= createPage(containerData,currentNavPage )
+            var currentPageDiv = createPage(containerData, currentNavPage)
             currentPageDiv.style.visibility = "visible";
 
 
             data.forEach(function (d) {
-                if( d[4]!= currentNavPage ){
-                    if(currentNavPage == "1"){
+                if (d[4] != currentNavPage) {
+                    if (currentNavPage == "1") {
                         var nextButton = document.createElement("div");
                         currentPageDiv.appendChild(nextButton);
                         nextButton.outerHTML = '<div class="pl-create ns" onclick="showPage(2)"><button class="pl-fr">Next &gt</button></div>'
@@ -453,29 +554,28 @@
 
 
                     currentNavPage = d[4];
-                    currentPageDiv= createPage(containerData,currentNavPage )
+                    currentPageDiv = createPage(containerData, currentNavPage)
                 }
 
                 createInput(currentPageDiv, d[0], d[1], d[2], d[3], d[5]);
             });
 
 
-                var backButton = document.createElement("div");
-                currentPageDiv.appendChild(backButton);
-                backButton.outerHTML = '<input type="checkbox" id="acceptlt"><label class="pl-acceptlt ns"  for="acceptlt">I have read and agree with the Payable Links <a href="#">Terms and Conditions</a> </br>and <a href="#">Privacy Notice.</a></label>'+
-                    '<div class="pl-create ns" ><button class="pl-grey" onclick="showPage(1)">&lt Back</button><button class="pl-fr" onclick="submit()" >CREATE LINK</button></div>'
+            var backButton = document.createElement("div");
+            currentPageDiv.appendChild(backButton);
+            backButton.outerHTML = '<input type="checkbox" id="acceptlt"><label class="pl-acceptlt ns"  for="acceptlt">I have read and agree with the Payable Links <a href="#">Terms and Conditions</a> </br>and <a href="#">Privacy Notice.</a></label>' +
+                '<div class="pl-create ns" ><button class="pl-grey" onclick="showPage(1)">&lt Back</button><button class="pl-fr" onclick="submit()" >CREATE LINK</button></div>'
 
-                //
-                // var createLink = document.createElement("div");
-                // currentPageDiv.appendChild(createLink);
-                // createLink.outerHTML =
-                //     // '<div class="nav-page-3">'+
-                //     // '<input type="checkbox" id="acceptlt"><label class="pl-acceptlt ns"  for="acceptlt">I have read and agree with the Payable Links <a href="#">Terms and Conditions</a> </br>and <a href="#">Privacy Notice.</a></label>' +
-                //
+            //
+            // var createLink = document.createElement("div");
+            // currentPageDiv.appendChild(createLink);
+            // createLink.outerHTML =
+            //     // '<div class="nav-page-3">'+
+            //     // '<input type="checkbox" id="acceptlt"><label class="pl-acceptlt ns"  for="acceptlt">I have read and agree with the Payable Links <a href="#">Terms and Conditions</a> </br>and <a href="#">Privacy Notice.</a></label>' +
+            //
 
 
-
-                calculateScale();
+            calculateScale();
         });
 
         var scalingEnabled = false;
@@ -486,19 +586,18 @@
             }
 
             var scaleCont = document.getElementsByClassName("pl-form")[0];
-            var scaleValue = (window.innerHeight-87)/scaleCont.clientHeight;
-            if( scaleValue<1 ) {
-                if(scaleValue<0.2){
+            var scaleValue = (window.innerHeight - 87) / scaleCont.clientHeight;
+            if (scaleValue < 1) {
+                if (scaleValue < 0.2) {
                     scaleValue = 0.2;
                 }
-                var scaleStr = ".pl-form{transform-origin: 0% 12%;transform:scale("+scaleValue+");} ";
+                var scaleStr = ".pl-form{transform-origin: 0% 12%;transform:scale(" + scaleValue + ");} ";
 
-                if(scaleValue<0.5){
-                    scaleStr+=" .pl-footer {height:6px !important;border-bottom:2px solid #F8C829!important;} .pl-footer div {font-size:4px !important;}"
+                if (scaleValue < 0.5) {
+                    scaleStr += " .pl-footer {height:6px !important;border-bottom:2px solid #F8C829!important;} .pl-footer div {font-size:4px !important;}"
                 }
                 document.getElementById("dinamycSizes").innerHTML = scaleStr;
-            }
-            else {
+            } else {
                 document.getElementById("dinamycSizes").innerHTML = "";
             }
         }
@@ -510,7 +609,7 @@
         #pl-tooltip {
             background: #989191;
             z-index: 9999;
-            color:white;
+            color: white;
             border-radius: 6px;
             padding: 24px;
             font-family: 'Open Sans', sans-serif;
@@ -529,57 +628,66 @@
             white-space: nowrap;
             width: 1px;
         }
-        input[type="file"] +label{
+
+        input[type="file"] + label {
             margin-top: -40px;
             float: right;
         }
 
-        .pl-label-file{
-            color:#696969 !important;
+        .pl-label-file {
+            color: #696969 !important;
             font-size: 16px !important;
             font-weight: 200 !important;
         }
 
-        .pl-upload-fileName{
+        .pl-upload-fileName {
             position: absolute;
             overflow: hidden;
             max-width: 320px;
-            width:320px;
-            margin-top:0px;
-            color:#696969;
+            width: 320px;
+            margin-top: 0px;
+            color: #696969;
             padding: 10px;
             left: 164px;
             font-size: 12px;
             background-color: white;
-            border-radius:6px;
+            border-radius: 6px;
         }
 
-        select{
-        background:white;
+        select {
+            background: white;
         }
-        .pl-file-padd{
+
+        .pl-file-padd {
             margin-top: 0px;
             margin-bottom: 13px;
         }
 
-        #plLightningTls-hlp,#plLightningMacaroon-hlp{
+        #plLightningTls-lb,
+        #plLightningMacaroon-lb {
+            padding-bottom: 10px;
+        }
+
+        #plLightningTls-hlp,
+        #plLightningMacaroon-hlp {
             margin-left: 400px;
             left: -280px;
             margin-top: -42px !important;
 
         }
 
-        .pg-hlp{
+        .pg-hlp {
             position: absolute;
-            float:right;
+            float: right;
             margin-top: 0px;
             right: -41px;
             width: 42px;
             height: 42px;
         }
+
         .pl-upload {
             width: 101px;
-            background:white;
+            background: white;
             border: none;
             border-radius: 0 6px 6px 0;
             color: #696969;
@@ -590,29 +698,29 @@
             font-weight: 600;
             outline: none;
             position: relative;
-            padding-top:10px;
-            padding-bottom:10px;
-            border:1px solid rgba(154,154,154,0.13);
+            padding-top: 10px;
+            padding-bottom: 10px;
+            border: 1px solid rgba(154, 154, 154, 0.13);
             box-shadow: 0px 2px 2px rgba(154, 154, 154, 0.34);
             text-align: center;
             vertical-align: center;
         }
 
 
-        .pl-file{
-            float:right;
+        .pl-file {
+            float: right;
             border: 1px solid #ccc;
             display: inline-block;
             padding: 6px 12px;
             cursor: pointer;
         }
 
-      .pl-fr{
-        float: right;
-      }
+        .pl-fr {
+            float: right;
+        }
 
 
-     .pl-form-info {
+        .pl-form-info {
             font-size: 30px;
             width: 410px;
         }
@@ -638,10 +746,9 @@
     <style id="dinamycSizes">
 
 
-
-        .pl-form{
+        .pl-form {
             transform-origin: 0% 12%;
-            transform:scale(1);
+            transform: scale(1);
         }
     </style>
 
@@ -665,8 +772,8 @@
             left: -9999px;
         }
 
-        input[type="checkbox"]:checked+label,
-        input[type="checkbox"]:not(:checked)+label {
+        input[type="checkbox"]:checked + label,
+        input[type="checkbox"]:not(:checked) + label {
             position: relative;
             padding-left: 28px;
             cursor: pointer;
@@ -675,8 +782,8 @@
             color: #747474;
         }
 
-        input[type="checkbox"]:checked+label:before,
-        input[type="checkbox"]:not(:checked)+label:before {
+        input[type="checkbox"]:checked + label:before,
+        input[type="checkbox"]:not(:checked) + label:before {
             content: '';
             position: absolute;
             left: 0;
@@ -688,8 +795,8 @@
             background: #fff;
         }
 
-        input[type="checkbox"]:checked+label:after,
-        input[type="checkbox"]:not(:checked)+label:after {
+        input[type="checkbox"]:checked + label:after,
+        input[type="checkbox"]:not(:checked) + label:after {
             content: '';
             width: 10px;
             height: 10px;
@@ -702,18 +809,17 @@
             transition: all 0.2s ease;
         }
 
-        input[type="checkbox"]:not(:checked)+label:after {
+        input[type="checkbox"]:not(:checked) + label:after {
             opacity: 0;
             -webkit-transform: scale(0);
             transform: scale(0);
         }
 
-        input[type="checkbox"]:checked+label:after {
+        input[type="checkbox"]:checked + label:after {
             opacity: 1;
             -webkit-transform: scale(1);
             transform: scale(1);
         }
-
 
 
         .pl-main {
@@ -738,7 +844,6 @@
         .pl-blue {
             color: rgb(41, 104, 248);
         }
-
 
 
         .pl-header {
@@ -771,7 +876,7 @@
             width: 60.42px;
             height: 60.42px;
             min-width: 60.42px;
-            min-height: 60p.42x;
+            min-height: 60 p .42x;
 
         }
 
@@ -881,8 +986,8 @@
             border: none;
         }
 
-        button.pl-grey{
-            background-color:#9A9A9A;
+        button.pl-grey {
+            background-color: #9A9A9A;
         }
 
         .pl-acceptlt {
@@ -911,7 +1016,7 @@
             margin-bottom: 32px;
             font-weight: bold;
             color: #696969;
-             font-size: 20px;
+            font-size: 20px;
         }
 
         .pl-footer div {
@@ -940,9 +1045,9 @@
         }
 
         ul.breadcrumb {
-            position:absolute;
-            width:300px;
-            margin-top:88px;
+            position: absolute;
+            width: 300px;
+            margin-top: 88px;
             z-index: 1;
             margin-left: -164px;
             list-style: none;
@@ -956,7 +1061,7 @@
             font-size: 16px;
         }
 
-        ul.breadcrumb li+li:before {
+        ul.breadcrumb li + li:before {
             padding: 8px;
             font-family: 'Open Sans', sans-serif;
             font-size: 20px;
@@ -997,16 +1102,15 @@
 <body onload="preload();" onresize="calculateScale()">
 <div id="pl-tooltip" display="none" style="position: absolute; display: none;"></div>
 <svg width="0" height="0">
-<defs>
-        <svg  xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42">
+    <defs>
+        <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42">
             <g id="pl-hlp">
-                <circle cx="22" cy="22" r="7" stroke="#707070" stroke-width="1" fill="none" />
-                <text style = "font: 11px sans-serif; " x="18.5" y="26.5" fill="#707070">?</text>
+                <circle cx="22" cy="22" r="7" stroke="#707070" stroke-width="1" fill="none"/>
+                <text style="font: 11px sans-serif; " x="18.5" y="26.5" fill="#707070">?</text>
             </g>
         </svg>
-</defs>
+    </defs>
 </svg>
-
 
 
 <div class="pl-main">
@@ -1018,7 +1122,7 @@
         <div class="pl-logo" onClick="switchMode()">
 
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%"
-                 height="100%" viewBox="0 0 42 42" >
+                 height="100%" viewBox="0 0 42 42">
                 <svg viewBox="142 442 42 42">
                     <g transform="translate(4.42 42.42)">
                         <g transform="translate(1.42 4.42)">
@@ -1026,10 +1130,10 @@
                             <circle fill="rgba(255,191,0,1)" cx="156.1614990234375" cy="415.2" r="16.42"></circle>
                             <g transform="translate(4.2 7.7242)">
                                 <path fill="white"
-                                      d="M 142.0480804443359 406.9642944335938 C 142.0480804443359 404.8582153320312 143.7572021484375 403.1491088867188 145.8603515625 403.1491088867188 L 150.7833709716797 403.1491088867188 L 150.7833709716797 400.81201171875 L 145.8603515625 400.81201171875 C 142.4657440185547 400.81201171875 139.7080078125 403.5667724609375 139.7080078125 406.9642944335938 C 139.7080078125 410.3588256835938 142.4657440185547 413.1166076660156 145.8603515625 413.1166076660156 L 150.7833709716797 413.1166076660156 L 150.7833709716797 410.7795104980469 L 145.8603515625 410.7795104980469 C 143.7572021484375 410.7795104980469 142.0480804443359 409.0673828125 142.0480804443359 406.9642944335938 Z M 147.0925750732422 408.1935119628906 L 156.9356384277344 408.1935119628906 L 156.9356384277344 405.7319946289062 L 147.0925750732422 405.7319946289062 L 147.0925750732422 408.1935119628906 Z M 158.1678771972656 400.81201171875 L 153.2448425292969 400.81201171875 L 153.2448425292969 403.1491088867188 L 158.1678771972656 403.1491088867188 C 160.2709808349609 403.1491088867188 161.9801330566406 404.8582153320312 161.9801330566406 406.9642944335938 C 161.9801330566406 409.0673828125 160.2709808349609 410.7795104980469 158.1678771972656 410.7795104980469 L 153.2448425292969 410.7795104980469 L 153.2448425292969 413.1166076660156 L 158.1678771972656 413.1166076660156 C 161.5624694824219 413.1166076660156 164.3201751708984 410.3588256835938 164.3201751708984 406.9642944335938 C 164.3201751708984 403.5667724609375 161.5624694824219 400.81201171875 158.1678771972656 400.81201171875 Z" />
+                                      d="M 142.0480804443359 406.9642944335938 C 142.0480804443359 404.8582153320312 143.7572021484375 403.1491088867188 145.8603515625 403.1491088867188 L 150.7833709716797 403.1491088867188 L 150.7833709716797 400.81201171875 L 145.8603515625 400.81201171875 C 142.4657440185547 400.81201171875 139.7080078125 403.5667724609375 139.7080078125 406.9642944335938 C 139.7080078125 410.3588256835938 142.4657440185547 413.1166076660156 145.8603515625 413.1166076660156 L 150.7833709716797 413.1166076660156 L 150.7833709716797 410.7795104980469 L 145.8603515625 410.7795104980469 C 143.7572021484375 410.7795104980469 142.0480804443359 409.0673828125 142.0480804443359 406.9642944335938 Z M 147.0925750732422 408.1935119628906 L 156.9356384277344 408.1935119628906 L 156.9356384277344 405.7319946289062 L 147.0925750732422 405.7319946289062 L 147.0925750732422 408.1935119628906 Z M 158.1678771972656 400.81201171875 L 153.2448425292969 400.81201171875 L 153.2448425292969 403.1491088867188 L 158.1678771972656 403.1491088867188 C 160.2709808349609 403.1491088867188 161.9801330566406 404.8582153320312 161.9801330566406 406.9642944335938 C 161.9801330566406 409.0673828125 160.2709808349609 410.7795104980469 158.1678771972656 410.7795104980469 L 153.2448425292969 410.7795104980469 L 153.2448425292969 413.1166076660156 L 158.1678771972656 413.1166076660156 C 161.5624694824219 413.1166076660156 164.3201751708984 410.3588256835938 164.3201751708984 406.9642944335938 C 164.3201751708984 403.5667724609375 161.5624694824219 400.81201171875 158.1678771972656 400.81201171875 Z"/>
                             </g>
                             <g transform="translate(-247.9 232.2) rotate(-45)">
-                                <path d="M139.9,415.2 a1,1 0 0,0 32.8,0" fill="rgba(0,0,0,0.08)" />
+                                <path d="M139.9,415.2 a1,1 0 0,0 32.8,0" fill="rgba(0,0,0,0.08)"/>
                             </g>
                         </g>
                     </g>
@@ -1049,68 +1153,79 @@
 
 
     <div class="pl-form">
-<style>
-    .pl-mnu{
-        margin-top: 20px;
-        margin-bottom: 20px;
+        <style>
+            .pl-mnu {
+                margin-top: 20px;
+                margin-bottom: 20px;
 
-    }
+            }
 
-    .pl-mn{
-        color:#696969;
-        margin-right: 82px;
-    }
+            .pl-mn {
+                color: #696969;
+                margin-right: 82px;
+            }
 
-    .pl-count{
-        border:1px solid #696969;
-        border-radius: 99em;
-        padding:10px;
-        padding-left:16px;
-        padding-right:16px;
-        width: 20px;
-        margin-right: 10px;
-    }
+            .pl-count {
+                border: 1px solid #696969;
+                border-radius: 99em;
+                padding: 10px;
+                padding-left: 16px;
+                padding-right: 16px;
+                width: 20px;
+                margin-right: 10px;
+            }
 
-    .pl-active-menu .pl-count{
-        border:1px solid transparent;
-        background-color: #2968F8;
-        color:white;
-        box-shadow: 0px 3px 6px rgba(154, 154, 154, 0.16);
-    }
+            .pl-active-menu .pl-count {
+                border: 1px solid transparent;
+                background-color: #2968F8;
+                color: white;
+                box-shadow: 0px 3px 6px rgba(154, 154, 154, 0.16);
+            }
 
-    .pl-active-menu .pl-ul-yellow::before{
-        width:34px;
-        position: absolute;
-        margin-top: 24px;
-        margin-left: 20px;
-        content: "";
-        border :2.5px solid #F8C829;
-    }
+            .pl-active-menu .pl-ul-yellow::before {
+                width: 34px;
+                position: absolute;
+                margin-top: 24px;
+                margin-left: 20px;
+                content: "";
+                border: 2.5px solid #F8C829;
+            }
 
 
-    hr {
-        display: block;
-        width: 60px;
-        overflow: hidden;
-        margin-top: -11px;
-        margin-left:146px;
-        border:1.5px solid #696969;
-    }
-    .hr2 {
-        display: block;
-        width: 60px;
-        overflow: hidden;
-        margin-top: -11px;
-        margin-left:364px;
-        border:1.5px solid #696969;
-    }
-</style>
+            hr {
+                display: block;
+                width: 60px;
+                overflow: hidden;
+                margin-top: -11px;
+                margin-left: 146px;
+                border: 1.5px solid #696969;
+            }
+
+            .hr2 {
+                display: block;
+                width: 60px;
+                overflow: hidden;
+                margin-top: -11px;
+                margin-left: 364px;
+                border: 1.5px solid #696969;
+            }
+        </style>
         <div class="pl-data">
             <div class="ns pl-form-info">Create a Payable Link</div>
             <div class="pl-mnu ns">
-                <spam onClick="showPage(1)" class="pl-mn pl-active-menu pl-mn1"><spam class="pl-count">1</spam><spam class="pl-ul-yellow">CONTENT</spam></spam>
-                <spam onClick="showPage(2)" class="pl-mn pl-mn2"><spam class="pl-count">2</spam><spam  class="pl-ul-yellow">PAYMENT</spam></spam>
-                <spam onClick="" class="pl-mn pl-mn3"><spam class="pl-count">3</spam><spam  class="pl-ul-yellow">SHARE</spam></spam> <hr class="hr2">
+                <spam onClick="showPage(1)" class="pl-mn pl-active-menu pl-mn1">
+                    <spam class="pl-count">1</spam>
+                    <spam class="pl-ul-yellow">CONTENT</spam>
+                </spam>
+                <spam onClick="showPage(2)" class="pl-mn pl-mn2">
+                    <spam class="pl-count">2</spam>
+                    <spam class="pl-ul-yellow">PAYMENT</spam>
+                </spam>
+                <spam onClick="" class="pl-mn pl-mn3">
+                    <spam class="pl-count">3</spam>
+                    <spam class="pl-ul-yellow">SHARE</spam>
+                </spam>
+                <hr class="hr2">
                 <hr>
             </div>
 

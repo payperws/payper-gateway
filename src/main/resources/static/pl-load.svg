@@ -1,0 +1,66 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0" y="0" width="42%" height="42%"
+     viewBox="0 0 50.42 50.42"
+     preserveAspectRatio="meet meet" style="position:absolute">
+    <defs>
+
+        <filter id="f3" width="1.42" height="1.42" x="-.242" y="-.242">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2.42" result="blur"/>
+            <feColorMatrix result="bluralpha" type="matrix" values=
+                    "1 0 0 0   0
+                                     0 1 0 0   0
+                                     0 0 1 0   0
+                                     0 0 0 0.4 0 "/>
+            <feOffset in="bluralpha" dx="2.42" dy="2.42" result="offsetBlur"/>
+            <feMerge>
+                <feMergeNode in="offsetBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="pl-load" filter="url(#f3)"
+       transform="translate(4.2 4.2)">
+        <!--transform="rotate(-10 50 142)-->
+        <!--translate(24.2 -4.2)-->
+        <!--skewX(-6.42)-->
+        <!--scale(1 1)"-->
+
+        <animate attributeName="opacity"
+                 values="0.942;1;0.942"
+                 dur="1.42s" repeatCount="indefinite"/>
+
+
+        <text x="10" y="21.42" font-family="Montserrat" font-size="3.42px"
+              style="font-weight:bold;letter-spacing:0.42"
+              fill="white">LOADING
+            <animate attributeName="opacity" values="0.42;1;0.42" dur="4.42s" repeatCount="indefinite"/>
+        </text>
+        <path fill="#FFFFFF"
+              d="M20,35c-8.271,0-15-6.729-15-15S11.729,5,20,5s15,6.729,15,15S28.271,35,20,35z M20,5.203 C11.841,5.203,5.203,11.841,5.203,20c0,8.159,6.638,14.797,14.797,14.797S34.797,28.159,34.797,20 C34.797,11.841,28.159,5.203,20,5.203z"/>
+        <path fill="#696969"
+              d="M20,33.125c-7.237,0-13.125-5.888-13.125-13.125S12.763,6.875,20,6.875S33.125,12.763,33.125,20 S27.237,33.125,20,33.125z M20,7.078C12.875,7.078,7.078,12.875,7.078,20c0,7.125,5.797,12.922,12.922,12.922 S32.922,27.125,32.922,20C32.922,12.875,27.125,7.078,20,7.078z"/>
+        <path fill="none" stroke="#F8C829" stroke-width="1.042" stroke-miterlimit="10"
+              d="M5.203,20 c0-8.159,6.638-14.797,14.797-14.797V5C11.729,5,5,11.729,5,20s6.729,15,15,15v-0.203C11.841,34.797,5.203,28.159,5.203,20z">
+            <animateTransform attributeName="transform"
+                              type="rotate"
+                              from="0 20 20"
+                              to="360 20 20"
+                              calcMode="spline"
+                              keySplines="0.42, 0, 0.24, 1"
+                              keyTimes="0;1"
+                              dur="2.4s"
+                              repeatCount="indefinite"/>
+        </path>
+
+        <path fill="none" stroke="#FF6969" stroke-width="0.2042" stroke-miterlimit="10" d="M7.078,20
+          c0-7.125,5.797-12.922,12.922-12.922V6.875C12.763,6.875,6.875,12.763,6.875,20S12.763,33.125,20,33.125v-0.203
+          C12.875,32.922,7.078,27.125,7.078,20z">
+            <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    from="0 20 20"
+                    to="360 20 20"
+                    dur="1.42s"
+                    repeatCount="indefinite"/>
+        </path>
+    </g>
+</svg>

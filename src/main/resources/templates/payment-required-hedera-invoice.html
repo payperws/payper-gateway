@@ -1,16 +1,21 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <title>Payable Links</title>
+    <link href="../favicon.png" rel="icon"  type="image/x-icon" />
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
 
     <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script th:inline="javascript">
+        //favicon.ico
         var namePR = "pl-page-";
         var payableUrl;
         var invoiceId;
-        var payReq;
         var openInWalletUrl;
+
+        var startValCounter = "";
 
         function copyLink(fieldID) {
             var copyText = document.getElementById(fieldID);
@@ -44,45 +49,58 @@
                     var amount = json['payableLink']['linkConfig']['price'];
                     var account = json['paymentOptionParameters']['account'];
                     var currency = json['payableLink']['linkConfig']['currency'];
+                    if (currency == "HBAR") {
+                        currency = "H-bar"
+                    }
                     var pseudonym = json['payableLink']['linkConfig']['pseudonym'];
                     var qrCode = "data:image/jpeg;base64," + json['paymentOptionParameters']['qr_code'];
                     var nodeInfo = "Node Info";
+                    var nodePayRef = "ae83h383f03j";//TODO: add node payment refefrence to API
 
                     payableUrl = json['payableLink']['payableUrl'];
                     invoiceId = json['invoiceId'];
                     openInWalletUrl = json['paymentOptionParameters']['open_in_wallet'];
 
-                    function setVal(inId,inVal, inField){
+                    function setVal(inId, inVal, inField) {
                         var fff = inField;
-                        if(typeof fff === 'undefined'){
-                            fff='textContent';
+                        if (typeof fff === 'undefined') {
+                            fff = 'textContent';
                         }
-                        var suff ="";
-                        for( var i=1;i<=3;i++ ){
-                            if( i>1){
+                        var suff = "";
+                        for (var i = 1; i <= 3; i++) {
+                            if (i > 1) {
                                 suff = i;
                             }
 
-                            try{
-                                document.getElementById(inId+suff)[fff] = inVal;
-                            }catch(e){}
+                            try {
+                                document.getElementById(inId + suff)[fff] = inVal;
+                            } catch (e) {
+                            }
 
                         }
                     }
 
-                    setVal("title",title);
-                    setVal("description",description);
-                    setVal("price",amount);
-                    setVal("currency",currency);
-                    setVal("account",account);
-                    setVal("reqby",pseudonym);
-                    setVal("invoiceId",invoiceId);
-                    setVal("nodeInfo",nodeInfo);
-                    setVal("qr_code",qrCode, "src");
+                    setVal("title", title);
+                    setVal("description", description);
+                    setVal("price", amount);
+                    setVal("currency", currency);
+                    // setVal("account",account);
+                    setVal("reqby", pseudonym);
+                    setVal("accountId", account);
+                    setVal("nodeInfo", nodeInfo);
+                    setVal("qr_code", qrCode, "src");
+                    setVal("nodePayRef", nodePayRef);
 
+                    try {
+                        document.getElementById("pl-timer").textContent = startValCounter;
+                        document.getElementById("pl-timer2").textContent = startValCounter;
+                        document.getElementById("pl-timer3").textContent = startValCounter;
+                    } catch (e) {
+                    }
 
 
                     console.log('Data loaded');
+                    showPage(1);
 
                     poll();
                 }
@@ -143,6 +161,7 @@
                         if (verified == true) {
                             done = true;
                             console.log('Request verified!');
+                            showPage(0);
                             window.open(payableUrl + "?x_payment_receipt=" + encodeURIComponent(invoiceId), "_self");
                         } else {
                             console.log('Request NOT verified!');
@@ -156,7 +175,7 @@
         }
 
         function showPage(pageNr) {
-            for (var i = 1; i <= 4; i++) {
+            for (var i = 0; i <= 4; i++) {
                 try {
                     document.getElementsByClassName(namePR + i)[0].style.visibility = (i == pageNr) ? "visible" : "hidden";
                     document.getElementsByClassName(namePR + i)[0].style.opacity = (i == pageNr) ? "1" : "0";
@@ -166,8 +185,10 @@
             }
         }
 
+        var currentTimer;
+
         function finalCountdown(minutes, seconds) {
-            var currentTimer = new Date(Date.parse('20 April 1979 00:' + minutes + ':' + seconds + ' GMT'));
+            currentTimer = new Date(Date.parse('20 April 1979 00:' + minutes + ':' + seconds + ' GMT'));
             var intervalID;
 
             function setTimerValue() {
@@ -198,23 +219,25 @@
         }
 
         var minutesLeft = 10; // add value from API
-        var secondsLeft = 00; // add value from API
+        var secondsLeft = 0; // add value from API
+
+        currentTimer = new Date(Date.parse('20 April 1979 00:' + minutesLeft + ':' + secondsLeft + ' GMT'));
+        startValCounter = ((currentTimer.getMinutes() < 10) ? ("0" + currentTimer.getMinutes()) : currentTimer.getMinutes()) + ":" + ((currentTimer.getSeconds() < 10) ? ("0" + currentTimer.getSeconds()) : currentTimer.getSeconds());
+
         finalCountdown(minutesLeft, secondsLeft);
-
-
-
     </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css?family=Montserrat:100,200,600');
         @import url('https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700');
-        .pl-cpy-gr{
+
+        .pl-cpy-gr {
             position: absolute;
-            right: 28px;
+            right: 48px;
             margin-top: -58px;
         }
 
-        .pl-copy-button{
+        .pl-copy-button {
             border: none;
             background-color: transparent;
             font-family: 'Montserrat', sans-serif;
@@ -224,9 +247,9 @@
             outline: none;
         }
 
-        .pl-copy-image{
-            margin-top:-2px;
-            margin-left:-42px;
+        .pl-copy-image {
+            margin-top: -2px;
+            margin-left: -42px;
             position: absolute;
         }
 
@@ -269,8 +292,22 @@
             flex-direction: column;
             background-color: rgba(23, 15, 42, 0.12);
             width: 494px;
-            height: 725px;
+            height: 685px;
             border-radius: 6px;
+        }
+
+        .pl-loading {
+            background: url('../pl-load.svg') no-repeat;
+            float: inside;
+            text-align: center;
+            width: 42%;
+            height: 42%;
+            margin-top: 42%;
+            -webkit-perspective: 600;
+            perspective: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .pl-p-form-header {
@@ -317,7 +354,7 @@
 
         .pl-reqb {
             text-align: left;
-            margin-top: 42px;
+
             color: rgba(255, 255, 255, 1);
             font-size: 16px;
             font-weight: bold;
@@ -331,8 +368,8 @@
         }
 
         .pl-spacer {
-            padding-top: 22px;
-            padding-bottom: 23px;
+            padding-top: 12px;
+            padding-bottom: 12px;
         }
 
         .pl-alrpayed {
@@ -344,7 +381,7 @@
         }
 
 
-        .pl-EXP{
+        .pl-EXP {
             text-align: center;
             margin-top: 120px;
             font-size: 30px;
@@ -418,12 +455,13 @@
             font-weight: 300;
             color: white;
             font-weight: normal;
-            border: 2px solid #FAFAFA;
+            border: 2px solid rgba(250, 250, 250, 0.7);
             border-radius: 6px;
             margin-top: 10px;
             padding: 12px;
             margin-bottom: 22px;
             vertical-align: center;
+            min-width: 424px;;
         }
 
         .pl-qrcode {
@@ -521,14 +559,20 @@
         }
 
         .pl-logo {
+            background-image: url('../pl-logo.svg');
             width: 32.42px;
             height: 32.42px;
             min-width: 32.42px;
             min-height: 2.42px;
         }
 
+        .pl-page-0 {
+            position: absolute;
+        }
+
         .pl-page-1 {
             position: absolute;
+            visibility: hidden;
         }
 
         .pl-page-2 {
@@ -541,7 +585,7 @@
             visibility: hidden;
         }
 
-        .pl-page-4{
+        .pl-page-4 {
             position: absolute;
             visibility: hidden;
 
@@ -581,7 +625,15 @@
 </head>
 
 <body onload="preload();">
+
+
 <div class="pl-main">
+    <div class="pl-page-0 ns">
+        <div class="pl-p-form">
+            <div class="pl-loading"></div>
+        </div>
+    </div>
+
     <div class="pl-page-1 ns">
         <div class="pl-p-form">
 
@@ -593,7 +645,7 @@
             <div class="pl-descr"><span id="description"></span>
             </div>
             <div class="pl-accessfor"><span>GET ACCESS FOR</span></div>
-            <div class="pl-price"><span id="price">0</span> <span id="currency">HBAR</span></div>
+            <div class="pl-price"><span id="price">0</span> <span id="currency"></span></div>
             <div class="pl-reqb"><span>REQUESTED BY</span> <span id="reqby"></span></div>
 
 
@@ -615,15 +667,17 @@
 
             <div class="ns pl-descr pl-descr2"><span id="title2"></span></div>
             <div class=" pl-price pl-price2"><span id="price2">0</span> <span id="currency2">HBAR</span></div>
+            <div class="ns pl-spacer"></div>
+            <div class="ns pl-orscan">Scan QR code</div>
+            <img id="qr_code" width="250px" class="ns pl-qrcode" src="">
+
+            <div class="ns pl-spacer"></div>
             <div>
-                <div class="ns pl-reqb pl-info-mnu">
-                    <div onclick="showPage(2)" class="pl-left pl-info-mnu-active">INVOICE INFO</div>
-                    <div onclick="showPage(3)" class="pl-right">NODE INFO</div>
-                </div>
-                <div class="ns pl-reqb">Invoice ID</div>
-                <div class="pl-payment-val" id="invoiceId" th:text="${invoiceId}"></div>
-                <div class="pl-cpy-gr" onclick="copyLink('invoiceId')" >
-                    <svg class="pl-copy-image" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <div class="ns pl-reqb">Account ID</div>
+                <div class="pl-payment-val" id="accountId"></div>
+                <div class="pl-cpy-gr" onclick="copyLink('accountId')">
+                    <svg class="pl-copy-image" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         viewBox="0 0 24 24">
                         <defs>
                             <style>
                                 .cls-1 {
@@ -637,42 +691,25 @@
                         </defs>
                         <g id="Group_92" data-name="Group 92" transform="translate(0)">
                             <g id="Group_86" data-name="Group 86">
-                                <path id="Path_61" data-name="Path 61" class="cls-1" d="M313.776,424.073h24v24h-24Z" transform="translate(-313.776 -424.073)"/>
-                                <path id="Path_62" data-name="Path 62" class="cls-2" d="M320.776,439.073h7v2h-7Zm0-4h10v2h-10Zm0-4h10v2h-10Zm12-4H328.6a2.988,2.988,0,0,0-5.64,0h-4.18a1.752,1.752,0,0,0-.4.04,2.02,2.02,0,0,0-1.44,1.19,1.926,1.926,0,0,0-.16.77v14a2.052,2.052,0,0,0,.16.78,2.12,2.12,0,0,0,.43.64,2.008,2.008,0,0,0,1.01.55,2.6,2.6,0,0,0,.4.03h14a2.006,2.006,0,0,0,2-2v-14A2.006,2.006,0,0,0,332.776,427.073Zm-7-.25a.75.75,0,1,1-.75.75A.755.755,0,0,1,325.776,426.823Zm7,16.25h-14v-14h14Z" transform="translate(-313.776 -424.073)"/>
+                                <path id="Path_61" data-name="Path 61" class="cls-1" d="M313.776,424.073h24v24h-24Z"
+                                      transform="translate(-313.776 -424.073)"/>
+                                <path id="Path_62" data-name="Path 62" class="cls-2"
+                                      d="M320.776,439.073h7v2h-7Zm0-4h10v2h-10Zm0-4h10v2h-10Zm12-4H328.6a2.988,2.988,0,0,0-5.64,0h-4.18a1.752,1.752,0,0,0-.4.04,2.02,2.02,0,0,0-1.44,1.19,1.926,1.926,0,0,0-.16.77v14a2.052,2.052,0,0,0,.16.78,2.12,2.12,0,0,0,.43.64,2.008,2.008,0,0,0,1.01.55,2.6,2.6,0,0,0,.4.03h14a2.006,2.006,0,0,0,2-2v-14A2.006,2.006,0,0,0,332.776,427.073Zm-7-.25a.75.75,0,1,1-.75.75A.755.755,0,0,1,325.776,426.823Zm7,16.25h-14v-14h14Z"
+                                      transform="translate(-313.776 -424.073)"/>
                             </g>
                         </g>
                     </svg>
-                    <button class="pl-copy-button ns" id="copy_button">COPY</button></div>
-
-            </div>
-
-            <div class="pl-create">
-                <button type="button" value="OPEN IN WALLET" onclick="window.open(openInWalletUrl)">OPEN IN WALLET
-                </button>
-            </div>
-
-            <div class="ns pl-orscan">Or scan QR code</div>
-            <img id="qr_code" width="250px" class="pl-qrcode" src="">
-            <div class="ns pl-alrpayed">&#x21bb; I have already paid</div>
-
-        </div>
-    </div>
-    <div class="pl-page-3">
-        <div class="pl-p-form">
-            <div class="ns pl-p-form-header">Awaiting payment in &nbsp<span id="pl-timer3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            </div>
-
-            <div class="ns pl-descr pl-descr2"><span id="title3"></span></div>
-            <div class=" pl-price pl-price2"><span id="price3">0</span> <span id="currency3">HBAR</span></div>
-            <div>
-                <div class="ns pl-reqb pl-info-mnu">
-                    <div onclick="showPage(2)" class="pl-left">INVOICE INFO</div>
-                    <div onclick="showPage(3)" class=" pl-info-mnu-active pl-right">NODE INFO</div>
+                    <button class="pl-copy-button ns" id="copy_button">COPY</button>
                 </div>
-                <div class="ns pl-reqb">Node Information (pubkey@host)</div>
-                <div class="pl-payment-val" id="nodeInfo"></div>
-                <div class="pl-cpy-gr" onclick="copyLink('nodeInfo')" >
-                    <svg class="pl-copy-image" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+
+            </div>
+
+            <div>
+                <div class="ns pl-reqb">Note (payment reference)</div>
+                <div class="pl-payment-val" id="nodePayRef">&nbsp;</div>
+                <div class="pl-cpy-gr" onclick="copyLink('nodePayRef')">
+                    <svg class="pl-copy-image" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         viewBox="0 0 24 24">
                         <defs>
                             <style>
                                 .cls-1 {
@@ -686,18 +723,21 @@
                         </defs>
                         <g id="Group_92" data-name="Group 92" transform="translate(0)">
                             <g id="Group_86" data-name="Group 86">
-                                <path id="Path_61" data-name="Path 61" class="cls-1" d="M313.776,424.073h24v24h-24Z" transform="translate(-313.776 -424.073)"/>
-                                <path id="Path_62" data-name="Path 62" class="cls-2" d="M320.776,439.073h7v2h-7Zm0-4h10v2h-10Zm0-4h10v2h-10Zm12-4H328.6a2.988,2.988,0,0,0-5.64,0h-4.18a1.752,1.752,0,0,0-.4.04,2.02,2.02,0,0,0-1.44,1.19,1.926,1.926,0,0,0-.16.77v14a2.052,2.052,0,0,0,.16.78,2.12,2.12,0,0,0,.43.64,2.008,2.008,0,0,0,1.01.55,2.6,2.6,0,0,0,.4.03h14a2.006,2.006,0,0,0,2-2v-14A2.006,2.006,0,0,0,332.776,427.073Zm-7-.25a.75.75,0,1,1-.75.75A.755.755,0,0,1,325.776,426.823Zm7,16.25h-14v-14h14Z" transform="translate(-313.776 -424.073)"/>
+                                <path id="Path_61" data-name="Path 61" class="cls-1" d="M313.776,424.073h24v24h-24Z"
+                                      transform="translate(-313.776 -424.073)"/>
+                                <path id="Path_62" data-name="Path 62" class="cls-2"
+                                      d="M320.776,439.073h7v2h-7Zm0-4h10v2h-10Zm0-4h10v2h-10Zm12-4H328.6a2.988,2.988,0,0,0-5.64,0h-4.18a1.752,1.752,0,0,0-.4.04,2.02,2.02,0,0,0-1.44,1.19,1.926,1.926,0,0,0-.16.77v14a2.052,2.052,0,0,0,.16.78,2.12,2.12,0,0,0,.43.64,2.008,2.008,0,0,0,1.01.55,2.6,2.6,0,0,0,.4.03h14a2.006,2.006,0,0,0,2-2v-14A2.006,2.006,0,0,0,332.776,427.073Zm-7-.25a.75.75,0,1,1-.75.75A.755.755,0,0,1,325.776,426.823Zm7,16.25h-14v-14h14Z"
+                                      transform="translate(-313.776 -424.073)"/>
                             </g>
                         </g>
                     </svg>
-                    <button class="pl-copy-button ns" id="copy_button">COPY</button></div>
+                    <button class="pl-copy-button ns" id="copy_button2">COPY</button>
+                </div>
 
             </div>
-            <div class="ns pl-spacer"></div>
-            <div class="ns pl-orscan">Or scan QR code</div>
-            <div class="ns pl-spacer"></div>
-            <img id="qr_code3" width="250px" class="pl-qrcode" src="">
+
+
+            <div class="ns pl-alrpayed" onclick="pollOnce()">&#x21bb; <u>I have already paid</u></div>
             <div class="ns pl-affter"> After signing the transaction return to this page to view content</div>
 
         </div>
@@ -707,11 +747,14 @@
             <div class="ns pl-p-form-header">Invoice expired &nbsp<span style="color:#F88129">00:00</span>
             </div>
 
-            <div class="ns pl-EXP" style="font-size: 30px;"><b>Oh NOES!</b> <br>Looks like your invoice has <B>expired</B></div>
+            <div class="ns pl-EXP" style="font-size: 30px;"><b>Oh NOES!</b> <br>Looks like your invoice has
+                <B>expired</B></div>
             <div class="ns  pl-EXP" style="font-size: 20px;">Just refresh the page to receive a <BR>new invoice</div>
 
-            <div class="ns pl-create pl-payment-go" >
-                <button type="button" value="GO TO PAYMENT" style="color:#2968F8;background-color: white" onclick="">GET NEW INVOICE</button>
+            <div class="ns pl-create pl-payment-go">
+                <button type="button" value="GO TO PAYMENT" style="color:#2968F8;background-color: white" onclick="">GET
+                    NEW INVOICE
+                </button>
             </div>
 
         </div>
@@ -719,26 +762,7 @@
 
     <div class="ns pl-footer pl-footer-p">
         <div class="pl-blue pl-p-title">
-            <div class="pl-logo" onclick="switchMode()">
-                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%"
-                     height="100%" viewBox="0 0 32 32">
-                    <svg viewBox="142 442 42 42">
-                        <g transform="translate(4.42 42.42)">
-                            <g transform="translate(1.42 4.42)">
-                                <circle fill="rgba(255,230,132,1)" cx="156.1614990234375" cy="415.2" r="18.7"></circle>
-                                <circle fill="rgba(255,191,0,1)" cx="156.1614990234375" cy="415.2" r="16.42"></circle>
-                                <g transform="translate(4.2 7.7242)">
-                                    <path fill="white"
-                                          d="M 142.0480804443359 406.9642944335938 C 142.0480804443359 404.8582153320312 143.7572021484375 403.1491088867188 145.8603515625 403.1491088867188 L 150.7833709716797 403.1491088867188 L 150.7833709716797 400.81201171875 L 145.8603515625 400.81201171875 C 142.4657440185547 400.81201171875 139.7080078125 403.5667724609375 139.7080078125 406.9642944335938 C 139.7080078125 410.3588256835938 142.4657440185547 413.1166076660156 145.8603515625 413.1166076660156 L 150.7833709716797 413.1166076660156 L 150.7833709716797 410.7795104980469 L 145.8603515625 410.7795104980469 C 143.7572021484375 410.7795104980469 142.0480804443359 409.0673828125 142.0480804443359 406.9642944335938 Z M 147.0925750732422 408.1935119628906 L 156.9356384277344 408.1935119628906 L 156.9356384277344 405.7319946289062 L 147.0925750732422 405.7319946289062 L 147.0925750732422 408.1935119628906 Z M 158.1678771972656 400.81201171875 L 153.2448425292969 400.81201171875 L 153.2448425292969 403.1491088867188 L 158.1678771972656 403.1491088867188 C 160.2709808349609 403.1491088867188 161.9801330566406 404.8582153320312 161.9801330566406 406.9642944335938 C 161.9801330566406 409.0673828125 160.2709808349609 410.7795104980469 158.1678771972656 410.7795104980469 L 153.2448425292969 410.7795104980469 L 153.2448425292969 413.1166076660156 L 158.1678771972656 413.1166076660156 C 161.5624694824219 413.1166076660156 164.3201751708984 410.3588256835938 164.3201751708984 406.9642944335938 C 164.3201751708984 403.5667724609375 161.5624694824219 400.81201171875 158.1678771972656 400.81201171875 Z"></path>
-                                </g>
-                                <g transform="translate(-247.9 232.2) rotate(-45)">
-                                    <path d="M139.9,415.2 a1,1 0 0,0 32.8,0" fill="rgba(0,0,0,0.08)"></path>
-                                </g>
-                            </g>
-                        </g>
-                    </svg>
-                </svg>
-            </div>
+            <div class="pl-logo" onclick="switchMode()"></div>
             <div class="pl-p-title-n ns">PAYABLE LINKS</div>
         </div>
 

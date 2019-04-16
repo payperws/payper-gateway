@@ -55,7 +55,7 @@
                     var pseudonym = json['payableLink']['linkConfig']['pseudonym'];
                     var qrCode = "data:image/jpeg;base64," + json['paymentOptionParameters']['qr_code'];
                     var nodeInfo = "Node Info";
-                    var nodePayRef = "ae83h383f03j";//TODO: add node payment refefrence to API
+                    var nodePayRef = json['invoiceId'];
 
                     payableUrl = json['payableLink']['payableUrl'];
                     invoiceId = json['invoiceId'];

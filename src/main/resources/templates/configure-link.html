@@ -95,8 +95,7 @@
             // document.getElementById('currency').value = currencyId;
 
             var currencyName = availablePaymentOptions[optionIdx]['currencyName'];
-            // TODO set currency label
-            // document.getElementById('currency-name').textContent = currencyName;
+            document.getElementById('plprice').placeholder = "Amount in " + currencyName;
         }
 
         function displayFields(elementIds) {

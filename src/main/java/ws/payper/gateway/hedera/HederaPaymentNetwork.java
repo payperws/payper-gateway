@@ -12,6 +12,8 @@ import ws.payper.gateway.PaymentNetwork;
 import ws.payper.gateway.config.PaymentEndpoint;
 import ws.payper.gateway.config.PaymentOptionType;
 
+import java.math.BigDecimal;
+
 @Component
 public class HederaPaymentNetwork implements PaymentNetwork {
 
@@ -73,8 +75,10 @@ public class HederaPaymentNetwork implements PaymentNetwork {
     }
 
     private boolean matchTransfer(HederaAccountAmount h, String account, String amount) {
+        BigDecimal amountInTinyBars = new BigDecimal(amount).multiply(new BigDecimal("10").pow(8));
+
         long verifiedAccount = Long.parseLong(account);
-        long verifiedAmount = Long.parseLong(amount);
+        long verifiedAmount = amountInTinyBars.longValue();
         return h.accountNum == verifiedAccount && h.amount == verifiedAmount;
     }
 

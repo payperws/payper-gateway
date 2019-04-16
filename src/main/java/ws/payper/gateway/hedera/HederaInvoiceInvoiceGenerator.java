@@ -9,6 +9,7 @@ import ws.payper.gateway.config.PaymentOptionType;
 import ws.payper.gateway.util.QrCodeGenerator;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -49,7 +50,9 @@ public class HederaInvoiceInvoiceGenerator implements InvoiceGenerator {
     private String generateHederaAppLink(String account, String amount, String memo) {
         String action = "payRequest";
 
-        return MessageFormat.format("https://hedera.app.link/5vuEEQhtLQ?acc={0}&action={1}&a={2}&n={3}", account, action, amount, memo);
+        String amountInTinyBars = new BigDecimal(amount).multiply(new BigDecimal("10").pow(8)).toString();
+        return MessageFormat.format("https://hedera.app.link/5vuEEQhtLQ?acc={0}&action={1}&a={2}&n={3}",
+                account, action, amountInTinyBars, memo);
     }
 
     /**

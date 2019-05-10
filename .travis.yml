@@ -6,20 +6,22 @@ install: true
 
 git:
   quiet: true
+  
+cache:
+  directories:
+  - $HOME/.m2
 
 before_script:
-  - echo "Building hedera-sdk-java to $HOME"
   - cd $HOME
   - git clone -b release/0.2.1 --single-branch https://github.com/hashgraph/hedera-sdk-java.git
   - cd hedera-sdk-java
   - mvn clean install
   
 script:
-  - echo "Building $TRAVIS_BUILD_DIR"
   - cd $TRAVIS_BUILD_DIR
   - mvn clean install
   - bash <(curl -s https://codecov.io/bash)
-
-cache:
-  directories:
-  - $HOME/.m2
+  
+branches:
+  only:
+  - master

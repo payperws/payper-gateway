@@ -4,7 +4,7 @@ jdk: oraclejdk11
 
 install: true
 script:
-  - ./mvnw clean install
+  - mvn clean install
   - bash <(curl -s https://codecov.io/bash)
 
 cache:

@@ -3,6 +3,9 @@ language: java
 jdk: oraclejdk11
 
 install: true
+before_script:
+  - git clone -b release/0.2.1 --single-branch git@github.com:hashgraph/hedera-sdk-java.git && cd hedera-sdk-java && mvn clean install
+
 script:
   - mvn clean install
   - bash <(curl -s https://codecov.io/bash)

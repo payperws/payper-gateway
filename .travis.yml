@@ -16,11 +16,11 @@ before_script:
   - git clone -b release/0.2.1 --single-branch https://github.com/hashgraph/hedera-sdk-java.git
   - cd hedera-sdk-java
   - mvn clean install
+  - cd $TRAVIS_BUILD_DIR
+
   
 script:
-  - cd $TRAVIS_BUILD_DIR
-  - mvn clean install
-  - bash <(curl -s https://codecov.io/bash)
+  - mvn test
   
 branches:
   only:

@@ -1,8 +1,27 @@
-logging.level.org.springframework: DEBUG
+logging.level.org.springframework: INFO
+logging.level.com.hedera.sdk.node.HederaNode: WARN
 
 spring:
+  data:
+    mongodb:
+      uri: "mongodb+srv://admin:y5JkSZj2aLlGmbIy@cluster0-j05v4.mongodb.net/test?retryWrites=true"
+      database: pl-test
   profiles:
-    include: 'price-list'
+#    include: 'dev'
 
 payper:
-  paymentRequiredRedirectUrl: 'http://localhost:8080/payment-required'
+  baseUrl: 'http://localhost:8080'
+  redirectPath: 'pypr/payment-required'
+  paymentOptions:
+    - id: HEDERA_HBAR_INVOICE
+      name: "Hedera Hashgraph"
+      currency: HBAR
+      currencyName: "HBar"
+    - id: LIGHTNING_BTC
+      name: "Bitcoin Lightning Network"
+      currency: SATOSHI_BTC
+      currencyName: "SATS"
+    - id: DUMMY_COIN
+      name: "Dummy Network"
+      currency: DUMMY_COIN
+      currencyName: "Dummy Coin"

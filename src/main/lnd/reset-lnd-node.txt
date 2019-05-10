@@ -1,0 +1,33 @@
+ssh payper@51.15.207.34
+
+killall lnd
+
+rm -rf ~/.lnd/data ~/.lnd/log
+
+screen -r lnd
+
+lnc create
+
+lnc getinfo
+
+---------------------------
+
+ssh lnd@212.47.234.65
+
+killall lnd
+
+rm -rf ~/.lnd/data ~/.lnd/log
+
+screen -r lnd
+
+lnc create
+
+absorb reduce pledge banner cup child latin net style work oil future corn teach moment clinic cruise zebra pumpkin siege burst tongue layer brisk
+
+lnc getinfo
+
+lnc connect 0328bcc23cd1485ec0bdb95023a18d6332c53bb107eb03cce3d9b399061dfdaf9b@51.15.207.34:9735
+
+lnc newaddress np2wkh
+
+lnc openchannel --node_key=0328bcc23cd1485ec0bdb95023a18d6332c53bb107eb03cce3d9b399061dfdaf9b --local_amt=10000000

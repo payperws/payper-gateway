@@ -1,0 +1,10 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: gateway
+spring:
+  data:
+    mongodb:
+      uri: "mongodb://admin:admin@127.0.0.1/test?retryWrites=true"
+      database: test

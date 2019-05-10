@@ -1,0 +1,772 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Payable Links</title>
+    <link href="../favicon.png" rel="icon"  type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
+
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script th:inline="javascript">
+        //favicon.ico
+        var namePR = "pl-page-";
+        var payableUrl;
+        var invoiceId;
+        var openInWalletUrl;
+
+        var startValCounter = "";
+
+        function copyLink(fieldID) {
+            var copyText = document.getElementById(fieldID);
+            var textArea = document.createElement("textarea");
+            textArea.value = copyText.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("Copy");
+            textArea.remove();
+            // document.getElementsByClassName("pl-inclip")[0].style.visibility="visible";
+        }
+
+        function preload() {
+            var thisUrl = new URL(window.location);
+            var linkId = thisUrl.searchParams.get("link-id");
+            invoiceId = thisUrl.searchParams.get("invoice-id");
+
+            var xhr = new XMLHttpRequest();
+            var url = "/pay-details?link-id=" + linkId;
+            if (invoiceId !== null && invoiceId !== '') {
+                url += "&invoice-id=" + invoiceId;
+            }
+            xhr.open("GET", url, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var json = JSON.parse(xhr.responseText);
+
+                    var title = json['payableLink']['linkConfig']['title'];
+                    var description = json['payableLink']['linkConfig']['description'];
+                    var amount = json['payableLink']['linkConfig']['price'];
+                    var account = json['paymentOptionParameters']['account'];
+                    var currency = json['payableLink']['linkConfig']['currency'];
+                    if (currency == "HBAR") {
+                        currency = "H-bar"
+                    }
+                    var pseudonym = json['payableLink']['linkConfig']['pseudonym'];
+                    var qrCode = "data:image/jpeg;base64," + json['paymentOptionParameters']['qr_code'];
+                    var nodeInfo = "Node Info";
+                    var nodePayRef = json['invoiceId'];
+
+                    payableUrl = json['payableLink']['payableUrl'];
+                    invoiceId = json['invoiceId'];
+                    openInWalletUrl = json['paymentOptionParameters']['open_in_wallet'];
+
+                    function setVal(inId, inVal, inField) {
+                        var fff = inField;
+                        if (typeof fff === 'undefined') {
+                            fff = 'textContent';
+                        }
+                        var suff = "";
+                        for (var i = 1; i <= 3; i++) {
+                            if (i > 1) {
+                                suff = i;
+                            }
+
+                            try {
+                                document.getElementById(inId + suff)[fff] = inVal;
+                            } catch (e) {
+                            }
+
+                        }
+                    }
+
+                    setVal("title", title);
+                    setVal("description", description);
+                    setVal("price", amount);
+                    setVal("currency", currency);
+                    // setVal("account",account);
+                    setVal("reqby", pseudonym);
+                    setVal("accountId", account);
+                    setVal("nodeInfo", nodeInfo);
+                    setVal("qr_code", qrCode, "src");
+                    setVal("nodePayRef", nodePayRef);
+
+                    try {
+                        document.getElementById("pl-timer").textContent = startValCounter;
+                        document.getElementById("pl-timer2").textContent = startValCounter;
+                        document.getElementById("pl-timer3").textContent = startValCounter;
+                    } catch (e) {
+                    }
+
+
+                    console.log('Data loaded');
+                    showPage(1);
+
+                    poll();
+                }
+            }
+            xhr.send();
+        }
+
+        function selectThis(sel) {
+            selection = window.getSelection();
+            range = document.createRange();
+
+            if (typeof sel === 'undefined') {
+                sel = document.getElementById("invoiceId");
+            }
+
+            range.selectNodeContents(sel);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand("copy");
+        }
+
+        function openInWallet() {
+            window.open(openInWalletUrl);
+        }
+
+        function alreadyPaid() {
+            window.open(payableUrl + '?x_payment_receipt=' + encodeURIComponent(invoiceId) + '&invoiceId', '_self');
+        }
+
+
+        var POLL_INTERVAL = 1000;
+        var inProgress = false;
+        var done = false;
+
+
+        function poll() {
+            setInterval(pollOnce, POLL_INTERVAL);
+            pollOnce();
+        }
+
+        function pollOnce() {
+            if (inProgress || done) {
+                console.log('...');
+                return;
+            }
+            inProgress = true;
+
+            console.log("Polling...  URL = " + payableUrl + "; Header = " + invoiceId);
+
+            var newXHR = new XMLHttpRequest();
+            newXHR.open('GET', "/verify" + "?x_payment_receipt=" + encodeURIComponent(invoiceId));
+
+            newXHR.onreadystatechange = function () {
+                if (newXHR.readyState == 4) {
+                    if (newXHR.status == 200) {
+                        var json = JSON.parse(newXHR.responseText);
+                        var verified = json['verified'];
+                        if (verified == true) {
+                            done = true;
+                            console.log('Request verified!');
+                            showPage(0);
+                            window.open(payableUrl + "?x_payment_receipt=" + encodeURIComponent(invoiceId), "_self");
+                        } else {
+                            console.log('Request NOT verified!');
+                        }
+                    }
+                }
+                inProgress = false;
+            };
+
+            newXHR.send();
+        }
+
+        function showPage(pageNr) {
+            for (var i = 0; i <= 4; i++) {
+                try {
+                    document.getElementsByClassName(namePR + i)[0].style.visibility = (i == pageNr) ? "visible" : "hidden";
+                    document.getElementsByClassName(namePR + i)[0].style.opacity = (i == pageNr) ? "1" : "0";
+                } catch (e) {
+                    console.log(e)
+                }
+            }
+        }
+
+        var currentTimer;
+
+        function finalCountdown(minutes, seconds) {
+            currentTimer = new Date(Date.parse('20 April 1979 00:' + minutes + ':' + seconds + ' GMT'));
+            var intervalID;
+
+            function setTimerValue() {
+                currentTimer.setSeconds(currentTimer.getSeconds() - 1);
+
+                if (currentTimer.getMinutes() == 0 &&
+                    currentTimer.getSeconds() == 0) {
+
+                    //timer expired
+                    clearInterval(intervalID);
+                    showPage(4);
+                }
+
+                try {
+                    var newVal = ((currentTimer.getMinutes() < 10) ? ("0" + currentTimer.getMinutes()) : currentTimer.getMinutes()) + ":" + ((currentTimer.getSeconds() < 10) ? ("0" + currentTimer.getSeconds()) : currentTimer.getSeconds());
+
+                    document.getElementById("pl-timer").textContent = newVal;
+                    document.getElementById("pl-timer2").textContent = newVal;
+                    document.getElementById("pl-timer3").textContent = newVal;
+
+                } catch (e) {
+                }
+            }
+
+            intervalID = setInterval(function () {
+                setTimerValue();
+            }, 1000)
+        }
+
+        var minutesLeft = 10; // add value from API
+        var secondsLeft = 0; // add value from API
+
+        currentTimer = new Date(Date.parse('20 April 1979 00:' + minutesLeft + ':' + secondsLeft + ' GMT'));
+        startValCounter = ((currentTimer.getMinutes() < 10) ? ("0" + currentTimer.getMinutes()) : currentTimer.getMinutes()) + ":" + ((currentTimer.getSeconds() < 10) ? ("0" + currentTimer.getSeconds()) : currentTimer.getSeconds());
+
+        finalCountdown(minutesLeft, secondsLeft);
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Montserrat:100,200,600');
+        @import url('https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700');
+
+        .pl-cpy-gr {
+            position: absolute;
+            right: 48px;
+            margin-top: -58px;
+        }
+
+        .pl-copy-button {
+            border: none;
+            background-color: transparent;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            color: #F8C829;
+            outline: none;
+        }
+
+        .pl-copy-image {
+            margin-top: -2px;
+            margin-left: -42px;
+            position: absolute;
+        }
+
+
+        body {
+            background-color: #2968F8;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: normal;
+            padding: 0;
+            margin: 0;
+        }
+
+        .ns {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .pl-main {
+            position: relative;
+            overflow: auto;
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pl-p-form {
+            padding: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: top;
+            flex-direction: column;
+            background-color: rgba(23, 15, 42, 0.12);
+            width: 494px;
+            height: 685px;
+            border-radius: 6px;
+        }
+
+        .pl-loading {
+            background: url('../pl-load.svg') no-repeat;
+            float: inside;
+            text-align: center;
+            width: 42%;
+            height: 42%;
+            margin-top: 42%;
+            -webkit-perspective: 600;
+            perspective: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pl-p-form-header {
+            color: rgba(255, 255, 255, 0.5);
+            text-align: right;
+            position: absolute;
+            top: 0;
+            padding-top: 7px;
+            padding-right: 10px;
+            right: 0;
+            background-color: rgba(23, 15, 42, 0.12);
+            width: 524px;
+            height: 35px;
+            border-radius: 6px;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        #pl-timer, #pl-timer2, #pl-timer3 {
+            font-family: 'Open Sans', sans-serif;
+            font-weight: bold;
+            font-size: 22px;
+            color: #F8C829
+        }
+
+        .pl-title {
+            padding-left: 20px;
+            position: absolute;
+            left: 0;
+            text-align: left;
+            padding-top: 42px;
+            color: rgba(255, 255, 255, 1);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .pl-accessfor {
+            margin-top: 42px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .pl-reqb {
+            text-align: left;
+
+            color: rgba(255, 255, 255, 1);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .pl-orscan {
+            color: rgba(255, 255, 255, 1);
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .pl-spacer {
+            padding-top: 12px;
+            padding-bottom: 12px;
+        }
+
+        .pl-alrpayed {
+            color: rgba(255, 255, 255, 1);
+            font-size: 16px;
+            font-weight: 100;
+            padding-left: 80px;
+            margin-top: 12px;
+        }
+
+
+        .pl-EXP {
+            text-align: center;
+            margin-top: 120px;
+            font-size: 30px;
+            font-weight: 200;
+            color: white;
+        }
+
+        .pl-affter {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 100;
+            position: absolute;
+            bottom: 0;
+            margin-bottom: -20px;
+            color: white;
+        }
+
+        #reqby {
+            color: #F8C829;
+        }
+
+
+        .pl-bottom-des {
+            position: absolute;
+            bottom: 104px;
+            /*padding-bottom: 142px;*/
+        }
+
+        .pl-descr {
+            align-items: flex-start;
+            /*left:20px;*/
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 100;
+            text-align: left;
+            padding-top: 82px;
+            color: rgba(255, 255, 255, 1);
+        }
+
+        .pl-descr2 {
+            padding-top: 42px;
+        }
+
+
+        .padtop, .pl-price, .pl-payment, .pl-payment-val, .pl-payment-info, .pl-create {
+            padding-top: 14px;
+        }
+
+        .pl-price {
+            color: #F8C829;
+            font-size: 50px;
+            font-weight: bold;
+        }
+
+        .pl-price2 {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+
+        .pl-payment {
+            width: 364px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .pl-payment-val {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 300;
+            color: white;
+            font-weight: normal;
+            border: 2px solid rgba(250, 250, 250, 0.7);
+            border-radius: 6px;
+            margin-top: 10px;
+            padding: 12px;
+            margin-bottom: 22px;
+            vertical-align: center;
+            min-width: 424px;;
+        }
+
+        .pl-qrcode {
+
+            border-radius: 6px;
+            color: white;
+        }
+
+        .pl-payment-info {
+            width: 250px;
+            line-height: 24px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 300;
+            color: white;
+        }
+
+        .pl-create {
+            padding-bottom: 30px;
+        }
+
+        .pl-payment-go {
+            bottom: 0;
+            position: absolute;
+        }
+
+        .pl-create button:active {
+            margin-top: 1px;
+            margin-left: 1px;
+            border: 1px solid rgba(41, 104, 248, 0.34);
+        }
+
+        .pl-create button:hover {
+            border: 1px solid rgba(41, 104, 248, 0.14);
+        }
+
+
+        .pl-create button {
+            border: 1px solid rgba(41, 104, 248, 0.0);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.60px;
+            color: white;
+            outline: none;
+            width: 215.5px;
+            height: 46px;
+            border-radius: 6px;
+            background-color: #F8C829;
+            box-shadow: 0px 1px 10px rgba(41, 104, 248, 0.24);
+            border: none;
+
+        }
+
+        .pl-footer {
+            min-width: 920px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 110%;
+            height: 46px;
+            background-color: #696969;
+            color: white;
+            text-align: center;
+            z-index: 1;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        .pl-footer-p {
+            position: fixed;
+            bottom: 0%;
+        }
+
+        .pl-blue {
+            color: rgb(41, 104, 248);
+        }
+
+        .pl-p-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 242px;
+            overflow: hidden;
+            letter-spacing: 0.60px;
+            color: #F8C829;
+        }
+
+        .pl-p-title-n {
+            margin-left: 10px;
+        }
+
+        .pl-logo {
+            background: url('../pl-logo.svg') no-repeat;
+            width: 32.42px;
+            height: 32.42px;
+            min-width: 32.42px;
+            min-height: 2.42px;
+        }
+
+        .pl-page-0 {
+            position: absolute;
+        }
+
+        .pl-page-1 {
+            position: absolute;
+            visibility: hidden;
+        }
+
+        .pl-page-2 {
+            position: absolute;
+            visibility: hidden;
+        }
+
+        .pl-page-3 {
+            position: absolute;
+            visibility: hidden;
+        }
+
+        .pl-page-4 {
+            position: absolute;
+            visibility: hidden;
+
+        }
+
+        .pl-info-mnu {
+            border-bottom: 1px solid white;
+            text-align: left;
+            width: 494px;
+            min-width: 494px;
+            height: 32px;
+        }
+
+        .pl-right {
+            margin-top: -35px;
+            width: 232px;
+            border-bottom: 5px solid transparent;
+            position: absolute;
+            right: 20px;
+            padding-right: 2px;
+
+            text-align: center;
+            height: 30px;
+        }
+
+        .pl-left {
+            border-bottom: 5px solid transparent;
+            width: 192px;
+            height: 30px;
+            padding-left: 42px;
+        }
+
+        .pl-info-mnu-active {
+            border-bottom: 5px solid white !important;
+        }
+    </style>
+</head>
+
+<body onload="preload();">
+
+
+<div class="pl-main">
+    <div class="pl-page-0 ns">
+        <div class="pl-p-form">
+            <div class="pl-loading"></div>
+        </div>
+    </div>
+
+    <div class="pl-page-1 ns">
+        <div class="pl-p-form">
+
+            <div class="pl-p-form-header">Awaiting payment in &nbsp<span id="pl-timer">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </div>
+            <div class="pl-title"><span id="title"></span></div>
+
+
+            <div class="pl-descr"><span id="description"></span>
+            </div>
+            <div class="pl-accessfor"><span>GET ACCESS FOR</span></div>
+            <div class="pl-price"><span id="price">0</span> <span id="currency"></span></div>
+            <div class="pl-reqb"><span>REQUESTED BY</span> <span id="reqby"></span></div>
+
+
+            <div class="pl-descr pl-bottom-des">
+                <span>By clicking on Go To Payment you agree</span><br><span> with our <u>Terms of Use</u> and <u>Privacy Policy</u>.</span>
+            </div>
+
+            <div class="pl-create pl-payment-go">
+                <button type="button" value="GO TO PAYMENT" onclick="showPage(2)">GO TO PAYMENT</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="pl-page-2">
+        <div class="pl-p-form">
+            <div class="ns pl-p-form-header">Awaiting payment in &nbsp<span id="pl-timer2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </div>
+
+            <div class="ns pl-descr pl-descr2"><span id="title2"></span></div>
+            <div class=" pl-price pl-price2"><span id="price2">0</span> <span id="currency2">HBAR</span></div>
+            <div class="ns pl-spacer"></div>
+            <div class="ns pl-orscan">Scan QR code</div>
+            <img id="qr_code" width="250px" class="ns pl-qrcode" src="">
+
+            <div class="ns pl-spacer"></div>
+            <div>
+                <div class="ns pl-reqb">Account ID</div>
+                <div class="pl-payment-val" id="accountId"></div>
+                <div class="pl-cpy-gr" onclick="copyLink('accountId')">
+                    <svg class="pl-copy-image" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         viewBox="0 0 24 24">
+                        <defs>
+                            <style>
+                                .cls-1 {
+                                    fill: none;
+                                }
+
+                                .cls-2 {
+                                    fill: #f8c829;
+                                }
+                            </style>
+                        </defs>
+                        <g id="Group_92" data-name="Group 92" transform="translate(0)">
+                            <g id="Group_86" data-name="Group 86">
+                                <path id="Path_61" data-name="Path 61" class="cls-1" d="M313.776,424.073h24v24h-24Z"
+                                      transform="translate(-313.776 -424.073)"/>
+                                <path id="Path_62" data-name="Path 62" class="cls-2"
+                                      d="M320.776,439.073h7v2h-7Zm0-4h10v2h-10Zm0-4h10v2h-10Zm12-4H328.6a2.988,2.988,0,0,0-5.64,0h-4.18a1.752,1.752,0,0,0-.4.04,2.02,2.02,0,0,0-1.44,1.19,1.926,1.926,0,0,0-.16.77v14a2.052,2.052,0,0,0,.16.78,2.12,2.12,0,0,0,.43.64,2.008,2.008,0,0,0,1.01.55,2.6,2.6,0,0,0,.4.03h14a2.006,2.006,0,0,0,2-2v-14A2.006,2.006,0,0,0,332.776,427.073Zm-7-.25a.75.75,0,1,1-.75.75A.755.755,0,0,1,325.776,426.823Zm7,16.25h-14v-14h14Z"
+                                      transform="translate(-313.776 -424.073)"/>
+                            </g>
+                        </g>
+                    </svg>
+                    <button class="pl-copy-button ns" id="copy_button">COPY</button>
+                </div>
+
+            </div>
+
+            <div>
+                <div class="ns pl-reqb">Note (payment reference)</div>
+                <div class="pl-payment-val" id="nodePayRef">&nbsp;</div>
+                <div class="pl-cpy-gr" onclick="copyLink('nodePayRef')">
+                    <svg class="pl-copy-image" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         viewBox="0 0 24 24">
+                        <defs>
+                            <style>
+                                .cls-1 {
+                                    fill: none;
+                                }
+
+                                .cls-2 {
+                                    fill: #f8c829;
+                                }
+                            </style>
+                        </defs>
+                        <g id="Group_92" data-name="Group 92" transform="translate(0)">
+                            <g id="Group_86" data-name="Group 86">
+                                <path id="Path_61" data-name="Path 61" class="cls-1" d="M313.776,424.073h24v24h-24Z"
+                                      transform="translate(-313.776 -424.073)"/>
+                                <path id="Path_62" data-name="Path 62" class="cls-2"
+                                      d="M320.776,439.073h7v2h-7Zm0-4h10v2h-10Zm0-4h10v2h-10Zm12-4H328.6a2.988,2.988,0,0,0-5.64,0h-4.18a1.752,1.752,0,0,0-.4.04,2.02,2.02,0,0,0-1.44,1.19,1.926,1.926,0,0,0-.16.77v14a2.052,2.052,0,0,0,.16.78,2.12,2.12,0,0,0,.43.64,2.008,2.008,0,0,0,1.01.55,2.6,2.6,0,0,0,.4.03h14a2.006,2.006,0,0,0,2-2v-14A2.006,2.006,0,0,0,332.776,427.073Zm-7-.25a.75.75,0,1,1-.75.75A.755.755,0,0,1,325.776,426.823Zm7,16.25h-14v-14h14Z"
+                                      transform="translate(-313.776 -424.073)"/>
+                            </g>
+                        </g>
+                    </svg>
+                    <button class="pl-copy-button ns" id="copy_button2">COPY</button>
+                </div>
+
+            </div>
+
+
+            <div class="ns pl-alrpayed" onclick="pollOnce()">&#x21bb; <u>I have already paid</u></div>
+            <div class="ns pl-affter"> After signing the transaction return to this page to view content</div>
+
+        </div>
+    </div>
+    <div class="pl-page-4">
+        <div class="pl-p-form">
+            <div class="ns pl-p-form-header">Invoice expired &nbsp<span style="color:#F88129">00:00</span>
+            </div>
+
+            <div class="ns pl-EXP" style="font-size: 30px;"><b>Oh NOES!</b> <br>Looks like your invoice has
+                <B>expired</B></div>
+            <div class="ns  pl-EXP" style="font-size: 20px;">Just refresh the page to receive a <BR>new invoice</div>
+
+            <div class="ns pl-create pl-payment-go">
+                <button type="button" value="GO TO PAYMENT" style="color:#2968F8;background-color: white" onclick="">GET
+                    NEW INVOICE
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="ns pl-footer pl-footer-p">
+        <div class="pl-blue pl-p-title">
+            <div class="pl-logo" onclick="switchMode()"></div>
+            <div class="pl-p-title-n ns">PAYABLE LINKS</div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

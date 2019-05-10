@@ -5,9 +5,14 @@ import com.hedera.sdk.account.HederaAccountAmount;
 import com.hedera.sdk.common.*;
 import com.hedera.sdk.query.HederaQueryHeader;
 import com.hedera.sdk.transaction.HederaTransaction;
+import com.hederahashgraph.api.proto.java.ResponseCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ws.payper.gateway.PaymentNetwork;
+import ws.payper.gateway.config.PaymentEndpoint;
+import ws.payper.gateway.config.PaymentOptionType;
+
+import java.math.BigDecimal;
 
 @Component
 public class HederaPaymentNetwork implements PaymentNetwork {
@@ -19,30 +24,13 @@ public class HederaPaymentNetwork implements PaymentNetwork {
     private HederaAccount hederaAccount;
 
     @Override
-    public long getBalance(String accountId) {
-        long accountNum;
-        try {
-            accountNum = Long.parseLong(accountId);
-        } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException("Could not parse accountId to long");
-        }
-
-        HederaAccount account = new HederaAccount();
-
-        account.txQueryDefaults = queryDefaults;
-
-        account.accountNum = accountNum;
-
-        try {
-            return account.getBalance();
-        } catch (Exception e) {
-            throw new NetworkCommunicationException("Could not retrieve balance for account " + accountId, e);
-        }
+    public PaymentOptionType getPaymentOptionType() {
+        return PaymentOptionType.HEDERA_HBAR;
     }
 
     @Override
-    public boolean verifyTransaction(String transactionId, String account, String amount) {
-        HederaTransactionID hederaTransactionID = parseTransactionId(transactionId);
+    public boolean verifyTransaction(String paymentProof, PaymentEndpoint paymentEndpoint, String amount) {
+        HederaTransactionID hederaTransactionID = parseTransactionId(paymentProof);
         HederaTransactionReceipt receipt;
         try {
             receipt = Utilities.getReceipt(hederaTransactionID, queryDefaults.node, 1, 0, 0);
@@ -50,13 +38,14 @@ public class HederaPaymentNetwork implements PaymentNetwork {
             throw new NetworkCommunicationException("Could not verify transaction ID", ex);
         }
 
-        if (receipt.transactionStatus == HederaTransactionStatus.SUCCESS) {
+        if (receipt.transactionStatus == ResponseCodeEnum.SUCCESS) {
             HederaTransactionRecord txRecord;
             try {
                 txRecord = getHederaTransactionRecord(hederaTransactionID, 10, queryDefaults);
             } catch (Exception ex) {
                 throw new NetworkCommunicationException("Could not retrieve transaction record", ex);
             }
+            String account =  ((HederaHbarPaymentEndpoint) paymentEndpoint).getAccount();
             return txRecord.transferList.stream()
                     .anyMatch(h -> matchTransfer(h, account, amount));
         }
@@ -86,8 +75,10 @@ public class HederaPaymentNetwork implements PaymentNetwork {
     }
 
     private boolean matchTransfer(HederaAccountAmount h, String account, String amount) {
+        BigDecimal amountInTinyBars = new BigDecimal(amount).multiply(new BigDecimal("10").pow(8));
+
         long verifiedAccount = Long.parseLong(account);
-        long verifiedAmount = Long.parseLong(amount);
+        long verifiedAmount = amountInTinyBars.longValue();
         return h.accountNum == verifiedAccount && h.amount == verifiedAmount;
     }
 
@@ -104,6 +95,11 @@ public class HederaPaymentNetwork implements PaymentNetwork {
         HederaTimeStamp timestamp = new HederaTimeStamp(seconds, nanos);
 
         return new HederaTransactionID(accountID, timestamp);
+    }
+
+    @Override
+    public String getPaymentProofPattern() {
+        return "^[0-9]{8,10}\\|[0-9]{1,9}\\|[0-9]{4,10}";
     }
 
 }

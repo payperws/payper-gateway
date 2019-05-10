@@ -4,15 +4,16 @@ package ws.payper.gateway.hedera;
 import com.hedera.sdk.account.HederaAccount;
 import com.hedera.sdk.common.HederaAccountID;
 import com.hedera.sdk.common.HederaDuration;
-import com.hedera.sdk.common.HederaKey;
+import com.hedera.sdk.common.HederaKeyPair;
 import com.hedera.sdk.common.HederaTransactionAndQueryDefaults;
-import com.hedera.sdk.cryptography.HederaCryptoKeyPair;
 import com.hedera.sdk.node.HederaNode;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import ws.payper.gateway.config.ConfigurationException;
 
 import java.security.spec.InvalidKeySpecException;
 
@@ -60,12 +61,12 @@ public class HederaNetworkConfiguration {
 
         HederaAccountID payingAccountID = new HederaAccountID(payingAccountShard, payingAccountRealm, payingAccountNum);
 
-        HederaCryptoKeyPair payingKeyPair = null;
+        HederaKeyPair payingKeyPair = null;
         if (StringUtils.isNoneBlank(pubKey, privKey)) {
             try {
-                payingKeyPair = new HederaCryptoKeyPair(HederaKey.KeyType.ED25519, pubKey, privKey);
-            } catch (InvalidKeySpecException ex) {
-                throw new NetworkConfigurationException("Could not init ED25519 key pair", ex);
+                payingKeyPair = new HederaKeyPair(HederaKeyPair.KeyType.ED25519, pubKey, privKey);
+            } catch (InvalidKeySpecException | DecoderException ex) {
+                throw new ConfigurationException("Could not init ED25519 key pair", ex);
             }
         }
 

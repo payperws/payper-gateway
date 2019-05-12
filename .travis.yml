@@ -20,7 +20,7 @@ before_script:
 
   
 script:
-  - mvn test
+  - mvn verify
   
 branches:
   only:

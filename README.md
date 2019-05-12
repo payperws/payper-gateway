@@ -1,5 +1,5 @@
 # Payper Gateway
-[![Build Status](https://travis-ci.org/payperws/payper-gateway.svg?branch=master)](https://travis-ci.org/payperws/payper-gateway)
+[![Build Status](https://travis-ci.org/payperws/payper-gateway.svg?branch=master)](https://travis-ci.org/payperws/payper-gateway) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Payper Gateway is an HTTP (reverse) proxy that verifies payments to route requests. As a practical application, it can be used to sell API requests for digital cash (crypto-currency) on the Internet. See the detailed description in this [medium article](https://medium.com/@alexandru.males/payper-p2p-micro-payments-for-the-open-api-economy-e8adee76d396?fbclid=IwAR25i3YekBZ82ETVOTDaNnYH-zo7R4niaVHrhDRknwptWLlha8WwT-7ORp4).
 

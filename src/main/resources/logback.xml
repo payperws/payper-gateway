@@ -1,5 +1,8 @@
 <?xml version = "1.0" encoding = "UTF-8"?>
 <configuration>
+
+    <property name="LOGS_HOME" value="/tmp/payper-gateway"/>
+
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg %n</pattern>
@@ -11,10 +14,10 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg %n</pattern>
         </encoder>
 
-        <file>/var/log/payper-gateway/console.log</file>
+        <file>${LOGS_HOME}/console.log</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/payper-gateway/console.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <fileNamePattern>${LOGS_HOME}/console.log.%d{yyyy-MM-dd}</fileNamePattern>
         </rollingPolicy>
     </appender>
 

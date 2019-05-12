@@ -35,17 +35,6 @@ public class ConfigureLinkController {
     @Autowired
     private PaymentOptionsService paymentOptionsService;
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String showNewLinkPage() {
-        return "configure-link";
-    }
-
-    @RequestMapping(value = "/ok", method = RequestMethod.GET)
-    public String linkCreated(@RequestParam String url, Model model) {
-        model.addAttribute("payableLink", url);
-        return "link-created";
-    }
-
     @PostMapping(value = "/link")
     @ResponseBody
     public

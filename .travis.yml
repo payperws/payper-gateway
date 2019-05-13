@@ -25,7 +25,7 @@ jobs:
   include:
     - stage: build
       script:
-        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+        - docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
         - mvn clean install
         - docker push payper/payper-gateway:latest
 

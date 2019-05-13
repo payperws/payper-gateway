@@ -18,7 +18,6 @@ before_script:
   - cd $HOME
   - git clone -b release/0.2.1 --single-branch https://github.com/hashgraph/hedera-sdk-java.git
   - cd hedera-sdk-java
-  - mvn clean install
   - cd $TRAVIS_BUILD_DIR
 
 script:

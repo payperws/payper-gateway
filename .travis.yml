@@ -18,9 +18,17 @@ before_script:
   - mvn clean install
   - cd $TRAVIS_BUILD_DIR
 
-  
-script:
-  - mvn verify
+jobs:
+  include:
+    - stage: build
+      script:
+        - mvn clean install
+    - stage: test
+      script:
+        - mvn verify
+    - stage: docker-publish
+      script:
+        - mvn dockerfile:push
   
 branches:
   only:

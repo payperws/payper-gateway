@@ -26,9 +26,7 @@ jobs:
     - stage: build
       script:
         - mvn clean install
-    - stage: test
-      script:
-        - mvn verify
+
     - stage: docker-publish
       script:
         - echo "$DOCKER_PASSWORD" docker login -u $DOCKER_USERNAME --password-stdin

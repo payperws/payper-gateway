@@ -27,8 +27,7 @@ jobs:
     - stage: build
       script:
         - mvn clean install
-        - mvn dockerfile:build
-        - mvn dockerfile:push
+        - docker_push.sh
 
 branches:
   only:

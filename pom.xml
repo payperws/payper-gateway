@@ -180,6 +180,15 @@
 					<repository>${username}/${docker.image.prefix}-${project.artifactId}</repository>
 					<tag>${project.version}</tag>
 				</configuration>
+				<executions>
+					<execution>
+						<id>default</id>
+						<phase>install</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
         </plugins>
 	</build>

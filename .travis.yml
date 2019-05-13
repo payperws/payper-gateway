@@ -28,7 +28,7 @@ jobs:
         - mvn verify
     - stage: docker-publish
       script:
-        - mvn dockerfile:push
+        - mvn dockerfile:push -Dusername=${DOCKER_USERNAME} -Dpassword=${DOCKER_PASSWORD}
   
 branches:
   only:

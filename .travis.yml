@@ -1,4 +1,4 @@
-sudo: 'required'
+sudo: required
 language: java
 jdk: oraclejdk11
 
@@ -21,13 +21,12 @@ before_script:
   - mvn clean install
   - cd $TRAVIS_BUILD_DIR
 
-jobs:
-  include:
-    - stage: build
-      script:
-        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-        - mvn clean install
-        - docker push payper/payper-gateway:latest
+script:
+  - mvn clean install
+
+after_success:
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+  - docker push payper/payper-gateway:latest
 
 branches:
   only:

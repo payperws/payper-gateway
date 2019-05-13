@@ -11,6 +11,9 @@ cache:
   directories:
   - $HOME/.m2
 
+services:
+  - docker
+
 before_script:
   - cd $HOME
   - git clone -b release/0.2.1 --single-branch https://github.com/hashgraph/hedera-sdk-java.git
@@ -28,7 +31,8 @@ jobs:
         - mvn verify
     - stage: docker-publish
       script:
-        - mvn dockerfile:push -Dusername=${DOCKER_USERNAME} -Dpassword=${DOCKER_PASSWORD}
+        - echo "$DOCKER_PASSWORD" docker login -u $DOCKER_USERNAME --password-stdin
+        - mvn dockerfile:push
   
 branches:
   only:

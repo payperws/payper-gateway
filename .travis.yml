@@ -22,7 +22,7 @@ before_script:
 
 script:
   - mvn clean install
-  - docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stin
   - docker push payper/payper-gateway:latest
 
 branches:

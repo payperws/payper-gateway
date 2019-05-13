@@ -27,7 +27,7 @@ jobs:
       script:
         - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
         - mvn clean install
-        - docker push payper/payper-gateway
+        - docker push payper/payper-gateway:latest
 
 branches:
   only:

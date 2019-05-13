@@ -20,6 +20,7 @@
 	<properties>
 		<revision>1.0.0</revision>
 		<changelist>-SNAPSHOT</changelist>
+		<username>payper</username>
 		<docker.image.prefix>payperws</docker.image.prefix>
 	</properties>
 
@@ -176,9 +177,8 @@
 				<artifactId>dockerfile-maven-plugin</artifactId>
 				<version>1.4.9</version>
 				<configuration>
-					<repository>docker.io/payper/${docker.image.prefix}-${project.artifactId}</repository>
+					<repository>${username}/${docker.image.prefix}-${project.artifactId}</repository>
 					<tag>${project.version}</tag>
-					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
 				</configuration>
 			</plugin>
         </plugins>

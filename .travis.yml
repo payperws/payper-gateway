@@ -20,18 +20,15 @@ before_script:
   - cd hedera-sdk-java
   - mvn clean install
   - cd $TRAVIS_BUILD_DIR
+  - echo "$DOCKER_PASSWORD" docker login -u $DOCKER_USERNAME --password-stdin
 
 jobs:
   include:
     - stage: build
       script:
         - mvn clean install
-
-    - stage: docker-publish
-      script:
-        - echo "$DOCKER_PASSWORD" docker login -u $DOCKER_USERNAME --password-stdin
         - mvn dockerfile:push
-  
+
 branches:
   only:
   - master

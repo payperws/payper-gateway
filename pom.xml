@@ -21,7 +21,7 @@
 		<revision>1.0.0</revision>
 		<changelist>-SNAPSHOT</changelist>
 		<username>payper</username>
-		<docker.image.prefix>payperws</docker.image.prefix>
+		<docker.image.prefix>payper</docker.image.prefix>
 	</properties>
 
 	<dependencyManagement>
@@ -179,7 +179,7 @@
 				<configuration>
 					<googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>
 					<repository>${username}/${docker.image.prefix}-${project.artifactId}</repository>
-					<tag>${project.version}</tag>
+					<tag>latest</tag>
 				</configuration>
 				<executions>
 					<execution>

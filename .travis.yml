@@ -1,6 +1,9 @@
-sudo: false
+sudo: 'required'
 language: java
 jdk: oraclejdk11
+
+services:
+  - docker
 
 install: true
 
@@ -10,9 +13,6 @@ git:
 cache:
   directories:
   - $HOME/.m2
-
-services:
-  - docker
 
 before_script:
   - cd $HOME
@@ -25,7 +25,7 @@ jobs:
   include:
     - stage: build
       script:
-        - docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
+        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
         - mvn clean install
         - docker push payper/payper-gateway:latest
 

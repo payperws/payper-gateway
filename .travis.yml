@@ -1,6 +1,9 @@
-sudo: false
+sudo: required
 language: java
 jdk: oraclejdk11
+
+services:
+  - docker
 
 install: true
 
@@ -15,13 +18,13 @@ before_script:
   - cd $HOME
   - git clone -b release/0.2.1 --single-branch https://github.com/hashgraph/hedera-sdk-java.git
   - cd hedera-sdk-java
-  - mvn clean install
   - cd $TRAVIS_BUILD_DIR
 
-  
 script:
-  - mvn verify
-  
+  - mvn clean install
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+  - docker push payper/payper-gateway:latest
+
 branches:
   only:
   - master

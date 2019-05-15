@@ -21,9 +21,13 @@ before_script:
   - cd $TRAVIS_BUILD_DIR
 
 script:
-  - mvn clean install
-  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-  - docker push payper/payper-gateway:latest
+  - if [ "$TRAVIS_PULL_REQUEST" == "true" ]; then
+      mvn clean install;
+    else
+      mvn clean install;
+      echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin;
+      docker push payper/payper-gateway:latest
+    fi
 
 branches:
   only:

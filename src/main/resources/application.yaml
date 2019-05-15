@@ -1,11 +1,16 @@
 logging.level.org.springframework: INFO
 logging.level.com.hedera.sdk.node.HederaNode: WARN
 
+mongo-host: "localhost"
+mongo-db: "pl-test"
+mongo-user: "admin"
+mongo-pass: "admin"
+
+
 spring:
   data:
     mongodb:
-      uri: "mongodb+srv://admin:y5JkSZj2aLlGmbIy@cluster0-j05v4.mongodb.net/test?retryWrites=true"
-      database: pl-test
+      uri: "mongodb://${mongo-user}:${mongo-pass}@${mongo-host}/${mongo-db}?retryWrites=true"
   profiles:
 #    include: 'dev'
 

@@ -22,7 +22,7 @@ before_script:
 
 script:
   - if [ ! "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn clean verify; mvn package; fi
-  - if [ "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = "master"]; then ./build-and-push.sh; fi
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = "master" ]; then ./build-and-push.sh; fi
 
 branches:
   only:

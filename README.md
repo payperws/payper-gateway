@@ -8,8 +8,8 @@ The gateway is part of a larger concept called Payper that deals with peer-to-pe
 ## Installation
 Payper Gateway works as a backend java-based component, so it is no different than running an usual JVM based service. Until it is going to be available as a docker image or a fully executable jar in a release, it is necessary to compile and package in order to run it.
 #### Prerequisites
-* Java SDK 10 (or newer)
-* Maven 3.5+
+* Java SDK 11 (or newer)
+* Maven 3.5.0+
 #### Dependencies
 Payper Gateway uses [Hedera Java SDK](https://github.com/hashgraph/hedera-sdk-java) as a dependency that is not yet available in a maven repo. That is why it is necessary to install Hedera SDK separately.
 ```
@@ -23,14 +23,11 @@ mvn install
 mvn package
 ```
 
-2. Configure your pricelist. As an example, refer to `application-price-list.yaml`. Create a file called exactly like that, `application-price-list.yaml` in your current directory.
+2. Run the Payper Gateway jar from your current directory:
 
-3. Run the Payper Gateway jar from your current directory:
 ```
-java -jar target/gateway-0.0.1-SNAPSHOT.jar
+java -jar target/gateway-1.0.0-SNAPSHOT.jar
 ```
-#### Test It
-Open one of the configured URL in a browser. You will be prompted to make a payment in order to get access to the requested resource. The details on how to make the payment are listed in the Payment Required page.
 
 ## Implementation
 This component basically integrates [Hedera Hashgraph](https://www.hedera.com) payment verification into an extension of [Spring Cloud Gateway](https://spring.io/projects/spring-cloud-gateway).

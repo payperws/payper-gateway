@@ -9,7 +9,7 @@ install: true
 
 git:
   quiet: true
-  
+
 cache:
   directories:
   - $HOME/.m2
@@ -19,9 +19,11 @@ before_script:
   - git clone -b release/0.2.1 --single-branch https://github.com/hashgraph/hedera-sdk-java.git
   - cd hedera-sdk-java
   - cd $TRAVIS_BUILD_DIR
+  - echo $TRAVIS_PULL_REQUEST
+  - echo $TRAVIS_BRANCH
 
 script:
-  - if [ "$TRAVIS_PULL_REQUEST" == "true" ]; then
+  - if [ $TRAVIS_PULL_REQUEST == "true" ]; then
       mvn clean install;
     else
       mvn clean install;

@@ -19,8 +19,6 @@ before_script:
   - git clone -b release/0.2.1 --single-branch https://github.com/hashgraph/hedera-sdk-java.git
   - cd hedera-sdk-java
   - cd $TRAVIS_BUILD_DIR
-  - echo $TRAVIS_PULL_REQUEST
-  - echo $TRAVIS_BRANCH
 
 script:
   - if [ ! "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn clean verify; mvn package; fi

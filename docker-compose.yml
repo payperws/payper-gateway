@@ -1,0 +1,22 @@
+version: '3.1'
+services:
+  mongo:
+    image: mongo
+    container_name: payper-gateway-mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_USERNAME: $MONGO_INITDB_USERNAME
+      MONGO_INITDB_PASSWORD: $MONGO_INITDB_PASSWORD
+      MONGO_INITDB_DATABASE: $MONGO_INITDB_DATABASE
+    ports:
+      - 27017:27017
+    volumes:
+       - ~/docker-volumes/mongo/mongo-entrypoint:/docker-entrypoint-initdb.d
+       - ~/docker-volumes/mongo/db:/data/db
+       - ~/docker-volumes/mongo/config:/data/configdb
+  payper-gateway:
+     image: payper/payper-gateway
+     container_name: payper-gateway
+     restart: always
+     volumes:
+       - ~/docker-volumes/payper-gateway/opt:/opt

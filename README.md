@@ -37,7 +37,7 @@ Set the environment variables
 ```
 export MONGO_INITDB_USERNAME=admin
 export MONGO_INITDB_PASSWORD=admin
-export MONGO_PAYPER_DATABASE=pl-test
+export MONGO_INITDB_DATABASE=pl-test
 ```
 
 Run the docker-compose.yml

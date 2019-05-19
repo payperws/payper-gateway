@@ -9,7 +9,7 @@ install: true
 
 git:
   quiet: true
-  
+
 cache:
   directories:
   - $HOME/.m2
@@ -21,9 +21,8 @@ before_script:
   - cd $TRAVIS_BUILD_DIR
 
 script:
-  - mvn clean install
-  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-  - docker push payper/payper-gateway
+  - if [ ! "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn clean verify; mvn package; fi
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = "master" ]; then ./build-and-push.sh; fi
 
 branches:
   only:

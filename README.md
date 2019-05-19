@@ -33,6 +33,23 @@ java -jar target/gateway-0.0.1-SNAPSHOT.jar
 #### Test It
 Open one of the configured URL in a browser. You will be prompted to make a payment in order to get access to the requested resource. The details on how to make the payment are listed in the Payment Required page.
 
+#### Start-up with docker-compose
+
+Set the environment variables
+
+```
+export MONGO_INITDB_USERNAME=admin
+export MONGO_INITDB_PASSWORD=admin
+export MONGO_PAYPER_DATABASE=pl-test
+```
+
+Run the docker-compose.yml
+
+```
+docker-compose build
+docker-compose up
+```
+
 ## Implementation
 This component basically integrates [Hedera Hashgraph](https://www.hedera.com) payment verification into an extension of [Spring Cloud Gateway](https://spring.io/projects/spring-cloud-gateway).
 

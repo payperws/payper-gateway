@@ -5,18 +5,45 @@ services:
     container_name: payper-gateway-mongodb
     restart: always
     environment:
-      MONGO_INITDB_USERNAME: $MONGO_INITDB_USERNAME
-      MONGO_INITDB_PASSWORD: $MONGO_INITDB_PASSWORD
+      MONGO_INITDB_USERNAME: $MONGO_INITDB_ROOT_USERNAME
+      MONGO_INITDB_PASSWORD: $MONGO_INITDB_ROOT_PASSWORD
       MONGO_INITDB_DATABASE: $MONGO_INITDB_DATABASE
     ports:
       - 27017:27017
     volumes:
-       - ~/docker-volumes/mongo/mongo-entrypoint:/docker-entrypoint-initdb.d
-       - ~/docker-volumes/mongo/db:/data/db
-       - ~/docker-volumes/mongo/config:/data/configdb
+       - ./docker/mongo/scripts:/docker-entrypoint-initdb.d
+       - mongodb:/data/db
+       - mongoconfig:/data/configdb
+    networks:
+       - payper_net
+
   payper-gateway:
-     image: payper/payper-gateway
+     depends_on:
+       - mongo
+     links:
+       - mongo
+     build:
+       context: .
+       dockerfile: docker/payper-gateway/dockerfile/Dockerfile
      container_name: payper-gateway
+     environment:
+       MONGO_HOST: "mongo"
+       MONGO_INITDB_USERNAME: $MONGO_INITDB_ROOT_USERNAME
+       MONGO_INITDB_PASSWORD: $MONGO_INITDB_ROOT_PASSWORD
+       MONGO_PAYPER_DATABASE: $MONGO_INITDB_DATABASE
+     ports:
+       - "8080:8080"
      restart: always
      volumes:
        - ~/docker-volumes/payper-gateway/opt:/opt
+     networks:
+       - payper_net
+
+
+volumes:
+  mongodb:
+  mongoconfig:
+
+networks:
+  payper_net:
+    driver: bridge

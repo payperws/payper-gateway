@@ -35,8 +35,8 @@ java -jar target/gateway-1.0.0-SNAPSHOT.jar
 Set the environment variables
 
 ```
-export MONGO_INITDB_USERNAME=admin
-export MONGO_INITDB_PASSWORD=admin
+export MONGO_INITDB_ROOT_USERNAME=admin
+export MONGO_INITDB_ROOT_PASSWORD=admin
 export MONGO_INITDB_DATABASE=pl-test
 ```
 

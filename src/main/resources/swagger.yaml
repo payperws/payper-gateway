@@ -1,0 +1,185 @@
+openapi: 3.0.1
+info:
+  title: Payper Gateway
+  description: 'Payper Gateway is an HTTP reverse proxy that verifies payments to route requests. As a practical application, it can be used to sell API requests for digital cash (crypto-currency) on the Internet. GithHub repository - [https://github.com/payperws/payper-gateway](https://github.com/payperws/payper-gateway)'
+  contact:
+    email: alexandru.males@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Payper
+  url: https://medium.com/@alexandru.males/payper-p2p-micro-payments-for-the-open-api-economy-e8adee76d396
+servers:
+  - url: https://demo.payper.ws/admin/api
+  - url: http://demo.payper.ws/admin/api
+tags:
+  - name: route
+    description: Route Configuration
+paths:
+  /admin/api/route:
+    post:
+      tags:
+        - route
+      summary: Add a new route
+      description: Add a new route
+      operationId: addRoute
+      requestBody:
+        description: API route configration object to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Route'
+        required: true
+      responses:
+        201:
+          description: Route added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        400:
+          description: Validation exception
+          content: {}
+    get:
+      tags:
+        - route
+      summary: List all routes
+      description: List all routes
+      operationId: listAllRoutes
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+  /admin/api/route/{routeId}:
+    get:
+      tags:
+        - route
+      summary: Find route by ID
+      description: Returns a single route
+      operationId: getRouteById
+      parameters:
+        - name: routeId
+          in: path
+          description: ID of route to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Route'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Route not found
+          content: {}
+      security:
+        - api_key: []
+    put:
+      tags:
+        - route
+      summary: Update an existing route
+      operationId: updateRoute
+      parameters:
+        - name: routeId
+          in: path
+          description: ID of route to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Route object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Route'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Route'
+        required: true
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Route not found
+          content: {}
+        405:
+          description: Validation exception
+          content: {}
+    delete:
+      tags:
+        - route
+      summary: Deletes a route
+      operationId: deleteRoute
+      parameters:
+        - name: routeId
+          in: path
+          description: Route id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Route not found
+          content: {}
+components:
+  schemas:
+    Route:
+      required:
+        - name
+        - photoUrls
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        uri:
+          type: string
+        method:
+          type: string
+          description: HTTP method
+          enum:
+            - GET
+            - HEAD
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+            - TRACE
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string

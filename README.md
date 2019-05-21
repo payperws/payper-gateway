@@ -32,19 +32,18 @@ java -jar target/gateway-1.0.0-SNAPSHOT.jar
 
 #### Start-up with docker-compose
 
-Set the environment variables
-
-```
-export MONGO_INITDB_ROOT_USERNAME=admin
-export MONGO_INITDB_ROOT_PASSWORD=admin
-export MONGO_INITDB_DATABASE=pl-test
-```
-
 Run the docker-compose.yml
 
 ```
+mvn package
 docker-compose build
 docker-compose up
+```
+
+Stop the docker-compose
+
+```
+docker-compose down
 ```
 
 ## Implementation

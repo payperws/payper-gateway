@@ -1,15 +1,11 @@
 logging.level.org.springframework: INFO
 logging.level.com.hedera.sdk.node.HederaNode: WARN
 
-mongo-host: ${MONGO_HOST}
-mongo-db: ${MONGO_INITDB_DATABASE}
-mongo-user: ${MONGO_INITDB_ROOT_USERNAME:admin}
-mongo-pass: ${MONGO_INITDB_ROOT_PASSWORD:admin}
-
 spring:
   data:
     mongodb:
-      uri: "mongodb://${mongo-user}:${mongo-pass}@${mongo-host}/${mongo-db}?retryWrites=true"
+      uri: mongodb://mongo:27017
+      database: payperdb
   profiles:
 
 payper:

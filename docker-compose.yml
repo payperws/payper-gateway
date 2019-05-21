@@ -7,9 +7,8 @@ services:
     ports:
       - 27017:27017
     volumes:
-       - ./docker/mongo/scripts:/docker-entrypoint-initdb.d
-       - /data/db
-       - /data/configdb
+       - mongodb:/data/db
+       - mongoconfig:/data/configdb
     networks:
        - payper_net
 

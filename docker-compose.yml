@@ -1,0 +1,39 @@
+version: '3.1'
+services:
+  mongo:
+    image: mongo
+    container_name: payper-gateway-mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+       - mongodb:/data/db
+       - mongoconfig:/data/configdb
+    networks:
+       - payper_net
+
+  payper-gateway:
+     depends_on:
+       - mongo
+     links:
+       - mongo
+     build:
+       context: .
+       dockerfile: docker/payper-gateway/dockerfile/Dockerfile
+     container_name: payper-gateway
+     ports:
+       - "8080:8080"
+     restart: always
+     volumes:
+       - ~/docker-volumes/payper-gateway/opt:/opt
+     networks:
+       - payper_net
+
+
+volumes:
+  mongodb:
+  mongoconfig:
+
+networks:
+  payper_net:
+    driver: bridge

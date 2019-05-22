@@ -4,13 +4,12 @@ logging.level.com.hedera.sdk.node.HederaNode: WARN
 spring:
   data:
     mongodb:
-      uri: "mongodb+srv://admin:y5JkSZj2aLlGmbIy@cluster0-j05v4.mongodb.net/test?retryWrites=true"
-      database: pl-test
+      uri: mongodb://mongo:27017
+      database: payperdb
   profiles:
-#    include: 'dev'
 
 payper:
-  baseUrl: 'http://localhost:8080'
+  baseUrl: ${BASE_URL:http://localhost:8080}
   redirectPath: 'pypr/payment-required'
   paymentOptions:
     - id: HEDERA_HBAR_INVOICE

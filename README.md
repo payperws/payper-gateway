@@ -30,6 +30,22 @@ mvn package
 java -jar target/gateway-1.0.0-SNAPSHOT.jar
 ```
 
+#### Start-up with docker-compose
+
+Run the docker-compose.yml
+
+```
+mvn package
+docker-compose build
+docker-compose up
+```
+
+Stop the docker-compose
+
+```
+docker-compose down
+```
+
 ## Implementation
 This component basically integrates [Hedera Hashgraph](https://www.hedera.com) payment verification into an extension of [Spring Cloud Gateway](https://spring.io/projects/spring-cloud-gateway).
 

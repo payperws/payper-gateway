@@ -175,11 +175,13 @@
 			<plugin>
 				<groupId>com.spotify</groupId>
 				<artifactId>dockerfile-maven-plugin</artifactId>
-				<version>1.4.9</version>
+				<version>1.4.10</version>
 				<configuration>
 					<googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>
 					<repository>${username}/${docker.image.prefix}-${project.artifactId}</repository>
-					<tag>latest</tag>
+                    <dockerfile>./docker/payper-gateway/dockerfile/Dockerfile</dockerfile>
+                    <tag>latest</tag>
+                    <tag>${project.version}</tag>
 				</configuration>
 				<executions>
 					<execution>
